@@ -11,10 +11,23 @@
  *  5. Copia l'URL che finisce con /exec e incollalo in GoFiber.
  */
 const VERSION = 1;
-const SHEET_ID = ''; // vuoto = il foglio a cui è collegato lo script
+const SHEET_ID = ''; // vuoto = il foglio collegato o, se lo script è separato, "GoFiber – Database" cercato su Drive
 const SESSION_DAYS = 90;
 
-function ss_() { return SHEET_ID ? SpreadsheetApp.openById(SHEET_ID) : SpreadsheetApp.getActiveSpreadsheet(); }
+let SS_ = null;
+function ss_() {
+  if (SS_) return SS_;
+  const p = PropertiesService.getScriptProperties();
+  const id = SHEET_ID || p.getProperty('SHEET_ID');
+  if (id) return (SS_ = SpreadsheetApp.openById(id));
+  const act = SpreadsheetApp.getActiveSpreadsheet();
+  if (act) return (SS_ = act);
+  // script separato dal foglio: cerca "GoFiber – Database" su Drive e lo ricorda
+  const it = DriveApp.searchFiles("title contains 'GoFiber' and title contains 'Database' and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false");
+  if (!it.hasNext()) throw new Error('Foglio "GoFiber – Database" non trovato');
+  const f = it.next(); p.setProperty('SHEET_ID', f.getId());
+  return (SS_ = SpreadsheetApp.openById(f.getId()));
+}
 function sh_(name, header) {
   const ss = ss_();
   let s = ss.getSheetByName(name);
