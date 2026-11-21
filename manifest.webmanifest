@@ -1,11 +1,21 @@
 {
-  "name": "GoFiber",
+  "name": "GoFiber – Pratiche e magazzino FTTH",
   "short_name": "GoFiber",
-  "description": "Pratiche e magazzino FTTH",
+  "description": "Pratiche di installazione in fibra ottica, magazzino a seriali e posizioni PFS",
+  "id": "./",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0b1220",
-  "theme_color": "#0b1220",
+  "theme_color": "#0284c7",
   "lang": "it",
-  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
 }

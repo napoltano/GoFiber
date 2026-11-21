@@ -4,11 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GoFiber</title>
-<meta name="theme-color" content="#0b1220">
+<meta name="theme-color" content="#0284c7">
 <link rel="manifest" href="manifest.webmanifest">
 <script src="config.js"></script>
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GoFiber">
 <style>
 /* VOICE: strumento da cantiere, diretto, leggibile al sole sul telefono.
    IDEA: la bolla di lavoro del tecnico FTTH e il registro di magazzino a seriali.
@@ -34,7 +39,7 @@ header.app{position:sticky;top:0;z-index:15;background:var(--bar);color:var(--ba
 header.app .wrap{display:flex;align-items:center;gap:14px;min-height:64px}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .logo .mk{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;box-shadow:0 6px 16px -6px var(--pri);display:grid;place-items:center}
-.logo .mk svg{width:24px;height:24px;stroke-width:2.2}
+.logo .mk{overflow:hidden;padding:0}.logo .mk svg{width:100%;height:100%;display:block}
 .logo b{font-family:var(--hf);font-size:22px;font-weight:800;line-height:1;letter-spacing:-.02em}
 .logo small{display:block;font-size:12px;opacity:.6;font-weight:400}
 nav#tabs{display:flex;gap:4px;margin-inline-start:18px}
@@ -200,6 +205,21 @@ details.grp summary{padding:14px 16px;cursor:pointer;display:flex;align-items:ce
 details.grp summary b{margin-inline-start:auto;font-family:var(--hf);font-size:26px}
 details.grp .sl{padding:0 16px 14px;display:flex;flex-wrap:wrap;gap:6px}
 details.grp code{background:var(--soft);padding:3px 8px;border-radius:6px;font-size:14px}
+body.auth header.app,body.auth #localbar{display:none}
+body.auth{background:radial-gradient(1100px 620px at 8% -12%,rgba(14,165,233,.38),transparent 62%),radial-gradient(900px 620px at 112% 112%,rgba(99,102,241,.34),transparent 62%),var(--bg);background-attachment:fixed}
+body.auth main{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:28px 16px calc(28px + env(safe-area-inset-bottom))}
+.authcard{width:min(420px,100%);background:var(--card);border:1px solid var(--line);border-radius:28px;padding:30px 26px;box-shadow:0 34px 70px -34px rgba(2,132,199,.55)}
+.authhead{text-align:center;margin-bottom:22px}
+.authlogo{width:104px;height:104px;border-radius:28px;overflow:hidden;margin:0 auto;box-shadow:0 22px 44px -16px rgba(2,132,199,.75)}
+.authlogo svg{width:100%;height:100%;display:block}
+.authhead h1{margin:16px 0 2px;font-size:40px;letter-spacing:-.03em}
+.authhead p{margin:0;color:var(--mute)}
+.authcard .subt{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.authcard .subt .chip{border:0;border-radius:10px;background:transparent}
+.authcard .subt .chip.on{background:var(--card);color:var(--prink);box-shadow:var(--sh)}
+.authcard .btn.yel{width:100%;min-height:50px;font-size:16px}
+.authfoot{text-align:center;font-size:13px;color:var(--mute);margin-top:16px}
+.auththm{position:fixed;top:14px;right:14px;z-index:5}
 @media(max-width:860px){.filters{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.filters .q{grid-column:1/-1}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){
   header.app .wrap{flex-wrap:wrap;gap:8px 12px;padding-top:8px}
@@ -217,7 +237,7 @@ details.grp code{background:var(--soft);padding:3px 8px;border-radius:6px;font-s
 </head>
 <body>
 <header class="app"><div class="wrap">
-  <a class="logo" href="#agenda"><span class="mk"><svg class="i" viewBox="0 0 24 24"><path d="M3 17c4 0 5-10 9-10s5 10 9 10"/><circle cx="12" cy="7" r="1.6"/></svg></span><span><b>GoFiber</b><small>Pratiche e magazzino FTTH</small></span></a>
+  <a class="logo" href="#agenda"><span class="mk"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"> <defs> <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0ea5e9"/><stop offset=".55" stop-color="#0284c7"/><stop offset="1" stop-color="#4f46e5"/></linearGradient> <radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".35" stop-color="#e0f2fe" stop-opacity=".55"/><stop offset="1" stop-color="#e0f2fe" stop-opacity="0"/></radialGradient> <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient> </defs> <rect width="512" height="512" rx="112" fill="url(#bg)"/> <rect width="512" height="512" rx="112" fill="url(#shine)"/> <g fill="none" stroke-linecap="round"> <path d="M86 352 C170 352 186 176 256 176 S342 352 426 352" stroke="#fff" stroke-opacity=".18" stroke-width="58"/> <path d="M86 352 C170 352 186 176 256 176 S342 352 426 352" stroke="#fff" stroke-width="26"/> <path d="M86 392 C170 392 190 236 256 236 S342 392 426 392" stroke="#7dd3fc" stroke-width="9" stroke-opacity=".9"/> <path d="M86 312 C170 312 182 128 256 128 S342 312 426 312" stroke="#c7d2fe" stroke-width="9" stroke-opacity=".75"/> </g> <circle cx="256" cy="176" r="74" fill="url(#glow)"/> <circle cx="256" cy="176" r="22" fill="#fff"/> <circle cx="148" cy="303" r="10" fill="#fff"/> <circle cx="364" cy="303" r="10" fill="#fff"/> </svg></span><span><b>GoFiber</b><small>Pratiche e magazzino FTTH</small></span></a>
   <nav id="tabs"></nav>
   <div class="hr"><span class="who" id="who">Caricamento…</span><a class="thm ft" href="https://napoltano.github.io/fiber-tools/" target="_blank" rel="noopener" title="FiberTools" aria-label="Apri FiberTools"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3.6 17.1a1.8 1.8 0 0 0 2.6 2.6l5.7-5.7a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.3-.6-.6-2.3z"/></svg><span>FiberTools</span></a><button class="thm" id="thm" aria-label="Cambia tema"></button></div>
 </div></header>
@@ -266,9 +286,13 @@ const fascia=k=>F[FI[k]]||{a:'--:--',b:''};
 const sk=s=>'s-'+s.replace(/[^A-Za-z0-9_\-.:@+]/g,c=>'~'+c.charCodeAt(0).toString(16));
 const normS=s=>String(s||'').trim().toUpperCase();
 
+const LOGO='<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"> <defs> <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0ea5e9"/><stop offset=".55" stop-color="#0284c7"/><stop offset="1" stop-color="#4f46e5"/></linearGradient> <radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".35" stop-color="#e0f2fe" stop-opacity=".55"/><stop offset="1" stop-color="#e0f2fe" stop-opacity="0"/></radialGradient> <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient> </defs> <rect width="512" height="512" rx="112" fill="url(#bg)"/> <rect width="512" height="512" rx="112" fill="url(#shine)"/> <g fill="none" stroke-linecap="round"> <path d="M86 352 C170 352 186 176 256 176 S342 352 426 352" stroke="#fff" stroke-opacity=".18" stroke-width="58"/> <path d="M86 352 C170 352 186 176 256 176 S342 352 426 352" stroke="#fff" stroke-width="26"/> <path d="M86 392 C170 392 190 236 256 236 S342 392 426 392" stroke="#7dd3fc" stroke-width="9" stroke-opacity=".9"/> <path d="M86 312 C170 312 182 128 256 128 S342 312 426 312" stroke="#c7d2fe" stroke-width="9" stroke-opacity=".75"/> </g> <circle cx="256" cy="176" r="74" fill="url(#glow)"/> <circle cx="256" cy="176" r="22" fill="#fff"/> <circle cx="148" cy="303" r="10" fill="#fff"/> <circle cx="364" cy="303" r="10" fill="#fff"/> </svg>';
+const authHead=sub=>`<div class="authhead"><div class="authlogo">${LOGO}</div><h1>GoFiber</h1><p>${sub||'Pratiche e magazzino FTTH'}</p></div>`;
+function setAuth(on){document.body.classList.toggle('auth',!!on);let t=document.getElementById('auththm');if(on&&!t){t=document.createElement('button');t.id='auththm';t.className='thm auththm';t.setAttribute('aria-label','Cambia tema');t.onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');document.body.appendChild(t);t.innerHTML=ic(document.documentElement.dataset.theme==='dark'?'sun':'moon')}else if(!on&&t)t.remove()}
 /* ---------- tema ---------- */
-function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('pf-theme',t)}catch(e){}const b=$('#thm');b.innerHTML=ic(t==='dark'?'sun':'moon');b.title=t==='dark'?'Tema chiaro':'Tema scuro'}
+function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('pf-theme',t)}catch(e){}const a=document.getElementById('auththm');if(a)a.innerHTML=ic(t==='dark'?'sun':'moon');const b=$('#thm');b.innerHTML=ic(t==='dark'?'sun':'moon');b.title=t==='dark'?'Tema chiaro':'Tema scuro'}
 {let t=null;try{t=localStorage.getItem('pf-theme')}catch(e){}if(t!=='dark'&&t!=='light')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';setTheme(t)}
+if(!(window.claude&&window.claude.use))setAuth(true);
 $('#thm').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
 
 const S={db:null,user:null,assets:null,admin:false,me:null,state:'load',
@@ -353,6 +377,7 @@ function render(){
   tabs();const m=$('#main');
   if(S.state==='nocl'||S.state==='nodb'){m.innerHTML=`<div class="card msg"><h3>Accedi per usare l'app</h3><p>L'app salva pratiche e magazzino in un archivio condiviso. Aprila dal link di Claude dopo aver effettuato l'accesso.</p></div>`;return}
   if(S.state!=='ok'){m.innerHTML='<p class="note">Caricamento…</p>';return}
+  setAuth(!!S.gate);
   if(S.gate){m.innerHTML=accessHTML();bindAccess();return}
   const v=S.view;
   if(v==='nuova'){if(!S.imp.def.data)S.imp.def.data=today();if(S.nuovaMode==='imp'&&!S.editId){m.innerHTML=nuovaTabs()+importHTML();bindNuovaTabs();bindImport()}else{m.innerHTML=(S.editId?'':nuovaTabs())+formHTML();if(!S.editId)bindNuovaTabs();bindForm()}}
@@ -1184,12 +1209,12 @@ function computeRole(){
 function applyRole(){const c=computeRole();const ch=c.role!==S.role||c.gate!==S.gate;S.role=c.role;S.gate=c.gate;S.admin=c.role==='admin'||c.role==='ufficio';S.boss=c.role==='admin';if(ch&&!views().includes(S.view))S.view='agenda';return ch}
 function accessHTML(){
   const g=S.gate,me=S.tec.get(S.me)||{};
-  const hero=`<div style="text-align:center;margin-bottom:18px"><span class="mk" style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;display:inline-grid;place-items:center;box-shadow:0 14px 30px -12px var(--pri)"><svg class="i" viewBox="0 0 24 24" style="width:38px;height:38px;stroke-width:2.2"><path d="M3 17c4 0 5-10 9-10s5 10 9 10"/><circle cx="12" cy="7" r="1.6"/></svg></span><h1 style="margin:12px 0 2px;font-size:38px">GoFiber</h1><div class="note">Pratiche e magazzino FTTH</div></div>`;
-  if(g==='load')return `<div class="msg">${hero}<p class="note" style="text-align:center">Verifica dell'accesso…</p></div>`;
-  if(g==='noid')return `<div class="card msg">${hero}<h3>Accesso non riconosciuto</h3><p>Non è stato possibile identificare il tuo account. Accedi a Claude e riapri il link.</p></div>`;
-  if(g==='attesa')return `<div class="card msg">${hero}<h3>Richiesta inviata</h3><p>Ciao <b>${esc(me.nome||'')}</b>, la tua registrazione come <b>${esc(RUOLI[me.ruoloRichiesto]||'Tecnico')}</b> è in attesa di conferma. Appena il responsabile la approva, questa pagina si aggiorna da sola.</p><div class="acts"><button class="btn sm" id="regEdit">Modifica i dati</button>${S.remote?'<button class="btn sm" onclick="logout()">Esci</button>':''}</div></div>`;
-  if(g==='bloccato')return `<div class="card msg">${hero}<h3>Accesso non attivo</h3><p>Il tuo accesso a GoFiber non è stato confermato o è stato sospeso. Contatta il responsabile.</p></div>`;
-  return `<form class="card pf msg" id="regf2">${hero}<h3>Registrati</h3><p class="note" style="margin-top:-4px">${S.remote?'Completa il profilo':'Accedi con il tuo account Claude: non serve una password'}. Dopo la registrazione il responsabile deve confermare il tuo accesso.</p>
+  const hero=authHead();
+  if(g==='load')return `<div class="authcard">${hero}<p class="note" style="text-align:center">Verifica dell'accesso…</p></div>`;
+  if(g==='noid')return `<div class="authcard">${hero}<h3>Accesso non riconosciuto</h3><p>Non è stato possibile identificare il tuo account. Accedi a Claude e riapri il link.</p></div>`;
+  if(g==='attesa')return `<div class="authcard">${hero}<h3>Richiesta inviata</h3><p>Ciao <b>${esc(me.nome||'')}</b>, la tua registrazione come <b>${esc(RUOLI[me.ruoloRichiesto]||'Tecnico')}</b> è in attesa di conferma. Appena il responsabile la approva, questa pagina si aggiorna da sola.</p><div class="acts"><button class="btn sm" id="regEdit">Modifica i dati</button>${S.remote?'<button class="btn sm" onclick="logout()">Esci</button>':''}</div></div>`;
+  if(g==='bloccato')return `<div class="authcard">${hero}<h3>Accesso non attivo</h3><p>Il tuo accesso a GoFiber non è stato confermato o è stato sospeso. Contatta il responsabile.</p></div>`;
+  return `<form class="authcard" id="regf2">${hero}<h3>Completa la registrazione</h3><p class="note" style="margin-top:-4px">${S.remote?'Completa il profilo':'Accedi con il tuo account Claude: non serve una password'}. Dopo la registrazione il responsabile deve confermare il tuo accesso.</p>
    <label class="f">Nome e cognome <span class="req">*</span><input class="in" name="nome" value="${esc(me.nome||'')}" autocomplete="name"></label>
    <label class="f">Telefono <span class="req">*</span><input class="in" name="telefono" type="tel" value="${esc(me.telefono||'')}" autocomplete="tel"></label>
    <div class="lbl">Ruolo <span class="req">*</span></div><div class="seg">${Object.entries(RUOLI).map(([k,l])=>`<label><input type="radio" name="ruolo" value="${k}" ${(me.ruoloRichiesto||'tecnico')===k?'checked':''}><span>${l}</span></label>`).join('')}</div>
@@ -1273,18 +1298,25 @@ async function apiCall(api,action,body){
   if(!r.ok)throw new Error('Il server non risponde ('+r.status+')');
   const j=await r.json();if(j.error)throw new Error(j.error);return j;
 }
-function loginHTML(api,msg){return `<form class="card pf msg" id="loginf" novalidate><div style="text-align:center;margin-bottom:14px"><span style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;display:inline-grid;place-items:center;box-shadow:0 14px 30px -12px var(--pri)"><svg class="i" viewBox="0 0 24 24" style="width:38px;height:38px;stroke-width:2.2"><path d="M3 17c4 0 5-10 9-10s5 10 9 10"/><circle cx="12" cy="7" r="1.6"/></svg></span><h1 style="margin:12px 0 2px;font-size:38px">GoFiber</h1><div class="note">Pratiche e magazzino FTTH</div></div>
-  <div class="subt" id="lmode"><button type="button" class="chip on" data-lm="login">Accedi</button><button type="button" class="chip" data-lm="reg">Crea account</button></div>
-  <label class="f">Email<input class="in" name="email" type="email" autocomplete="username" inputmode="email"></label>
+function loginHTML(api,msg){return `<form class="authcard" id="loginf" novalidate>${authHead()}
+  <div class="subt" id="lmode" style="margin-bottom:16px"><button type="button" class="chip on" data-lm="login">Accedi</button><button type="button" class="chip" data-lm="reg">Registrati</button></div>
+  <label class="f">Email<input class="in" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false"></label>
   <label class="f">Password<input class="in" name="password" type="password" autocomplete="current-password"></label>
   <label class="f" id="lpw2" hidden>Ripeti la password<input class="in" name="password2" type="password" autocomplete="new-password"></label>
-  <p class="note" id="lnote">Entra con l'account che ti ha dato il responsabile, oppure crea il tuo: dopo la registrazione deve confermarlo.</p>
-  <div class="err" id="lerr">${esc(msg||'')}</div><div class="acts"><button class="btn yel" type="submit" id="lgo">Accedi</button></div>
-  <p class="note" style="margin-top:14px">Server: ${esc(api.replace(/^https:\/\/script\.google\.com\/macros\/s\/(.{6}).*$/,'Google Apps Script ($1…)'))} · <button type="button" class="lnk" id="lchg">cambia</button></p></form>`}
+  <p class="note" id="lnote" style="margin:-4px 0 10px">Non hai un account? Scegli <b>Registrati</b>: il responsabile conferma il tuo accesso.</p>
+  <div class="err" id="lerr">${esc(msg||'')}</div><button class="btn yel" type="submit" id="lgo">Accedi</button>
+  <p class="authfoot">Password dimenticata? Chiedila al responsabile.<br><button type="button" class="lnk" id="lchg" style="font-size:13px;margin-top:6px">Cambia server</button></p></form>`}
+function waitServer(){return new Promise(res=>{
+  setAuth(true);$('#main').innerHTML=`<form class="authcard" id="srvf" novalidate>${authHead()}<h3>Collega il server</h3><p class="note" style="margin-top:-4px">Solo la prima volta su questo dispositivo: incolla l'indirizzo dell'app web del Foglio Google (finisce con <code>/exec</code>). Te lo dà il responsabile.</p>
+   <label class="f">Indirizzo del server<input class="in mono" name="api" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false"></label><div class="err" id="srverr"></div><button class="btn yel" type="submit">Continua</button></form>`;
+  $('#srvf').onsubmit=async e=>{e.preventDefault();const u=String(new FormData(e.target).get('api')||'').trim(),er=$('#srverr');
+    if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)){er.textContent='L\'indirizzo deve iniziare con https://script.google.com/';return}
+    er.textContent='Verifica…';try{const r=await fetch(u);const j=await r.json();if(j.app!=='GoFiber')throw 0}catch(x){er.textContent='Non risponde come server GoFiber: controlla l\'indirizzo e che il deployment sia aperto a «Chiunque».';return}
+    LS.set('gofiber-api',u);res(u)}})}
 function waitLogin(api,msg){return new Promise(res=>{
-  $('#tabs').innerHTML='';$('#who').textContent='Accesso';
+  setAuth(true);$('#tabs').innerHTML='';$('#who').textContent='Accesso';
   $('#main').innerHTML=loginHTML(api,msg);let mode='login';const f=$('#loginf');
-  $('#lmode').onclick=e=>{const b=e.target.closest('[data-lm]');if(!b)return;mode=b.dataset.lm;$('#lmode').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b));$('#lpw2').hidden=mode!=='reg';$('#lgo').textContent=mode==='reg'?'Crea account':'Accedi'};
+  $('#lmode').onclick=e=>{const b=e.target.closest('[data-lm]');if(!b)return;mode=b.dataset.lm;$('#lmode').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b));$('#lpw2').hidden=mode!=='reg';$('#lgo').textContent=mode==='reg'?'Crea account':'Accedi';$('#lnote').innerHTML=mode==='reg'?'Dopo la registrazione inserisci nome e ruolo: il responsabile conferma il tuo accesso.':'Non hai un account? Scegli <b>Registrati</b>: il responsabile conferma il tuo accesso.'};
   $('#lchg').onclick=()=>{LS.set('gofiber-api',null);LS.set('gofiber-token',null);location.search='';location.reload()};
   f.onsubmit=async e=>{e.preventDefault();const fd=new FormData(f),em=String(fd.get('email')||'').trim(),pw=String(fd.get('password')||'');const er=$('#lerr');er.textContent='';
     if(!em||!pw){er.textContent='Inserisci email e password.';return}
@@ -1297,7 +1329,7 @@ async function remoteClaude(api){
   S.remote=true;S.api=api;let token=LS.get('gofiber-token'),me=null,msg='';
   for(;;){
     if(!token)token=await waitLogin(api,msg);
-    try{me=await apiCall(api,'me',{token});break}catch(x){msg=x.message==='auth'?'Sessione scaduta: accedi di nuovo.':x.message;if(x.message==='auth'){token=null;LS.set('gofiber-token',null)}else{$('#main').innerHTML=`<div class="card msg"><h3>Server non raggiungibile</h3><p>${esc(msg)}</p><div class="acts"><button class="btn yel" onclick="location.reload()">Riprova</button></div></div>`;await new Promise(()=>{})}}
+    try{me=await apiCall(api,'me',{token});break}catch(x){msg=x.message==='auth'?'Sessione scaduta: accedi di nuovo.':x.message;if(x.message==='auth'){token=null;LS.set('gofiber-token',null)}else{setAuth(true);$('#main').innerHTML=`<div class="authcard">${authHead()}<h3>Server non raggiungibile</h3><p>${esc(msg)}</p><div class="acts"><button class="btn yel" onclick="location.reload()">Riprova</button></div></div>`;await new Promise(()=>{})}}
   }
   S.email=me.email;S.token=token;
   const call=(a,b)=>apiCall(api,a,{token,...b}).catch(x=>{if(x.message==='auth'){LS.set('gofiber-token',null);location.reload()}throw x});
@@ -1368,7 +1400,12 @@ function sub(path,key,map){
 (async()=>{
   let api=new URLSearchParams(location.search).get('api');if(api){LS.set('gofiber-api',api);history.replaceState(null,'',location.pathname+location.hash)}
   api=(window.GOFIBER_API||'').trim()||LS.get('gofiber-api')||'';
-  const C=(window.claude&&typeof window.claude.use==='function')?window.claude:api?await remoteClaude(api):localClaude();
+  const inClaude=!!(window.claude&&typeof window.claude.use==='function');
+  const wantLocal=new URLSearchParams(location.search).has('locale');
+  if(!inClaude&&!api&&!wantLocal)api=await waitServer();
+  const C=inClaude?window.claude:api?await remoteClaude(api):localClaude();
+  setAuth(false);
+  if(!inClaude&&'serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
   const [db,user,assets]=await Promise.all([C.use('db'),C.use('user'),C.use('assets')]);
   if(!db){S.state='nodb';render();return}
   S.db=db;S.user=user;S.assets=assets;
