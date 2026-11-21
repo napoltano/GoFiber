@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoFiber</title>
+<meta name="theme-color" content="#0b1220">
+<link rel="manifest" href="manifest.webmanifest">
+<script src="config.js"></script>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+/* VOICE: strumento da cantiere, diretto, leggibile al sole sul telefono.
+   IDEA: la bolla di lavoro del tecnico FTTH e il registro di magazzino a seriali.
+   PICTURE: l'agenda con le fasce orarie grandi; nel magazzino le schede prodotto con le barre di giacenza.
+   COLOUR and TYPE: palette di FiberTools (azzurro #0284c7 / indaco, notte #0b1220), giallo solo per l'anticipo; font di sistema.
+   LAYOUT: barra app in alto, navigazione in basso su telefono, schede su una colonna sotto 760px. */
+:root{color-scheme:light;--bf:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;--hf:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+--bg:#f3f6fb;--g1:rgba(14,165,233,.10);--g2:rgba(168,85,247,.07);--card:#fff;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--soft:#f8fafc;
+--sh:0 1px 2px rgba(15,23,42,.04),0 8px 24px -8px rgba(15,23,42,.10);--pri:#0284c7;--pri2:#6366f1;--pris:#e0f2fe;--prink:#075985;
+--bar:rgba(255,255,255,.82);--bar2:#eef4fb;--barink:#0f172a;--yel:#f5c400;--yink:#14171c;
+--sirti:#1f5fd1;--valt:#8a4fd8;--sielte:#0e8a8a;--ok:#059669;--ko:#dc2626;--wait:#d97706;--neu:#64748b}
+:root[data-theme=dark]{color-scheme:dark;--bg:#0b1220;--g1:rgba(56,189,248,.14);--g2:rgba(129,140,248,.12);--card:#121b2e;--ink:#e8eef8;--mute:#8a9bb5;--line:#22304a;--soft:#0f1727;
+--sh:0 1px 2px rgba(0,0,0,.3),0 10px 30px -10px rgba(0,0,0,.6);--pri:#38bdf8;--pri2:#818cf8;--pris:rgba(56,189,248,.12);--prink:#7dd3fc;
+--bar:rgba(11,18,32,.82);--bar2:#121b2e;--barink:#e8eef8;--ok:#34d399;--ko:#f87171;--wait:#fbbf24;--neu:#8a9bb5}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:radial-gradient(900px 500px at 0% -10%,var(--g1),transparent 60%),radial-gradient(700px 500px at 110% 10%,var(--g2),transparent 60%),var(--bg);background-attachment:fixed;color:var(--ink);font:16px/1.5 var(--bf);overflow-x:clip;transition:background .2s}
+h1,h2,h3,h4,.cond{font-family:var(--hf);letter-spacing:-.02em;font-weight:750}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.wrap{max-width:1160px;margin:0 auto;padding:0 max(4vw,14px)}
+header.app{position:sticky;top:0;z-index:15;background:var(--bar);color:var(--barink);border-bottom:1px solid var(--line);-webkit-backdrop-filter:saturate(1.6) blur(14px);backdrop-filter:saturate(1.6) blur(14px)}
+header.app .wrap{display:flex;align-items:center;gap:14px;min-height:64px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo .mk{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;box-shadow:0 6px 16px -6px var(--pri);display:grid;place-items:center}
+.logo .mk svg{width:24px;height:24px;stroke-width:2.2}
+.logo b{font-family:var(--hf);font-size:22px;font-weight:800;line-height:1;letter-spacing:-.02em}
+.logo small{display:block;font-size:12px;opacity:.6;font-weight:400}
+nav#tabs{display:flex;gap:4px;margin-inline-start:18px}
+nav#tabs a{display:flex;align-items:center;gap:8px;text-decoration:none;padding:9px 14px;border-radius:10px;font-weight:600;font-size:15px;color:var(--mute);min-height:44px}
+nav#tabs a:hover{color:var(--ink);background:var(--bar2)}
+nav#tabs a.on{color:var(--prink);background:var(--pris)}
+.hr{margin-inline-start:auto;display:flex;align-items:center;gap:8px}
+.who{font-size:14px;background:var(--bar2);padding:7px 12px;border-radius:99px;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+.thm{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.thm:hover{background:var(--bar2)}
+.thm.ft{width:auto;padding:0 12px;gap:7px;display:flex;align-items:center;text-decoration:none;font-weight:600;font-size:14px;color:var(--prink);background:var(--pris);border-color:color-mix(in srgb,var(--pri) 35%,transparent)}
+@media(max-width:600px){.thm.ft span{display:none}.thm.ft{width:44px;padding:0;justify-content:center}}
+main{padding-block:24px 90px}
+.ph{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.ph h1{margin:0;font-size:clamp(32px,4.5vw,44px);line-height:1.02;font-weight:700}
+.ph .sub{color:var(--mute);font-size:15px;text-transform:capitalize}
+.ph .sp{margin-inline-start:auto;display:flex;gap:8px;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 16px;box-shadow:var(--sh)}
+.kpi b{display:block;font-family:var(--hf);font-size:34px;line-height:1;font-weight:700}
+.kpi span{font-size:14px;color:var(--mute)}
+.kpi.k-ko b{color:var(--ko)}.kpi.k-wait b{color:var(--wait)}.kpi.k-ok b{color:var(--ok)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:8px 14px;min-height:40px;cursor:pointer;font-size:15px;white-space:nowrap;font-weight:500}
+.chip.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.in{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 12px;min-height:44px;font-size:16px;width:100%}
+textarea.in{min-height:96px;resize:vertical}
+.mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px}
+:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+.seg input:focus-visible+span{outline:3px solid var(--pri);outline-offset:2px}
+.filters{display:grid;grid-template-columns:minmax(0,2fr) repeat(4,minmax(0,1fr));gap:8px;margin-bottom:6px}
+.day{margin:24px 0 10px;display:flex;align-items:baseline;gap:10px}
+.day h2{margin:0;font-size:23px;text-transform:capitalize}
+.day span{color:var(--mute);font-size:14px}
+.day::after{content:"";flex:1;height:1px;background:var(--line);align-self:center}
+.day.past h2{color:var(--mute)}
+.row{display:grid;grid-template-columns:96px minmax(0,1fr) 20px;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px 12px 12px;margin-bottom:8px;cursor:pointer;box-shadow:var(--sh)}
+.row:hover{border-color:var(--mute)}
+.when{font-family:var(--hf);line-height:1;text-align:center;border-radius:10px;padding:10px 4px;background:color-mix(in srgb,var(--wait) 14%,transparent);align-self:stretch;display:flex;flex-direction:column;justify-content:center}
+.when b{display:block;font-size:28px;font-weight:700}
+.when span{font-size:16px;color:var(--mute)}
+.row.st-libera .when{background:color-mix(in srgb,var(--ko) 13%,transparent)}
+.row.st-fatta .when{background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.chev{color:var(--mute);font-size:24px}
+.top2{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:3px}
+.tag{font-size:12.5px;font-weight:700;color:#fff;padding:2px 9px;border-radius:6px}
+.t-Assurance{background:#d13a2f;color:#fff}.t-Delivery{background:#14171c;color:#fff}:root[data-theme=dark] .t-Delivery{background:#eceef1;color:#14171c}
+.seg.tipo input:checked+span.k-Assurance{background:#d13a2f;border-color:#d13a2f;color:#fff}
+.antib{grid-column:1/-1;background:var(--yel);color:var(--yink);font-weight:700;font-size:14px;border-radius:8px;padding:6px 10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:-2px -2px 2px}
+.antib b{font-family:var(--hf);font-size:18px;letter-spacing:.06em}
+.antibox{background:color-mix(in srgb,var(--yel) 22%,var(--card));border:2px solid var(--yel);border-radius:16px;padding:14px;margin:0 0 18px}
+.antibox h2{margin:0 0 10px;font-size:26px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.antibox h2 span{background:var(--yel);color:var(--yink);padding:2px 10px;border-radius:8px;letter-spacing:.06em}
+.ckline{display:flex;gap:10px;align-items:flex-start;background:color-mix(in srgb,var(--yel) 16%,var(--card));border:1px solid var(--yel);border-radius:12px;padding:12px;margin-bottom:16px;cursor:pointer;font-size:15px}
+.ckline input{width:22px;height:22px;flex:none;margin:1px 0 0;accent-color:#c99f00}
+tr[data-open]{cursor:pointer}tr[data-open]:hover td{background:var(--soft)}
+.alink{text-decoration:none;color:inherit;display:inline-flex;align-items:center;gap:6px}
+.alink:hover{color:var(--pri)}.alink svg{width:17px;height:17px;color:var(--pri)}
+.plink{display:inline-flex;align-items:center;gap:4px;color:var(--pri);font-weight:600;text-decoration:none;background:var(--pris);padding:0 8px;border-radius:99px}
+.plink svg{width:14px;height:14px}
+.pfsok{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--pris);border:1px solid color-mix(in srgb,var(--pri) 35%,transparent);border-radius:12px;padding:10px 12px;margin:-6px 0 12px;font-size:15px}
+.pfsok>svg{color:var(--pri)}.pfsok>div{flex:1 1 180px}
+.sugl{display:grid;gap:4px;margin:-6px 0 12px}
+.sug{display:flex;gap:10px;align-items:baseline;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 12px;cursor:pointer;min-height:40px}
+.sug:hover{border-color:var(--pri)}.sug span{color:var(--mute);font-size:13px}
+.seg.esa input:checked+span.k-positiva{background:var(--ok);border-color:var(--ok);color:#fff}
+.seg.esa input:checked+span.k-negativa{background:var(--ko);border-color:var(--ko);color:#fff}
+.seg.esa input:checked+span.k-rimodulato{background:var(--wait);border-color:var(--wait);color:#fff}
+.bars{display:flex;gap:3px;align-items:stretch;height:190px;padding-top:16px;overflow-x:auto}
+.bcol{flex:1 0 18px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative;min-width:18px}
+.bcol.we .bl{color:var(--ko)}
+.bst{width:100%;max-width:34px;display:flex;flex-direction:column-reverse;border-radius:6px 6px 2px 2px;overflow:hidden;min-height:0;background:transparent}
+.bst i{display:block;min-height:0}
+.bn{font-size:11px;color:var(--mute);margin-bottom:2px;min-height:14px}.bl{font-size:11px;color:var(--mute);margin-top:4px;white-space:nowrap}
+tfoot td{border-top:2px solid var(--line)}
+.dupw{background:color-mix(in srgb,var(--wait) 14%,transparent);border:1px solid color-mix(in srgb,var(--wait) 45%,transparent);border-radius:10px;padding:10px 12px;font-size:14px;margin:-4px 0 14px}.dupw b{font-weight:600}.dupw button{margin-inline-start:4px}
+.r-OF{background:#13a538}.r-FC{background:#e2001a}
+.seg.rete input:checked+span.k-OF{background:#13a538;border-color:#13a538;color:#fff}.seg.rete input:checked+span.k-FC{background:#e2001a;border-color:#e2001a;color:#fff}
+.c-SIRTI{background:var(--sirti)}.c-Valtellina{background:var(--valt)}.c-SIELTE{background:var(--sielte)}
+.pill{font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.pill.libera,.pill.ko{color:var(--ko);background:color-mix(in srgb,var(--ko) 13%,transparent)}
+.pill.assegnata,.pill.wait{color:var(--wait);background:color-mix(in srgb,var(--wait) 15%,transparent)}
+.pill.fatta,.pill.ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.pill.neu{color:var(--neu);background:color-mix(in srgb,var(--neu) 14%,transparent)}
+.addr{font-weight:600;font-size:17px}
+.meta{font-size:14px;color:var(--mute);display:flex;flex-wrap:wrap;gap:2px 14px}
+.meta b{color:var(--ink);font-weight:500}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:18px;padding:30px;text-align:center;color:var(--mute)}
+.btn{border:1px solid var(--line);border-radius:10px;padding:10px 16px;min-height:44px;font-weight:600;cursor:pointer;background:var(--card);font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--mute)}
+.btn.pri{background:var(--pri);color:#fff;border-color:var(--pri)}
+.btn.yel{background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;border-color:transparent;box-shadow:0 8px 20px -10px var(--pri)}
+.btn.dng{color:var(--ko);border-color:color-mix(in srgb,var(--ko) 45%,transparent);background:transparent}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:14px}
+.btn[disabled]{opacity:.5;cursor:wait}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:clamp(16px,3vw,26px);box-shadow:var(--sh)}
+.card h3{margin:0 0 10px;font-size:24px}
+form.pf{max-width:740px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+label.f{display:block;font-size:14px;font-weight:600;margin-bottom:14px}
+label.f>.in{margin-top:6px}
+.lbl{font-size:14px;font-weight:600;margin-bottom:6px}
+.seg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.seg label{cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:flex;align-items:center;justify-content:center;min-height:46px;padding:8px 16px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-weight:600}
+.seg input:checked+span{background:var(--pri);color:#fff;border-color:var(--pri)}
+.seg.comm input:checked+span.k-SIRTI{background:var(--sirti);border-color:var(--sirti);color:#fff}
+.seg.comm input:checked+span.k-Valtellina{background:var(--valt);border-color:var(--valt);color:#fff}
+.seg.comm input:checked+span.k-SIELTE{background:var(--sielte);border-color:var(--sielte);color:#fff}
+.seg.fasce{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.seg.fasce span{font-family:var(--hf);font-size:21px;flex-direction:column;line-height:1.1;padding:8px}
+.seg.fasce small{font-size:15px;opacity:.7}
+.req{color:var(--ko)}
+.err{color:var(--ko);font-size:14px;min-height:20px;margin:6px 0}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.ov{position:fixed;inset:0;background:rgba(6,8,10,.6);display:flex;align-items:flex-start;justify-content:center;padding:4vh 12px;z-index:30;overflow-y:auto}
+.mod{background:var(--bg);border-radius:18px;width:min(700px,100%);padding:clamp(16px,3vw,26px);position:relative;border:1px solid var(--line)}
+.mod h3{margin:0 0 4px;font-size:30px;line-height:1.05;padding-inline-end:44px}
+.x{position:absolute;right:10px;top:10px;width:44px;height:44px;border-radius:50%;border:0;background:transparent;font-size:26px;cursor:pointer}
+dl.kv{display:grid;grid-template-columns:8.5em minmax(0,1fr);gap:8px 12px;margin:14px 0;font-size:15px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+dl.kv dt{color:var(--mute)}dl.kv dd{margin:0;font-weight:500;overflow-wrap:anywhere}
+.esito{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
+.esito h4{margin:0 0 8px;font-size:22px;color:var(--ok)}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:6px 0 12px}
+.gal .th{aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--soft);border:1px solid var(--line);position:relative;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px;text-decoration:none}
+.gal img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.gal img.broken{display:none}
+.gal .rm{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;cursor:pointer}
+.up,.sbox{border:1px dashed var(--line);border-radius:12px;padding:12px;margin-bottom:12px;background:var(--card)}
+.fh{position:absolute;opacity:0;width:1px;height:1px;overflow:hidden}
+.sval{display:grid;gap:4px;margin-top:8px;max-height:260px;overflow-y:auto}
+.sv{display:flex;gap:10px;align-items:center;font-size:14px;padding:4px 8px;border-radius:8px;background:var(--soft)}
+.sv code{flex:none;font-size:14px}.sv span{color:var(--mute)}
+.sv.ko span{color:var(--ko)}.sv.ok span{color:var(--ok)}.sv.wait span{color:var(--wait)}
+.big img{max-width:100%;max-height:80vh;display:block;margin:0 auto;border-radius:8px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;z-index:40;font-weight:500;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.note{font-size:14px;color:var(--mute)}
+.tlist{display:grid;gap:8px}
+.trow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px;box-shadow:var(--sh)}
+.trow .nm{font-weight:600;font-size:17px;flex:1 1 180px}
+.steps{margin:0;padding-inline-start:20px}.steps li{margin-bottom:6px}
+.msg{max-width:560px;margin:40px auto}
+.subt{display:flex;gap:6px;overflow-x:auto;margin-bottom:16px;padding-bottom:2px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.prod{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;cursor:pointer;box-shadow:var(--sh);text-align:left;width:100%}
+.prod:hover{border-color:var(--mute)}
+.prod h4{margin:0;font-size:22px;line-height:1.1}
+.prod .cod{font-size:13px;color:var(--mute);display:flex;align-items:center;gap:6px;margin:2px 0 10px}
+.prod .cod svg{width:16px;height:16px}
+.stock{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--soft);margin-bottom:8px}
+.stock i{display:block;height:100%}
+.leg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--mute)}
+.leg b{color:var(--ink);font-size:15px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-inline-end:5px;vertical-align:1px}
+table.t{width:100%;border-collapse:collapse;font-size:14px;background:var(--card)}
+table.t th{text-align:left;color:var(--mute);font-weight:600;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.t td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tw{border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--sh)}
+.lnk{background:none;border:0;padding:0;color:var(--pri);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+details.grp{background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:8px;box-shadow:var(--sh)}
+details.grp summary{padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;list-style:none}
+details.grp summary b{margin-inline-start:auto;font-family:var(--hf);font-size:26px}
+details.grp .sl{padding:0 16px 14px;display:flex;flex-wrap:wrap;gap:6px}
+details.grp code{background:var(--soft);padding:3px 8px;border-radius:6px;font-size:14px}
+@media(max-width:860px){.filters{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.filters .q{grid-column:1/-1}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){
+  header.app .wrap{flex-wrap:wrap;gap:8px 12px;padding-top:8px}
+  nav#tabs{order:3;width:100%;margin:0 0 8px;overflow-x:auto;scrollbar-width:none;gap:6px}
+  nav#tabs::-webkit-scrollbar{display:none}
+  nav#tabs a{flex:none;padding:8px 12px;font-size:14px;background:var(--bar2)}
+  nav#tabs a.on{background:var(--pris)}
+  .logo small,.who{display:none}
+}
+@media(max-width:600px){.grid2{grid-template-columns:minmax(0,1fr)}.seg.fasce{grid-template-columns:repeat(2,minmax(0,1fr))}.row{grid-template-columns:74px minmax(0,1fr);gap:10px}.chev{display:none}.when b{font-size:24px}.when span{font-size:15px}dl.kv{grid-template-columns:minmax(0,1fr)}dl.kv dt{margin-top:6px}
+  table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 10px;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-7.5em;color:var(--mute);white-space:normal}.stack td:empty{display:none}}
+@media(prefers-reduced-motion:no-preference){.row,.prod{transition:border-color .15s,transform .15s}.row:active,.prod:active{transform:scale(.995)}.mod{animation:up .18s ease-out}@keyframes up{from{transform:translateY(12px);opacity:0}}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="app"><div class="wrap">
+  <a class="logo" href="#agenda"><span class="mk"><svg class="i" viewBox="0 0 24 24"><path d="M3 17c4 0 5-10 9-10s5 10 9 10"/><circle cx="12" cy="7" r="1.6"/></svg></span><span><b>GoFiber</b><small>Pratiche e magazzino FTTH</small></span></a>
+  <nav id="tabs"></nav>
+  <div class="hr"><span class="who" id="who">Caricamento…</span><a class="thm ft" href="https://napoltano.github.io/fiber-tools/" target="_blank" rel="noopener" title="FiberTools" aria-label="Apri FiberTools"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3.6 17.1a1.8 1.8 0 0 0 2.6 2.6l5.7-5.7a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.3-.6-.6-2.3z"/></svg><span>FiberTools</span></a><button class="thm" id="thm" aria-label="Cambia tema"></button></div>
+</div></header>
+<div id="localbar"></div>
+<main class="wrap" id="main"><p class="note">Caricamento…</p></main>
+<div id="modal"></div>
+<div id="toast"></div>
+
+<script>
+{
+const F=[{k:'0830',a:'08:30',b:'10:30'},{k:'1130',a:'11:30',b:'13:30'},{k:'1430',a:'14:30',b:'16:30'},{k:'1630',a:'16:30',b:'18:00'}];
+const FI=Object.fromEntries(F.map((f,i)=>[f.k,i]));
+const COMM=['SIRTI','Valtellina','SIELTE'];
+const TIPI=['Assurance','Delivery'];
+const RETI=['Open Fiber','FiberCop'];const rk=r=>r==='Open Fiber'?'OF':r==='FiberCop'?'FC':'';
+const reteTag=p=>p?.rete?`<span class="tag r-${rk(p.rete)}">${esc(p.rete)}</span>`:'';
+const normT=t=>t==='Guasto'?'Assurance':t;
+const fixT=d=>d&&d.tipo==='Guasto'?{...d,tipo:'Assurance'}:d;
+const pv=(id,p,k)=>S.es.get(id)?.[k]||p?.[k]||'';
+const tipoTag=p=>p.tipo?`<span class="tag t-${esc(p.tipo)}">${esc(p.tipo)}</span>`:'';
+const ST={libera:'Da assegnare',assegnata:'Assegnata',fatta:'Completata'};
+const IC={
+ cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ box:'<path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/>',
+ users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.8.8 3 2.6 3.5 5.2"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+ sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+ moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+ bc:'<path d="M4 5v14M7 5v14M11 5v14M14 5v14M18 5v14M20 5v14"/>',
+ arch:'<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9M10 13h4"/>',
+ chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+ pin:'<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+ cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'};
+const ic=k=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=s=>{const [y,m,d]=String(s).split('-').map(Number);return new Date(y,(m||1)-1,d||1)};
+const addDays=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return iso(d)};
+const today=()=>iso(new Date());
+const dayName=s=>{const t=today(),d=parse(s);const base=d.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:d.getFullYear()!==new Date().getFullYear()?'numeric':undefined});return s===t?'Oggi · '+base:s===addDays(t,1)?'Domani · '+base:base};
+const dt=s=>s?new Date(s).toLocaleString('it-IT',{day:'numeric',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+const fascia=k=>F[FI[k]]||{a:'--:--',b:''};
+const sk=s=>'s-'+s.replace(/[^A-Za-z0-9_\-.:@+]/g,c=>'~'+c.charCodeAt(0).toString(16));
+const normS=s=>String(s||'').trim().toUpperCase();
+
+/* ---------- tema ---------- */
+function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('pf-theme',t)}catch(e){}const b=$('#thm');b.innerHTML=ic(t==='dark'?'sun':'moon');b.title=t==='dark'?'Tema chiaro':'Tema scuro'}
+{let t=null;try{t=localStorage.getItem('pf-theme')}catch(e){}if(t!=='dark'&&t!=='light')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';setTheme(t)}
+$('#thm').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
+
+const S={db:null,user:null,assets:null,admin:false,me:null,state:'load',
+  pr:new Map(),es:new Map(),tec:new Map(),pd:new Map(),un:new Map(),
+  loaded:{pr:false,es:false,tec:false,pd:false,un:false,pfsx:false,ro:false},pfs:new Map(),pfsDocs:new Map(),roles:new Map(),role:null,gate:undefined,boss:false,isOwner:false,canApprove:false,forceReg:false,pfsBase:new Map(),pfsImp:new Map(),pfsBaseAt:'',pfsBaseState:'load',slow:false,err:null,
+  view:'agenda',editId:null,f:{range:'oggi',day:'',stato:'',comm:'',tipo:'',tec:'',q:''},
+  mag:{tab:'prodotti',prod:null,pst:'',pq:'',q:'',mode:'ser',comm:'',lastComm:''},ar:{q:'',mese:'',tipo:'',comm:'',tec:''},rep:{per:'mese',ref:new Date().toISOString().slice(0,10),comm:'',tipo:'',tec:''},repMine:false,imp:{txt:'',rows:null,skip:true,def:{tipo:'',comm:'',rete:'',data:'',fascia:'',tec:''}},nuovaMode:'one',modal:null,up:null,dupOk:null,needReg:null,busy:false};
+
+const tecsOf=p=>Array.isArray(p?.tecnici)?p.tecnici:(p?.tecnicoId?[p.tecnicoId]:[]);
+const statoOf=(id,p)=>S.es.has(id)?'fatta':(tecsOf(p).length?'assegnata':'libera');
+const teamNames=p=>tecsOf(p).map(id=>tecName(id)).join(' + ')||'Non assegnata';
+const pk=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const navLL=(lat,lng)=>`https://www.google.com/maps/dir/?api=1&destination=${Number(lat).toFixed(6)},${Number(lng).toFixed(6)}`;
+const navAddr=a=>'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(a);
+const pfsLoc=p=>{if(!p?.pfs)return null;if(p.pfsLat!=null&&p.pfsLat!==''&&isFinite(p.pfsLat))return{n:p.pfs,lat:+p.pfsLat,lng:+p.pfsLng,a:p.pfsAnello||''};return S.pfs.get(pk(p.pfs))||null};
+const pfsHTML=p=>{const l=pfsLoc(p);return l?`<a class="plink" href="${navLL(l.lat,l.lng)}" target="_blank" rel="noopener" title="Vai al PFS">${ic('pin')}${esc(p.pfs)}</a>`:esc(p.pfs||'—')};
+const isAss=p=>normT(p?.tipo)==='Assurance';
+const ESA={positiva:['ok','Positiva'],negativa:['ko','Negativa']};
+const stLab=(id,st)=>{const e=S.es.get(id);return st==='fatta'&&ESA[e?.esitoAss]?ESA[e.esitoAss]:[st,ST[st]]};
+const dmy=s=>s?parse(s).toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'}):'';
+const lastRim=p=>Array.isArray(p?.rimod)&&p.rimod.length?p.rimod[p.rimod.length-1]:null;
+const isAnti=(id,p)=>!!p.anticipo&&!S.es.has(id);
+const tecName=id=>id?(S.tec.get(id)?.nome||'Tecnico rimosso'):'Non assegnata';
+const prodName=id=>S.pd.get(id)?.nome||'Prodotto';
+const unitsOf=pid=>[...S.un.values()].filter(u=>u.prodottoId===pid);
+function uLab(u){if(!u)return['ko','Non presente in magazzino'];if(u.stato==='scaricato')return['ko','Scaricato'+(u.motivoScarico?' · '+u.motivoScarico:'')];if(u.stato==='installato')return['ok','Installato · ordine '+(u.ordine||'—')];if(u.stato==='tecnico')return['wait','Assegnato a '+tecName(u.tecnicoId)];return['neu','In magazzino']}
+
+function toast(t){const el=$('#toast');el.innerHTML='<div class="toast" role="status">'+esc(t)+'</div>';clearTimeout(toast.t);toast.t=setTimeout(()=>el.innerHTML='',3400)}
+async function pool(items,fn,n,onp){let i=0,done=0;const errs=[];const w=async()=>{while(i<items.length){const it=items[i++];try{await fn(it)}catch(e){errs.push([it,e])}done++;onp&&onp(done)}};await Promise.all(Array.from({length:Math.min(n,items.length)},w));return errs}
+const errText=x=>x?.code==='invalid_argument'?'Non hai i permessi per salvare qui.':x?.code==='quota_exceeded'?'Archivio pieno: elimina dati vecchi.':'Salvataggio non riuscito, riprova.';
+
+/* ---------- codici a barre da foto ---------- */
+let zxP=null;
+function loadZX(){return zxP||(zxP=new Promise((ok,ko)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';s.onload=()=>ok(window.ZXing);s.onerror=()=>{zxP=null;ko(new Error('lib'))};document.head.appendChild(s)}))}
+async function scanFile(file){
+  if('BarcodeDetector' in window){try{const d=new BarcodeDetector();const b=await createImageBitmap(file);const r=await d.detect(b);if(r.length)return r.map(x=>x.rawValue)}catch(e){}}
+  const ZX=await loadZX();const url=URL.createObjectURL(file);
+  try{const rd=new ZX.BrowserMultiFormatReader();const r=await rd.decodeFromImageUrl(url);return [r.getText()]}catch(e){return []}finally{URL.revokeObjectURL(url)}
+}
+document.addEventListener('change',async e=>{
+  const inp=e.target.closest('input[data-scan]');if(!inp)return;
+  const tgt=document.getElementById(inp.dataset.scan);const files=[...inp.files];inp.value='';if(!tgt||!files.length)return;
+  toast('Lettura codice in corso…');const found=[];
+  for(const f of files){try{found.push(...await scanFile(f))}catch(x){}}
+  if(!found.length){toast('Nessun codice trovato: avvicina la fotocamera e riprova');return}
+  if(tgt.tagName==='TEXTAREA'){tgt.value=(tgt.value.trim()?tgt.value.trim()+'\n':'')+found.join('\n')}else tgt.value=found[0];
+  tgt.dispatchEvent(new Event('input',{bubbles:true}));toast(found.length===1?'Letto: '+found[0]:found.length+' codici letti');
+});
+const scanBtn=(tid,l)=>`<label class="btn sm">${ic('cam')}${l||'Leggi da foto'}<input class="fh" type="file" accept="image/*" multiple data-scan="${tid}"></label>`;
+
+/* ---------- box seriali ---------- */
+const serials=id=>[...new Set((document.getElementById('sb-'+id)?.value||'').split(/[\s,;]+/).map(normS).filter(Boolean))];
+const VAL={
+  car:l=>l.map(s=>{const u=S.un.get(sk(s));return !u?[s,'ok','Nuovo']:u.stato==='scaricato'?[s,'wait','Era scaricato: verrà ricaricato']:[s,'ko','Già presente · '+prodName(u.prodottoId)+(u.committente?' · '+u.committente:'')]}),
+  pre:l=>l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non presente in magazzino: avvisa l\'ufficio'];const d=prodName(u.prodottoId)+(u.committente?' · '+u.committente:'');if(u.stato==='installato')return[s,'ko','Già installato · ordine '+(u.ordine||'—')];if(u.stato==='scaricato')return[s,'ko','Scaricato dal magazzino'];if(u.stato==='tecnico'&&u.tecnicoId===S.me)return[s,'neu',d+' · già in carico a te'];if(u.stato==='tecnico')return[s,'ko',d+' · in carico a '+tecName(u.tecnicoId)];return[s,'ok',d]}),
+  sca:l=>l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non trovato'];if(u.stato==='installato')return[s,'ko','Installato · ordine '+(u.ordine||'—')+': non scaricabile'];if(u.stato==='scaricato')return[s,'neu','Già scaricato'];const d=prodName(u.prodottoId)+(u.committente?' · '+u.committente:'');if(u.stato==='tecnico')return[s,'wait',d+' · in carico a '+tecName(u.tecnicoId)];return[s,'ok',d]}),
+  ass:l=>{const tid=$('#atec')?.value;return l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non trovato'];if(u.stato==='scaricato')return[s,'ko','Scaricato dal magazzino'];if(u.stato==='installato')return[s,'ko','Già installato · ordine '+(u.ordine||'—')];if(u.stato==='tecnico'&&u.tecnicoId===tid)return[s,'neu','Già assegnato a questo tecnico'];if(u.stato==='tecnico')return[s,'wait',prodName(u.prodottoId)+' · riassegna da '+tecName(u.tecnicoId)];return[s,'ok',prodName(u.prodottoId)]})},
+  rie:l=>l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non trovato'];if(u.stato==='scaricato')return[s,'ko','Scaricato: ripristinalo dalla scheda prodotto'];if(u.stato==='installato')return[s,'ko','Installato: riapri prima la pratica'];if(u.stato==='magazzino')return[s,'neu','Già in magazzino'];return[s,'ok',prodName(u.prodottoId)+' · da '+tecName(u.tecnicoId)]}),
+  ins:l=>{const pid=S.modal?.id,p=S.pr.get(pid)||{},team=tecsOf(p).length?tecsOf(p):[S.me];return l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Seriale non presente in magazzino'];if(u.stato==='scaricato')return[s,'ko','Seriale scaricato dal magazzino'];if(u.committente&&p.committente&&u.committente!==p.committente&&u.stato!=='installato')return[s,'wait',prodName(u.prodottoId)+' · materiale '+u.committente+', pratica '+p.committente];if(u.stato==='installato'&&u.praticaId!==pid)return[s,'ko','Già installato · ordine '+(u.ordine||'—')];if(u.stato==='tecnico'&&!team.includes(u.tecnicoId))return[s,'wait',prodName(u.prodottoId)+' · in carico a '+tecName(u.tecnicoId)];if(u.stato==='magazzino')return[s,'wait',prodName(u.prodottoId)+' · in magazzino, non assegnato'];return[s,'ok',prodName(u.prodottoId)]})}};
+function serBox(id,label,hint){return `<div class="sbox"><div class="lbl">${label}</div><textarea class="in mono" id="sb-${id}" rows="4" placeholder="${esc(hint||'Scansiona con il lettore o scrivi un seriale per riga')}" autocomplete="off" autocapitalize="characters" spellcheck="false"></textarea>
+  <div class="acts">${scanBtn('sb-'+id)}<span class="note" id="sbc-${id}"></span></div><div class="sval" id="sbv-${id}"></div></div>`}
+function sbUpdate(id){
+  const c=document.getElementById('sbc-'+id);if(!c)return;const l=serials(id);const r=VAL[id](l);
+  const n=k=>r.filter(x=>x[1]===k).length;
+  c.textContent=l.length?`${l.length} seriali · ${n('ok')+n('wait')} validi${n('ko')?' · '+n('ko')+' con errore':''}`:'';
+  document.getElementById('sbv-'+id).innerHTML=r.slice(0,300).map(([s,k,t])=>`<div class="sv ${k}"><code>${esc(s)}</code><span>${esc(t)}</span></div>`).join('')+(r.length>300?`<div class="note">…e altri ${r.length-300}</div>`:'');
+}
+document.addEventListener('input',e=>{const t=e.target;if(t.id?.startsWith('sb-'))sbUpdate(t.id.slice(3))});
+
+/* ---------- navigazione ---------- */
+const views=()=>S.boss?['agenda','nuova','archivio','report','magazzino','tecnici']:S.admin?['agenda','nuova','archivio','report','magazzino']:['agenda','materiale','resa','profilo'];
+function tabs(){
+  const lab=S.admin?{agenda:['cal','Agenda'],nuova:['plus',S.editId?'Modifica':'Nuova pratica'],archivio:['arch','Archivio'],report:['chart','Riepilogo'],magazzino:['box','Magazzino'],tecnici:['users','Utenti']}:{agenda:['cal','Le mie pratiche'],archivio:['arch','Archivio'],materiale:['box','Il mio materiale'],resa:['chart','La mia resa'],profilo:['user','Profilo']};
+  $('#tabs').innerHTML=(S.state==='ok'&&!S.gate)?views().map(v=>`<a href="#${v}" class="${S.view===v?'on':''}">${ic(lab[v][0])}<span>${lab[v][1]}</span></a>`).join(''):'';
+  $('#who').textContent=S.state!=='ok'?'Non connesso':S.gate?'Accesso':(S.isOwner?'Proprietario':(S.tec.get(S.me)?.nome||'')+' · '+(RUOLI[S.role]||''));
+}
+function show(v){S.view=views().includes(v)?v:'agenda';if(location.hash.slice(1)!==S.view)location.hash=S.view;render();window.scrollTo(0,0)}
+addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(v!==S.view){S.editId=null;S.dupOk=null;S.view=views().includes(v)?v:'agenda';render();window.scrollTo(0,0)}});
+
+/* ---------- render ---------- */
+function render(){
+  tabs();const m=$('#main');
+  if(S.state==='nocl'||S.state==='nodb'){m.innerHTML=`<div class="card msg"><h3>Accedi per usare l'app</h3><p>L'app salva pratiche e magazzino in un archivio condiviso. Aprila dal link di Claude dopo aver effettuato l'accesso.</p></div>`;return}
+  if(S.state!=='ok'){m.innerHTML='<p class="note">Caricamento…</p>';return}
+  if(S.gate){m.innerHTML=accessHTML();bindAccess();return}
+  const v=S.view;
+  if(v==='nuova'){if(!S.imp.def.data)S.imp.def.data=today();if(S.nuovaMode==='imp'&&!S.editId){m.innerHTML=nuovaTabs()+importHTML();bindNuovaTabs();bindImport()}else{m.innerHTML=(S.editId?'':nuovaTabs())+formHTML();if(!S.editId)bindNuovaTabs();bindForm()}}
+  else if(v==='report'){m.innerHTML=reportHTML(false);bindReport();renderReport()}
+  else if(v==='resa'){m.innerHTML=reportHTML(true);bindReport();renderReport()}
+  else if(v==='tecnici')m.innerHTML=utentiHTML();
+  else if(v==='profilo'){m.innerHTML=profileHTML(false);bindProfile()}
+  else if(v==='materiale'){m.innerHTML=materialeHTML();bindMateriale()}
+  else if(v==='archivio'){m.innerHTML=archHTML();bindArch();renderArch()}
+  else if(v==='magazzino'){m.innerHTML=magHTML();magBind()}
+  else{m.innerHTML=agendaHTML();bindAgenda();renderList()}
+}
+function live(){
+  const fr=S.forceReg;if(applyRole()&&!fr){render()}
+  else if(S.gate){tabs();if(!fr&&S.gate!=='nuovo')render()}
+  else if(S.view==='agenda'){renderList();fillTecFilter();tabs()}
+  else if(S.view==='tecnici'){render()}
+  else if(S.view==='materiale'){const l=$('#matList');if(l)l.innerHTML=matListHTML();sbUpdate('pre');tabs()}
+  else if(S.view==='archivio'){renderArch();tabs()}
+  else if(S.view==='report'||S.view==='resa'){renderReport();tabs()}
+  else if(S.view==='magazzino'){magRefresh();tabs()}
+  else{tabs();if(S.view==='nuova')renderPfsSug()}
+  if(S.modal?.type==='detail')renderModal();
+  if(S.modal?.type==='complete')sbUpdate('ins');
+}
+
+/* ---------- agenda ---------- */
+function agendaHTML(){
+  const f=S.f;const ch=[['oggi','Oggi'],['domani','Domani'],['sett','7 giorni'],['aperte','Da chiudere'],['tutte','Tutte']];
+  return `<div class="ph"><div><h1>${S.admin?'Agenda':'Le mie pratiche'}</h1><div class="sub">${esc(new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))}</div></div>
+   ${S.admin?`<div class="sp"><a class="btn yel" href="#nuova">${ic('plus')}Nuova pratica</a></div>`:''}</div>
+  <div class="kpis" id="stats"></div>
+  <div class="bar" id="chips">${ch.map(([k,l])=>`<button class="chip ${f.range===k?'on':''}" data-r="${k}">${l}</button>`).join('')}
+    <input type="date" class="chip ${f.range==='giorno'?'on':''}" id="fday" aria-label="Vai al giorno" value="${esc(f.day)}"></div>
+  <div class="filters">
+    <input class="in q" id="fq" type="search" placeholder="Cerca ordine, ID risorsa, indirizzo, telefono, PFS" value="${esc(f.q)}">
+    <select class="in" id="fst" aria-label="Stato"><option value="">Tutti gli stati</option>${Object.entries(ST).map(([k,l])=>`<option value="${k}" ${f.stato===k?'selected':''}>${l}</option>`).join('')}</select>
+    <select class="in" id="fti" aria-label="Tipo intervento"><option value="">Assurance e delivery</option>${TIPI.map(t=>`<option ${f.tipo===t?'selected':''}>${t}</option>`).join('')}</select>
+    <select class="in" id="fcm" aria-label="Committente"><option value="">Tutti i committenti</option>${COMM.map(c=>`<option ${f.comm===c?'selected':''}>${c}</option>`).join('')}</select>
+    ${S.admin?`<select class="in" id="ftc" aria-label="Tecnico"></select>`:'<span></span>'}
+  </div><div id="list"></div>`;
+}
+function fillTecFilter(){
+  const s=$('#ftc');if(!s)return;
+  const opts=[['','Tutti i tecnici'],['__none','Non assegnate'],...activeTecs().map(([id,t])=>[id,t.nome||'Tecnico'])];
+  s.innerHTML=opts.map(([v,l])=>`<option value="${esc(v)}" ${S.f.tec===v?'selected':''}>${esc(l)}</option>`).join('');
+}
+function bindAgenda(){
+  fillTecFilter();
+  $('#chips').onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;S.f.range=b.dataset.r;render()};
+  $('#fday').onchange=e=>{if(e.target.value){S.f.day=e.target.value;S.f.range='giorno';render()}};
+  $('#fq').oninput=e=>{S.f.q=e.target.value;renderList()};
+  $('#fst').onchange=e=>{S.f.stato=e.target.value;renderList()};
+  $('#fcm').onchange=e=>{S.f.comm=e.target.value;renderList()};
+  $('#fti').onchange=e=>{S.f.tipo=e.target.value;renderList()};
+  if($('#ftc'))$('#ftc').onchange=e=>{S.f.tec=e.target.value;renderList()};
+}
+function filtered(){
+  const f=S.f,t=today();let lo=null,hi=null;
+  if(f.range==='oggi')lo=hi=t;else if(f.range==='domani')lo=hi=addDays(t,1);else if(f.range==='sett'){lo=t;hi=addDays(t,6)}else if(f.range==='giorno'&&f.day)lo=hi=f.day;
+  const q=f.q.trim().toLowerCase();const out=[];
+  for(const [id,p] of S.pr){
+    if(!S.admin&&!tecsOf(p).includes(S.me))continue;
+    const st=statoOf(id,p);
+    if(f.range==='aperte'&&!(p.data<t&&st!=='fatta'))continue;
+    if(lo&&(p.data<lo||p.data>hi))continue;
+    if(f.stato&&st!==f.stato)continue;
+    if(f.comm&&p.committente!==f.comm)continue;
+    if(f.tipo&&p.tipo!==f.tipo)continue;
+    if(S.admin&&f.tec){if(f.tec==='__none'?tecsOf(p).length:!tecsOf(p).includes(f.tec))continue}
+    if(q){const mat=(S.es.get(id)?.materiali||[]).join(' ');if(![p.tipo,p.rete,p.ordine,p.idRisorsa,p.indirizzo,p.telefono,p.pfs,pv(id,p,'permuta'),pv(id,p,'splitter'),p.committente,mat].join(' ').toLowerCase().includes(q))continue}
+    out.push({id,p,st});
+  }
+  return out.sort((a,b)=>(a.p.data||'').localeCompare(b.p.data||'')||(FI[a.p.fascia]??9)-(FI[b.p.fascia]??9)||(a.p.ordine||'').localeCompare(b.p.ordine||''));
+}
+function rowHTML(id,p,st){const fa=fascia(p.fascia),team=tecsOf(p);
+  const who=S.admin?`<span>${team.length>1?'Tecnici':'Tecnico'} <b>${esc(teamNames(p))}</b></span>`:(team.length>1?`<span>In coppia con <b>${esc(team.filter(x=>x!==S.me).map(tecName).join(' + '))}</b></span>`:'');
+  return `<article class="row st-${st}" tabindex="0" data-open="${esc(id)}">${isAnti(id,p)?`<div class="antib"><b>ANTICIPO</b><span>prevista ${esc(dayName(p.data))} · puoi farla prima</span></div>`:''}<div class="when"><b>${fa.a}</b><span>${fa.b}</span></div>
+      <div><div class="top2">${tipoTag(p)}<span class="tag c-${esc(p.committente)}">${esc(p.committente)}</span>${reteTag(p)}${(([c,l])=>`<span class="pill ${c}">${l}</span>`)(stLab(id,st))}${lastRim(p)&&st!=='fatta'?`<span class="pill wait">Rimodulata${p.rimod.length>1?' ×'+p.rimod.length:''} · era ${esc(dmy(lastRim(p).daData))} ${esc(fascia(lastRim(p).daFascia).a)}</span>`:''}${p.ora&&st!=='fatta'?`<span class="pill neu">Ore ${esc(p.ora)}</span>`:''}</div>
+      <div class="addr">${p.indirizzo?`<a class="alink" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener" title="Naviga all'indirizzo">${esc(p.indirizzo)}${ic('pin')}</a>`:'Indirizzo non indicato'}</div>
+      <div class="meta"><span>Ordine <b>${esc(p.ordine||'—')}</b></span><span>ID risorsa <b>${esc(p.idRisorsa||'—')}</b></span><span>PFS <b>${pfsHTML(p)}</b></span>${pv(id,p,'permuta')?`<span>Permuta <b>${esc(pv(id,p,'permuta'))}</b></span>`:''}${pv(id,p,'splitter')?`<span>Splitter <b>${esc(pv(id,p,'splitter'))}</b></span>`:''}${p.telefono?`<span>Tel <b>${esc(p.telefono)}</b></span>`:''}${who}</div></div><div class="chev">›</div></article>`}
+function antiBox(){
+  if(S.admin)return '';
+  const t=today(),l=[...S.pr].filter(([id,p])=>isAnti(id,p)&&tecsOf(p).includes(S.me)&&p.data>t).sort((a,b)=>(a[1].data||'').localeCompare(b[1].data||'')||(FI[a[1].fascia]??9)-(FI[b[1].fascia]??9));
+  if(!l.length)return '';
+  return `<div class="antibox" role="status"><h2><span>ANTICIPO</span>${l.length===1?'1 pratica futura da anticipare':l.length+' pratiche future da anticipare'}</h2>${l.map(([id,p])=>rowHTML(id,p,statoOf(id,p))).join('')}</div>`;
+}
+function renderList(){
+  const L=$('#list');if(!L)return;const items=filtered();const n=k=>items.filter(i=>i.st===k).length;
+  $('#stats').innerHTML=`<div class="kpi"><b>${items.length}</b><span>Pratiche nel periodo</span></div>${S.admin?`<div class="kpi k-ko"><b>${n('libera')}</b><span>Da assegnare</span></div>`:''}<div class="kpi k-wait"><b>${n('assegnata')}</b><span>Da eseguire</span></div><div class="kpi k-ok"><b>${n('fatta')}</b><span>Completate</span></div>${!S.admin?`<div class="kpi"><b>${[...S.un.values()].filter(u=>u.stato==='tecnico'&&u.tecnicoId===S.me).length}</b><span>Materiale in carico</span></div>`:''}`;
+  const warn=(S.slow?'<p class="note" style="color:var(--ko)">Connessione lenta: i dati potrebbero non essere aggiornati.</p>':'')+(S.err?'<p class="note" style="color:var(--ko)">Alcuni dati non sono leggibili con il tuo accesso.</p>':'');
+  if(!items.length){const none=!S.pr.size&&S.loaded.pr;
+    L.innerHTML=warn+antiBox()+`<div class="empty">${none?(S.admin?'Nessuna pratica ancora. Crea la prima.':'Nessuna pratica assegnata a te per ora.'):'Nessuna pratica per questo periodo o filtro.'}${S.admin?`<div style="margin-top:12px"><a class="btn yel" href="#nuova">${ic('plus')}Nuova pratica</a></div>`:''}</div>`;return}
+  let html=warn+antiBox(),cur=null;const t=today();
+  for(const {id,p,st} of items){
+    if(p.data!==cur){cur=p.data;const c=items.filter(i=>i.p.data===cur).length;html+=`<div class="day ${cur<t?'past':''}"><h2>${esc(dayName(cur))}</h2><span>${c} ${c===1?'pratica':'pratiche'}</span></div>`}
+    html+=rowHTML(id,p,st);
+  }
+  L.innerHTML=html;
+}
+
+/* ---------- form pratica ---------- */
+function tecOpts(sel,none){const tecs=activeTecs();return (none?`<option value="">${none}</option>`:'')+tecs.map(([id,t])=>`<option value="${esc(id)}" ${sel===id?'selected':''}>${esc(t.nome||'Tecnico')}</option>`).join('')}
+function nuovaTabs(){return `<div class="subt" id="ntabs" style="margin-bottom:10px"><button class="chip ${S.nuovaMode!=='imp'?'on':''}" data-nm="one">Singola pratica</button><button class="chip ${S.nuovaMode==='imp'?'on':''}" data-nm="imp">Importa da Excel</button></div>`}
+function bindNuovaTabs(){$('#ntabs').onclick=e=>{const b=e.target.closest('[data-nm]');if(!b)return;S.nuovaMode=b.dataset.nm;render()}}
+function formHTML(){
+  const p=S.editId?S.pr.get(S.editId):null;
+  const v=p||{tipo:'',committente:'',ordine:'',idRisorsa:'',indirizzo:'',telefono:'',pfs:'',data:S.f.range==='giorno'&&S.f.day?S.f.day:today(),fascia:'',tecnicoId:''};
+  return `<div class="ph"><h1>${p?'Modifica pratica':'Nuova pratica'}</h1></div><form class="pf card" id="pf" novalidate>
+   <div class="lbl">Tipo di intervento <span class="req">*</span></div>
+   <div class="seg tipo">${TIPI.map(t=>`<label><input type="radio" name="tipo" value="${t}" ${v.tipo===t?'checked':''}><span class="k-${t}">${t}</span></label>`).join('')}</div>
+   <div class="lbl">Committente <span class="req">*</span></div>
+   <div class="seg comm">${COMM.map(c=>`<label><input type="radio" name="committente" value="${c}" ${v.committente===c?'checked':''}><span class="k-${c}">${c}</span></label>`).join('')}</div>
+   <div class="lbl">Rete <span class="req">*</span></div>
+   <div class="seg rete">${RETI.map(r=>`<label><input type="radio" name="rete" value="${r}" ${v.rete===r?'checked':''}><span class="k-${rk(r)}">${r}</span></label>`).join('')}</div>
+   <div class="grid2"><label class="f">Ordine <span class="req">*</span><input class="in" name="ordine" value="${esc(v.ordine)}" autocomplete="off"></label>
+    <label class="f">ID risorsa<input class="in" name="idRisorsa" value="${esc(v.idRisorsa)}" autocomplete="off"></label></div>
+   <div id="dupw"></div>
+   <label class="f">Indirizzo<input class="in" name="indirizzo" value="${esc(v.indirizzo)}" placeholder="Via, civico, comune" autocomplete="off"></label>
+   <div class="grid2"><label class="f">Numero di telefono<input class="in" name="telefono" type="tel" inputmode="tel" value="${esc(v.telefono)}" autocomplete="off"></label>
+    <div><label class="f">PFS<input class="in" name="pfs" id="pfsIn" value="${esc(v.pfs)}" autocomplete="off" autocapitalize="characters" placeholder="Es. NA_05/08W22"></label><div id="pfsSug"></div></div></div>
+   <div class="grid2"><label class="f">Numero permuta<input class="in" name="permuta" value="${esc(v.permuta||'')}" autocomplete="off"></label>
+    <label class="f">Splitter<input class="in" name="splitter" value="${esc(v.splitter||'')}" placeholder="Es. SPL 1:8 porta 3" autocomplete="off"></label></div>
+   <label class="f" style="max-width:340px">Data <span class="req">*</span><input class="in" name="data" type="date" value="${esc(v.data)}"></label>
+   <div class="lbl">Fascia oraria <span class="req">*</span></div>
+   <div class="seg fasce">${F.map(f=>`<label><input type="radio" name="fascia" value="${f.k}" ${v.fascia===f.k?'checked':''}><span>${f.a}<small>${f.b}</small></span></label>`).join('')}</div>
+   <div class="lbl">Tecnici assegnati <span class="note" style="font-weight:400">· puoi sceglierne più di uno se escono in coppia</span></div>
+   <div class="seg">${activeTecs().map(([id,t])=>`<label><input type="checkbox" name="tecnici" value="${esc(id)}" ${tecsOf(v).includes(id)?'checked':''}><span>${esc(t.nome||'Tecnico')}</span></label>`).join('')}${tecsOf(v).filter(id=>!activeTecs().some(([x])=>x===id)).map(id=>`<label><input type="checkbox" name="tecnici" value="${esc(id)}" checked><span>Tecnico rimosso</span></label>`).join('')}</div>
+   <label class="ckline"><input type="checkbox" name="anticipo" value="1" ${v.anticipo?'checked':''}><span><b>Anticipo</b> · pratica futura da fare prima della data: i tecnici assegnati la vedono subito in cima con il banner giallo “ANTICIPO”.</span></label>
+   ${!activeTecs().length?'<p class="note">Nessun tecnico confermato: vai su “Utenti” per vedere come farli registrare.</p>':''}
+   <div class="err" id="ferr"></div>
+   <div class="acts"><button class="btn pri" type="submit" data-next="agenda">${p?'Salva modifiche':'Salva pratica'}</button>${p?'':'<button class="btn" type="submit" data-next="again">Salva e inserisci un\'altra</button>'}<a class="btn" href="#agenda">Annulla</a></div></form>
+  <div class="card pf" style="margin-top:14px"><h3>Posizioni PFS da FiberTools</h3>
+   <p class="note" style="margin-top:-4px"><span id="pfsCount">${pfsCountHTML()}</span> Per aggiornarle: in FiberTools apri <b>PFS → Condividi posizioni</b>, crea il file e caricalo qui; vengono aggiunti solo i PFS nuovi o spostati.</p>
+   <div class="acts"><label class="btn yel">${ic('pin')}Importa file KML<input class="fh" type="file" id="pfsFile" accept=".kml,.txt,.xml,application/vnd.google-earth.kml+xml,text/plain,text/xml,application/xml"></label>${S.pfsImp.size?'<button type="button" class="btn dng sm" id="pfsClear">Togli le posizioni importate</button>':''}<span class="note" id="pfsMsg"></span></div></div>`;
+}
+function findDups(ordine,idr){
+  const o=String(ordine||'').trim().toLowerCase(),r=String(idr||'').trim().toLowerCase(),out=[];
+  for(const [id,p] of S.pr){if(id===S.editId)continue;
+    const mo=o&&String(p.ordine||'').trim().toLowerCase()===o,mr=r&&String(p.idRisorsa||'').trim().toLowerCase()===r;
+    if(mo)out.push({id,p,campo:'ordine'});if(mr)out.push({id,p,campo:'ID risorsa'})}
+  return out;
+}
+function showDups(){
+  const box=$('#dupw'),f=$('#pf');if(!box||!f)return;
+  const d=findDups(f.elements.ordine.value,f.elements.idRisorsa.value);
+  if(!d.length){box.innerHTML='';return}
+  const seen=new Map();for(const x of d){const k=x.id;if(!seen.has(k))seen.set(k,{p:x.p,c:[]});seen.get(k).c.push(x.campo)}
+  box.innerHTML=`<div class="dupw" role="status"><b>Pratica già presente.</b> Puoi salvarla comunque.${[...seen].slice(0,5).map(([id,{p,c}])=>`<div style="margin-top:4px">Stesso ${c.join(' e ')}: ${esc(p.tipo?p.tipo+' · ':'')}${esc(p.committente||'')} · ordine ${esc(p.ordine||'—')} · ID risorsa ${esc(p.idRisorsa||'—')} · ${esc(p.data||'')} · ${esc(statoOf(id,p)==='fatta'?'completata':teamNames(p))} <button type="button" class="lnk" data-open="${esc(id)}">Apri</button></div>`).join('')}</div>`;
+}
+function bindForm(){
+  const form=$('#pf');let next='agenda';
+  form.addEventListener('click',e=>{const b=e.target.closest('button[data-next]');if(b)next=b.dataset.next;const pp=e.target.closest('[data-pfspick]');if(pp){$('#pfsIn').value=pp.dataset.pfspick;renderPfsSug()}});
+  $('#pfsIn').addEventListener('input',renderPfsSug);renderPfsSug();
+  $('#pfsFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)importPfs(f)};
+  if($('#pfsClear'))$('#pfsClear').onclick=()=>{S.modal={type:'confirm',danger:true,title:'Togliere le posizioni importate?',text:`Le ${S.pfsImp.size} posizioni importate verranno tolte; resta l\'elenco FiberTools incluso nell\'app. Le pratiche già salvate mantengono la loro posizione.`,ok:'Svuota',done:'Posizioni svuotate',fn:async()=>{for(const id of [...S.pfsDocs.keys()])await S.db.doc('pfsdb/'+id).delete();if(S.view==='nuova')render()}};renderModal()};
+  form.addEventListener('input',e=>{if(e.target.name==='ordine'||e.target.name==='idRisorsa'){S.dupOk=null;showDups()}});
+  showDups();
+  form.onsubmit=async e=>{
+    e.preventDefault();const fd=new FormData(form);const g=k=>String(fd.get(k)||'').trim();
+    const o={tipo:g('tipo'),committente:g('committente'),rete:g('rete'),ordine:g('ordine'),idRisorsa:g('idRisorsa'),indirizzo:g('indirizzo'),telefono:g('telefono'),pfs:g('pfs'),permuta:g('permuta'),splitter:g('splitter'),data:g('data'),fascia:g('fascia')};
+    o.tecnici=[...new Set(fd.getAll('tecnici').map(String))];o.tecnicoId=o.tecnici[0]||'';o.anticipo=fd.get('anticipo')==='1';
+    {const l=S.pfs.get(pk(o.pfs));if(l){o.pfs=l.n;o.pfsLat=l.lat;o.pfsLng=l.lng;o.pfsAnello=l.a||''}else{const old=S.editId?S.pr.get(S.editId):null;if(old&&pk(old.pfs)===pk(o.pfs)&&old.pfsLat!=null){o.pfsLat=old.pfsLat;o.pfsLng=old.pfsLng;o.pfsAnello=old.pfsAnello||''}else{o.pfsLat=null;o.pfsLng=null;o.pfsAnello=''}}}
+    const miss=[!o.tipo&&'tipo di intervento (Assurance o Delivery)',!o.committente&&'committente',!o.rete&&'rete (Open Fiber o FiberCop)',!o.ordine&&'ordine',!o.data&&'data',!o.fascia&&'fascia oraria'].filter(Boolean);const er=$('#ferr');
+    if(miss.length){er.textContent='Manca: '+miss.join(', ')+'.';return}
+    const dups=findDups(o.ordine,o.idRisorsa),dk=o.ordine+'|'+o.idRisorsa;showDups();
+    if(dups.length&&S.dupOk!==dk){S.dupOk=dk;er.textContent='Attenzione: esiste già una pratica con lo stesso '+[...new Set(dups.map(d=>d.campo))].join(' e ')+'. Controlla qui sopra e premi di nuovo Salva per aggiungerla comunque.';return}
+    const btns=form.querySelectorAll('button');btns.forEach(b=>b.disabled=true);er.textContent='';const now=new Date().toISOString();
+    try{
+      if(S.editId){const old=S.pr.get(S.editId)||{};await S.db.doc('pratiche/'+S.editId).set({...old,...o,updatedAt:now})}
+      else await S.db.collection('pratiche').add({...o,createdAt:now,updatedAt:now});
+      toast(S.editId?'Pratica aggiornata':'Pratica salvata');S.dupOk=null;
+      if(next==='again'){S.editId=null;render();window.scrollTo(0,0)}else{S.editId=null;S.f.range='giorno';S.f.day=o.data;show('agenda')}
+    }catch(x){er.textContent=errText(x);btns.forEach(b=>b.disabled=false)}
+  };
+}
+
+/* ---------- magazzino (gestore) ---------- */
+const SL={magazzino:'In magazzino',tecnico:'Ai tecnici',installato:'Installato',scaricato:'Scaricato'};
+const MOTIVI=['Reso al committente','Difettoso / guasto','Smarrito o rubato','Rettifica inventario','Altro'];
+const ctag=c=>c?`<span class="tag c-${esc(c)}">${esc(c)}</span>`:'<span class="note">—</span>';
+const inC=u=>!S.mag.comm||u.committente===S.mag.comm;
+function counts(list){const c={magazzino:0,tecnico:0,installato:0,scaricato:0};for(const u of list)c[u.stato]=(c[u.stato]||0)+1;return c}
+function magKpi(){const l=[...S.un.values()].filter(inC),c=counts(l);return `<div class="kpi"><b>${c.magazzino}</b><span>In magazzino</span></div><div class="kpi k-wait"><b>${c.tecnico}</b><span>Ai tecnici</span></div><div class="kpi k-ok"><b>${c.installato}</b><span>Installati</span></div><div class="kpi k-ko"><b>${c.scaricato}</b><span>Scaricati</span></div>`}
+function magHTML(){
+  const M=S.mag;const tb=[['prodotti','Prodotti'],['carica','Carica'],['assegna','Assegna ai tecnici'],['scarico','Scarico'],['cerca','Controlla seriale']];
+  return `<div class="ph"><div><h1>Magazzino</h1><div class="sub" style="text-transform:none">${S.pd.size} prodotti · ${[...S.un.values()].filter(u=>u.stato!=='scaricato').length} pezzi a seriale attivi</div></div></div>
+  <div class="bar" id="mcomm"><span class="note">Committente:</span>${[['','Tutti'],...COMM.map(c=>[c,c])].map(([k,l])=>`<button class="chip ${M.comm===k?'on':''}" data-mc="${k}">${l}</button>`).join('')}</div>
+  <div class="kpis" id="mkpi">${magKpi()}</div>
+  <div class="subt" id="mtabs">${tb.map(([k,l])=>`<button class="chip ${M.tab===k?'on':''}" data-mt="${k}">${l}</button>`).join('')}</div>
+  <div id="magbody">${magBody()}</div>`;
+}
+function magBody(){const t=S.mag.tab;if(t==='carica')return caricaHTML();if(t==='assegna')return assegnaHTML();if(t==='scarico')return scaricoHTML();if(t==='cerca')return cercaHTML();return S.mag.prod&&S.pd.has(S.mag.prod)?prodDetHTML():prodListHTML()}
+function magBind(){
+  $('#mtabs').onclick=e=>{const b=e.target.closest('[data-mt]');if(!b)return;S.mag.tab=b.dataset.mt;S.mag.prod=null;render()};
+  $('#mcomm').onclick=e=>{const b=e.target.closest('[data-mc]');if(!b)return;S.mag.comm=b.dataset.mc;$('#mcomm').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b));magRefresh()};
+  const t=S.mag.tab;
+  if(t==='carica')bindCarica();if(t==='assegna')bindAssegna();if(t==='scarico')bindScarico();
+  if(t==='cerca'){$('#mq').oninput=e=>{S.mag.q=e.target.value;$('#cres').innerHTML=cercaRes()};}
+  if(t==='prodotti'&&S.mag.prod&&$('#pq')){$('#pq').oninput=e=>{S.mag.pq=e.target.value;$('#ptab').innerHTML=prodTable()}}
+}
+function magRefresh(){
+  const t=S.mag.tab;if($('#mkpi'))$('#mkpi').innerHTML=magKpi();
+  if(t==='prodotti'){if(S.mag.prod&&$('#ptab')){$('#ptab').innerHTML=prodTable();$('#phead').innerHTML=prodHead()}else if(!S.mag.prod)$('#magbody').innerHTML=prodListHTML()}
+  else if(t==='cerca'&&$('#cres'))$('#cres').innerHTML=cercaRes();
+  else{['car','ass','rie','sca'].forEach(sbUpdate);if($('#qav'))qAvail();if($('#prelist'))$('#prelist').innerHTML=prelHTML()}
+}
+function stockBar(c){const tot=c.magazzino+c.tecnico+c.installato||1;return `<div class="stock"><i style="width:${c.magazzino/tot*100}%;background:var(--neu)"></i><i style="width:${c.tecnico/tot*100}%;background:var(--wait)"></i><i style="width:${c.installato/tot*100}%;background:var(--ok)"></i></div>`}
+function prodListHTML(){
+  if(!S.pd.size)return `<div class="empty">Nessun prodotto in magazzino.<div style="margin-top:12px"><button class="btn yel" data-mt2="carica">${ic('plus')}Carica i primi prodotti</button></div></div>`;
+  const list=[...S.pd].sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||'')).map(([id,p])=>[id,p,unitsOf(id)]).filter(([,,u])=>!S.mag.comm||u.some(inC));
+  if(!list.length)return `<div class="empty">Nessun prodotto per ${esc(S.mag.comm)}.</div>`;
+  return `<div class="pgrid">${list.map(([id,p,us])=>{const u=us.filter(inC),c=counts(u);
+    const per=COMM.map(k=>[k,us.filter(x=>x.committente===k&&x.stato!=='scaricato').length]).filter(x=>x[1]);
+    return `<button class="prod" data-prod="${esc(id)}"><h4>${esc(p.nome)}</h4><div class="cod">${ic('bc')}${esc(p.codice||'Senza codice a barre')}</div>${stockBar(c)}
+    <div class="leg"><span><span class="dot" style="background:var(--neu)"></span><b>${c.magazzino}</b> in magazzino</span><span><span class="dot" style="background:var(--wait)"></span><b>${c.tecnico}</b> ai tecnici</span><span><span class="dot" style="background:var(--ok)"></span><b>${c.installato}</b> installati</span>${c.scaricato?`<span><b>${c.scaricato}</b> scaricati</span>`:''}</div>
+    ${!S.mag.comm&&per.length?`<div class="top2" style="margin-top:8px">${per.map(([k,n])=>`<span class="tag c-${k}">${k} ${n}</span>`).join('')}</div>`:''}</button>`}).join('')}</div>`;
+}
+function prodHead(){const p=S.pd.get(S.mag.prod)||{},all=unitsOf(S.mag.prod),c=counts(all.filter(inC));
+  return `<div class="ph" style="margin-bottom:8px"><div><button class="lnk" data-back-prod>← Tutti i prodotti</button><h1 style="margin-top:6px">${esc(p.nome)}</h1><div class="sub" style="text-transform:none">Codice a barre: <code>${esc(p.codice||'—')}</code>${S.mag.comm?' · solo '+esc(S.mag.comm):''}</div></div>
+   <div class="sp"><button class="btn sm" data-pedit>Modifica</button><button class="btn sm" data-mt2="carica" data-pp="${esc(S.mag.prod)}">${ic('plus')}Aggiungi seriali</button>${all.length===0?'<button class="btn sm dng" data-pdel>Elimina prodotto</button>':''}</div></div>
+   ${stockBar(c)}<div class="leg" style="margin-bottom:14px"><span><b>${c.magazzino+c.tecnico+c.installato}</b> attivi</span><span><b>${c.magazzino}</b> in magazzino</span><span><b>${c.tecnico}</b> ai tecnici</span><span><b>${c.installato}</b> installati</span><span><b>${c.scaricato}</b> scaricati</span></div>`}
+function prodDetHTML(){const st=S.mag.pst;
+  return `<div id="phead">${prodHead()}</div><div class="bar">${[['','Tutti'],['magazzino','In magazzino'],['tecnico','Ai tecnici'],['installato','Installati'],['scaricato','Scaricati']].map(([k,l])=>`<button class="chip ${st===k?'on':''}" data-pst="${k}">${l}</button>`).join('')}<input class="in" id="pq" style="max-width:280px" placeholder="Cerca seriale" value="${esc(S.mag.pq)}"></div><div id="ptab">${prodTable()}</div>`}
+const uDate=u=>u.scaricatoAt||u.installedAt||u.assignedAt||u.createdAt||'';
+function unitRows(list,showProd){
+  return `<div class="tw"><table class="t stack"><thead><tr><th>Seriale</th>${showProd?'<th>Prodotto</th>':''}<th>Committente</th><th>Stato</th><th>Tecnico</th><th>Pratica</th><th>ID risorsa</th><th>Data</th>${S.admin?'<th></th>':''}</tr></thead><tbody>${list.map(u=>{const [k,l]=uLab(u);const key=sk(u.seriale||'');
+    return `<tr><td><code>${esc(u.seriale)}</code></td>${showProd?`<td>${esc(prodName(u.prodottoId))}</td>`:''}<td>${ctag(u.committente)}</td><td><span class="pill ${k}" title="${esc(l)}">${SL[u.stato]||'In magazzino'}</span>${u.stato==='scaricato'&&u.motivoScarico?`<div class="note">${esc(u.motivoScarico)}${u.notaScarico?' · '+esc(u.notaScarico):''}</div>`:''}</td><td>${u.tecnicoId?esc(tecName(u.tecnicoId)):''}</td>
+    <td>${u.praticaId?`<button class="lnk" data-open="${esc(u.praticaId)}">${esc(u.ordine||'Apri')}</button>`:''}</td><td>${esc(u.idRisorsa||'')}</td><td>${esc(dt(uDate(u)))}</td>
+    ${S.admin?`<td>${u.stato==='scaricato'?`<button class="btn sm" data-urest="${esc(key)}">Ripristina</button>`:''}${u.stato==='magazzino'||u.stato==='scaricato'?` <button class="btn sm dng" data-udel="${esc(key)}">Elimina</button>`:''}</td>`:''}</tr>`}).join('')}</tbody></table></div>`}
+function prodTable(){
+  const q=normS(S.mag.pq);let l=unitsOf(S.mag.prod).filter(u=>inC(u)&&(!S.mag.pst||u.stato===S.mag.pst)&&(!q||(u.seriale||'').includes(q))).sort((a,b)=>uDate(b).localeCompare(uDate(a)));
+  if(!l.length)return '<div class="empty">Nessun seriale.</div>';
+  const more=l.length>300;l=l.slice(0,300);return unitRows(l,false)+(more?'<p class="note">Mostrati i primi 300: usa la ricerca per trovarne altri.</p>':'');
+}
+const commSeg=(name,sel)=>`<div class="seg comm">${COMM.map(c=>`<label><input type="radio" name="${name}" value="${c}" ${sel===c?'checked':''}><span class="k-${c}">${c}</span></label>`).join('')}</div>`;
+function caricaHTML(){
+  const pre=S.mag.preProd||'';
+  return `<form class="card pf" id="cform" novalidate><h3>Carica prodotti</h3>
+   <p class="note" style="margin-top:-4px">Scegli committente e prodotto (o creane uno nuovo con nome e codice a barre), poi scansiona tutti i seriali della serie: diventano la quantità di quel prodotto.</p>
+   <div class="lbl">Committente <span class="req">*</span></div>${commSeg('ccomm',S.mag.comm||S.mag.lastComm||'')}
+   <label class="f">Prodotto<select class="in" id="cprod"><option value="__new">+ Nuovo prodotto</option>${[...S.pd].sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||'')).map(([id,p])=>`<option value="${esc(id)}" ${pre===id?'selected':''}>${esc(p.nome)}${p.codice?' · '+esc(p.codice):''}</option>`).join('')}</select></label>
+   <div id="cnew" ${pre?'hidden':''}><div class="grid2"><label class="f">Nome prodotto <span class="req">*</span><input class="in" id="cnome" placeholder="Es. ONT ZTE F6005" autocomplete="off"></label>
+    <div><label class="f" style="margin-bottom:6px">Codice a barre prodotto<input class="in mono" id="ccod" placeholder="Scansiona o scrivi" autocomplete="off"></label>${scanBtn('ccod')}</div></div><div class="note" id="cmatch" style="margin-bottom:10px"></div></div>
+   ${serBox('car','Seriali della serie')}
+   <label class="f">Assegna subito a un tecnico (facoltativo)<select class="in" id="ctec">${tecOpts('','Lascia in magazzino')}</select></label>
+   <div class="err" id="cerr2"></div><div class="acts"><button class="btn yel" type="submit">Carica in magazzino</button></div></form>`;
+}
+function bindCarica(){
+  S.mag.preProd='';
+  const sel=$('#cprod'),nw=$('#cnew'),form=$('#cform');
+  sel.onchange=()=>{nw.hidden=sel.value!=='__new'};
+  $('#ccod').oninput=e=>{const v=e.target.value.trim();const m=[...S.pd].find(([,p])=>p.codice&&p.codice===v);$('#cmatch').innerHTML=m?`Questo codice è già il prodotto <b>${esc(m[1].nome)}</b>: l'ho selezionato.`:'';if(m){sel.value=m[0];nw.hidden=true}};
+  form.onsubmit=async e=>{
+    e.preventDefault();const er=$('#cerr2'),btn=form.querySelector('button[type=submit]');er.textContent='';
+    const comm=form.querySelector('[name=ccomm]:checked')?.value||'';if(!comm){er.textContent='Scegli il committente (SIRTI, Valtellina o SIELTE).';return}
+    let pid=sel.value;const all=serials('car');const list=all.filter(s=>{const u=S.un.get(sk(s));return !u||u.stato==='scaricato'});
+    let nome='',codice='';
+    if(pid==='__new'){nome=$('#cnome').value.trim();codice=$('#ccod').value.trim();if(!nome){er.textContent='Inserisci il nome del prodotto.';return}
+      const ex=[...S.pd].find(([,p])=>(p.nome||'').toLowerCase()===nome.toLowerCase());if(ex){pid=ex[0]}}
+    if(pid!=='__new'&&!list.length){er.textContent=all.length?'Tutti i seriali sono già presenti in magazzino.':'Scansiona almeno un seriale.';return}
+    const tid=$('#ctec').value;btn.disabled=true;S.busy=true;const now=new Date().toISOString();S.mag.lastComm=comm;
+    try{
+      if(pid==='__new'){btn.textContent='Creo prodotto…';const r=await S.db.collection('prodotti').add({nome,codice,createdAt:now});pid=r.id}
+      const errs=await pool(list,s=>S.db.doc('unita/'+sk(s)).set({seriale:s,prodottoId:pid,committente:comm,stato:tid?'tecnico':'magazzino',tecnicoId:tid||'',praticaId:'',ordine:'',idRisorsa:'',createdAt:now,assignedAt:tid?now:'',installedAt:'',scaricatoAt:'',motivoScarico:'',notaScarico:''}),6,d=>btn.textContent=`Salvo ${d} di ${list.length}…`);
+      S.busy=false;const ok=list.length-errs.length;
+      toast(list.length?`${ok} pezzi ${comm} caricati in ${prodName(pid)}${tid?' e assegnati a '+tecName(tid):''}`:'Prodotto creato');
+      if(errs.length){er.textContent=`${errs.length} seriali non salvati: ${errs.slice(0,5).map(x=>x[0]).join(', ')}…`}
+      S.mag.preProd=pid;S.mag.tab='prodotti';S.mag.prod=pid;render();
+    }catch(x){S.busy=false;er.textContent=errText(x)}
+    btn.disabled=false;btn.textContent='Carica in magazzino';
+  };
+}
+function assegnaHTML(){const m=S.mag.mode;
+  return `<form class="card pf" id="aform" novalidate><h3>Movimenta materiale</h3>
+   <div class="seg">${[['ser','Assegna per seriale'],['qty','Assegna per quantità'],['rie','Rientro in magazzino']].map(([k,l])=>`<label><input type="radio" name="amode" value="${k}" ${m===k?'checked':''}><span>${l}</span></label>`).join('')}</div>
+   ${m!=='rie'?`<label class="f">Tecnico <span class="req">*</span><select class="in" id="atec">${tecOpts('','Scegli tecnico')}</select></label>`:''}
+   ${m==='ser'?serBox('ass','Seriali da consegnare'):''}
+   ${m==='qty'?`<div class="grid2"><label class="f">Committente<select class="in" id="qcom"><option value="">Qualsiasi committente</option>${COMM.map(c=>`<option ${S.mag.comm===c?'selected':''}>${c}</option>`).join('')}</select></label><label class="f">Prodotto<select class="in" id="qprod">${[...S.pd].sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||'')).map(([id,p])=>`<option value="${esc(id)}">${esc(p.nome)}</option>`).join('')}</select></label></div><label class="f" style="max-width:220px">Quantità<input class="in" id="qn" type="number" min="1" value="1" inputmode="numeric"></label><p class="note" id="qav"></p>`:''}
+   ${m==='rie'?serBox('rie','Seriali che rientrano in magazzino'):''}
+   <div class="err" id="aerr"></div><div class="acts"><button class="btn yel" type="submit">${m==='rie'?'Registra rientro':'Assegna'}</button></div></form>
+  <h2 class="cond" style="font-size:24px;margin:22px 0 10px">Prelievi fatti dai tecnici · ultimi 30 giorni</h2><div id="prelist">${prelHTML()}</div>`}
+function prelHTML(){const lim=addDays(today(),-30);const l=[...S.un.values()].filter(u=>u.prelevatoAt&&u.prelevatoAt.slice(0,10)>=lim).sort((a,b)=>b.prelevatoAt.localeCompare(a.prelevatoAt));
+  if(!l.length)return '<div class="empty">Nessun prelievo registrato dai tecnici.</div>';
+  return `<div class="tw"><table class="t stack"><thead><tr><th>Quando</th><th>Tecnico</th><th>Seriale</th><th>Prodotto</th><th>Committente</th><th>Stato ora</th></tr></thead><tbody>${l.slice(0,300).map(u=>`<tr><td>${esc(dt(u.prelevatoAt))}</td><td>${esc(tecName(u.prelevatoDa))}</td><td><code>${esc(u.seriale)}</code></td><td>${esc(prodName(u.prodottoId))}</td><td>${ctag(u.committente)}</td><td><span class="pill ${uLab(u)[0]}">${SL[u.stato]||''}</span></td></tr>`).join('')}</tbody></table></div>`}
+const qList=()=>{const c=$('#qcom')?.value||'';return unitsOf($('#qprod')?.value).filter(u=>u.stato==='magazzino'&&(!c||u.committente===c)).sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''))};
+function qAvail(){const n=qList().length;$('#qav').textContent=`Disponibili in magazzino: ${n}`;return n}
+function bindAssegna(){
+  const f=$('#aform');
+  f.addEventListener('change',e=>{if(e.target.name==='amode'){S.mag.mode=e.target.value;render()}if(e.target.id==='atec')sbUpdate('ass');if(e.target.id==='qprod'||e.target.id==='qcom')qAvail()});
+  if($('#qprod'))qAvail();
+  f.onsubmit=async e=>{
+    e.preventDefault();const m=S.mag.mode,er=$('#aerr'),btn=f.querySelector('button[type=submit]');er.textContent='';
+    const tid=$('#atec')?.value||'';if(m!=='rie'&&!tid){er.textContent='Scegli il tecnico.';return}
+    let keys=[];
+    if(m==='ser')keys=VAL.ass(serials('ass')).filter(r=>r[1]==='ok'||r[1]==='wait').map(r=>sk(r[0]));
+    else if(m==='rie')keys=VAL.rie(serials('rie')).filter(r=>r[1]==='ok').map(r=>sk(r[0]));
+    else{if(!$('#qprod')?.value){er.textContent='Nessun prodotto.';return}const n=parseInt($('#qn').value,10)||0;const av=qList();
+      if(n<1||n>av.length){er.textContent=`Quantità non valida: disponibili ${av.length}.`;return}keys=av.slice(0,n).map(u=>sk(u.seriale))}
+    if(!keys.length){er.textContent='Nessun seriale valido da movimentare.';return}
+    btn.disabled=true;S.busy=true;const now=new Date().toISOString();
+    const errs=await pool(keys,k=>S.db.doc('unita/'+k).update(m==='rie'?{stato:'magazzino',tecnicoId:'',assignedAt:now}:{stato:'tecnico',tecnicoId:tid,assignedAt:now}),6,d=>btn.textContent=`Salvo ${d} di ${keys.length}…`);
+    S.busy=false;btn.disabled=false;
+    toast(m==='rie'?`${keys.length-errs.length} pezzi rientrati in magazzino`:`${keys.length-errs.length} pezzi assegnati a ${tecName(tid)}`);
+    if(errs.length)er.textContent=`${errs.length} non salvati.`;else render();
+  };
+}
+function scaricoHTML(){
+  return `<form class="card pf" id="sform" novalidate><h3>Scarico dal magazzino</h3>
+   <p class="note" style="margin-top:-4px">Scansiona i codici dei seriali da togliere (resi, difettosi, smarriti…). Restano nello storico come “scaricati” e puoi ripristinarli dalla scheda prodotto.</p>
+   ${serBox('sca','Seriali da scaricare')}
+   <div class="grid2"><label class="f">Motivo <span class="req">*</span><select class="in" id="smot">${MOTIVI.map(m=>`<option>${m}</option>`).join('')}</select></label>
+   <label class="f">Nota (facoltativa)<input class="in" id="snota" placeholder="Es. DDT reso n. 123" autocomplete="off"></label></div>
+   <div class="err" id="serr"></div><div class="acts"><button class="btn dng" type="submit">Scarica dal magazzino</button></div></form>`;
+}
+function bindScarico(){
+  const f=$('#sform');
+  f.onsubmit=e=>{e.preventDefault();const er=$('#serr');er.textContent='';
+    const keys=VAL.sca(serials('sca')).filter(r=>r[1]==='ok'||r[1]==='wait').map(r=>sk(r[0]));
+    if(!keys.length){er.textContent='Nessun seriale valido da scaricare.';return}
+    const mot=$('#smot').value,nota=$('#snota').value.trim();
+    S.modal={type:'confirm',danger:true,title:`Scaricare ${keys.length} pezzi?`,text:`Motivo: ${mot}${nota?' · '+nota:''}. I pezzi non saranno più disponibili né assegnabili.`,ok:'Scarica',done:`${keys.length} pezzi scaricati`,
+      fn:async()=>{const now=new Date().toISOString();const errs=await pool(keys,k=>S.db.doc('unita/'+k).update({stato:'scaricato',tecnicoId:'',motivoScarico:mot,notaScarico:nota,scaricatoAt:now}),6);if(errs.length)throw errs[0][1];const ta=$('#sb-sca');if(ta){ta.value='';sbUpdate('sca')}}};
+    renderModal()};
+}
+function cercaHTML(){return `<div class="card" style="margin-bottom:14px"><h3>Controlla un seriale</h3><p class="note" style="margin-top:-4px">Scansiona o scrivi un seriale, un numero d'ordine o un ID risorsa: vedi dov'è il pezzo, per quale committente, a chi è assegnato e in quale pratica è stato installato.</p>
+  <div class="acts"><input class="in mono" id="mq" style="flex:1 1 260px" placeholder="Seriale, ordine o ID risorsa" value="${esc(S.mag.q)}" autocomplete="off">${scanBtn('mq','Leggi da foto')}</div></div><div id="cres">${cercaRes()}</div>`}
+function cercaRes(){
+  const q=normS(S.mag.q);if(q.length<2)return '<p class="note">Scrivi almeno 2 caratteri.</p>';
+  const l=[...S.un.values()].filter(u=>(u.seriale||'').includes(q)||normS(u.ordine).includes(q)||normS(u.idRisorsa).includes(q)).slice(0,200);
+  if(!l.length)return `<div class="empty">Nessun pezzo trovato per “${esc(S.mag.q)}”.</div>`;
+  const ex=S.un.get(sk(q));
+  const top=ex?(()=>{const [k,lb]=uLab(ex);return `<div class="card" style="margin-bottom:12px"><div class="top2">${ex.committente?ctag(ex.committente):''}<span class="pill ${k}">${esc(lb)}</span></div><h3 style="margin:6px 0"><code>${esc(ex.seriale)}</code> · ${esc(prodName(ex.prodottoId))}</h3>
+    ${ex.stato==='installato'?`<dl class="kv" style="margin:8px 0 0"><dt>Pratica</dt><dd><button class="lnk" data-open="${esc(ex.praticaId)}">Ordine ${esc(ex.ordine||'—')}</button></dd><dt>ID risorsa</dt><dd>${esc(ex.idRisorsa||'—')}</dd><dt>Tecnico</dt><dd>${esc(tecName(ex.tecnicoId))}</dd><dt>Installato il</dt><dd>${esc(dt(ex.installedAt))}</dd></dl>`
+    :ex.stato==='tecnico'?`<p style="margin:0">In carico a <b>${esc(tecName(ex.tecnicoId))}</b> dal ${esc(dt(ex.assignedAt))}. Non ancora installato.</p>`
+    :ex.stato==='scaricato'?`<p style="margin:0">Scaricato il ${esc(dt(ex.scaricatoAt))} · ${esc(ex.motivoScarico||'')}${ex.notaScarico?' · '+esc(ex.notaScarico):''}.</p>`
+    :`<p style="margin:0">Disponibile in magazzino, caricato il ${esc(dt(ex.createdAt))}.</p>`}</div>`})():'';
+  return top+unitRows(l,true);
+}
+
+/* ---------- materiale tecnico ---------- */
+function matListHTML(){
+  const mine=[...S.un.values()].filter(u=>u.tecnicoId===S.me);
+  const inCar=mine.filter(u=>u.stato==='tecnico'),inst=mine.filter(u=>u.stato==='installato').sort((a,b)=>(b.installedAt||'').localeCompare(a.installedAt||''));
+  const g={};for(const u of inCar){const k=u.prodottoId+'|'+(u.committente||'');(g[k]=g[k]||[]).push(u)}
+  return `<div class="kpis"><div class="kpi k-wait"><b>${inCar.length}</b><span>In carico</span></div><div class="kpi k-ok"><b>${inst.length}</b><span>Installati</span></div></div>
+  ${Object.keys(g).length?Object.entries(g).sort((a,b)=>a[0].localeCompare(b[0])).map(([k,l])=>`<details class="grp"><summary>${ic('box')}${esc(prodName(k.split('|')[0]))}${k.split('|')[1]?ctag(k.split('|')[1]):''}<b>${l.length}</b></summary><div class="sl">${l.map(u=>`<code>${esc(u.seriale)}</code>`).join('')}</div></details>`).join(''):'<div class="empty">Nessun materiale in carico.</div>'}
+  ${inst.length?`<h2 class="cond" style="font-size:26px;margin:26px 0 10px">Installati di recente</h2>${unitRows(inst.slice(0,50),true)}`:''}`;
+}
+function materialeHTML(){
+  return `<div class="ph"><div><h1>Il mio materiale</h1><div class="sub" style="text-transform:none">Pezzi a seriale che hai in carico. Quando completi una pratica inserisci i seriali installati.</div></div></div>
+  <form class="card pf" id="preform" novalidate style="margin-bottom:16px"><h3>Preleva dal magazzino</h3><p class="note" style="margin-top:-4px">Scansiona i codici dei seriali che prendi dal magazzino: passano in carico a te e l'ufficio vede il prelievo.</p>
+   ${serBox('pre','Seriali prelevati')}<div class="err" id="prerr"></div><div class="acts"><button class="btn yel" type="submit">Registra prelievo</button></div></form>
+  <div id="matList">${matListHTML()}</div>`;
+}
+function bindMateriale(){const f=$('#preform');if(!f)return;
+  f.onsubmit=async e=>{e.preventDefault();const er=$('#prerr'),btn=f.querySelector('button[type=submit]');er.textContent='';
+    const r=VAL.pre(serials('pre'));const keys=r.filter(x=>x[1]==='ok').map(x=>sk(x[0]));
+    if(!keys.length){er.textContent=r.length?'Nessun seriale prelevabile: controlla gli avvisi qui sopra.':'Scansiona almeno un seriale.';return}
+    btn.disabled=true;S.busy=true;const now=new Date().toISOString();
+    const errs=await pool(keys,k=>S.db.doc('unita/'+k).update({stato:'tecnico',tecnicoId:S.me,assignedAt:now,prelevatoAt:now,prelevatoDa:S.me}),6,d=>btn.textContent=`Salvo ${d} di ${keys.length}…`);
+    S.busy=false;btn.disabled=false;btn.textContent='Registra prelievo';
+    if(errs.length){er.textContent=`${errs.length} non salvati: ${errText(errs[0][1])}`}
+    else{toast(`${keys.length} pezzi presi in carico`);const ta=$('#sb-pre');ta.value='';sbUpdate('pre')}};
+}
+
+/* ---------- dettaglio e modali ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.closest('a[href]'))return;
+  const r=t.closest('[data-open]');if(r){S.modal={type:'detail',id:r.dataset.open};renderModal();return}
+  const pr=t.closest('[data-prod]');if(pr){S.mag.prod=pr.dataset.prod;S.mag.pst='';S.mag.pq='';render();window.scrollTo(0,0);return}
+  if(t.closest('[data-back-prod]')){S.mag.prod=null;render();return}
+  const m2=t.closest('[data-mt2]');if(m2){S.mag.tab=m2.dataset.mt2;S.mag.preProd=m2.dataset.pp||'';S.mag.prod=null;render();return}
+  const ps=t.closest('[data-pst]');if(ps){S.mag.pst=ps.dataset.pst;render();return}
+  if(t.closest('[data-pedit]')){S.modal={type:'prod',id:S.mag.prod};renderModal();return}
+  if(t.closest('[data-pdel]')){const id=S.mag.prod;S.modal={type:'confirm',danger:true,title:'Eliminare il prodotto?',text:`${prodName(id)} non ha pezzi e verrà eliminato.`,ok:'Elimina',done:'Prodotto eliminato',fn:async()=>{await S.db.doc('prodotti/'+id).delete();S.mag.prod=null;render()}};renderModal();return}
+  const ur=t.closest('[data-urest]');if(ur){const k=ur.dataset.urest,u=S.un.get(k);S.modal={type:'confirm',title:'Ripristinare il seriale?',text:`${u?.seriale||''} torna disponibile in magazzino.`,ok:'Ripristina',done:'Seriale ripristinato',fn:()=>S.db.doc('unita/'+k).update({stato:'magazzino',tecnicoId:'',motivoScarico:'',notaScarico:'',scaricatoAt:''})};renderModal();return}
+  const ud=t.closest('[data-udel]');if(ud){const k=ud.dataset.udel,u=S.un.get(k);S.modal={type:'confirm',danger:true,title:'Eliminare il seriale?',text:`${u?.seriale||''} verrà tolto dal magazzino.`,ok:'Elimina',done:'Seriale eliminato',fn:()=>S.db.doc('unita/'+k).delete()};renderModal();return}
+  const v=t.closest('[data-tf]');if(v){S.f={...S.f,tec:v.dataset.tf,range:'tutte'};show('agenda');return}
+  const rm=t.closest('[data-trm]');if(rm){const id=rm.dataset.trm;S.modal={type:'confirm',danger:true,title:'Rimuovere il tecnico?',text:`${S.tec.get(id)?.nome||'Il tecnico'} non comparirà più nell'elenco. Pratiche e materiale già assegnati restano, da riassegnare. Per togliergli l'accesso rimuovilo anche dalla condivisione.`,ok:'Rimuovi',done:'Tecnico rimosso',fn:()=>S.db.doc('tecnici/'+id).delete()};renderModal()}
+});
+document.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches?.('.row[data-open]')){e.preventDefault();e.target.click()}
+  if(e.key==='Escape'&&S.modal&&!S.busy)closeModal();
+});
+document.addEventListener('error',e=>{if(e.target.tagName==='IMG'){e.target.classList.add('broken');const p=e.target.parentElement;if(p&&!p.dataset.ph){p.dataset.ph=1;p.insertAdjacentHTML('beforeend','<span class="note">Foto non disponibile</span>')}}},true);
+
+function closeModal(){if(S.up)for(const k in S.up)S.up[k].forEach(u=>URL.revokeObjectURL(u.url));S.modal=null;S.up=null;$('#modal').innerHTML=''}
+const shell=inner=>`<div class="ov" id="ov"><div class="mod" role="dialog" aria-modal="true"><button class="x" data-close aria-label="Chiudi">×</button>${inner}</div></div>`;
+const thumbs=list=>(list||[]).map(a=>a.type==='application/pdf'?`<a class="th" href="${esc(bLink(a.id))}" target="_blank" rel="noopener">PDF<br>Apri</a>`:`<div class="th"><img src="${esc(bUrl(a.id))}" alt="Foto" loading="lazy" referrerpolicy="no-referrer" data-big="${esc(bUrl(a.id))}"></div>`).join('');
+const prev=k=>(S.up?.[k]||[]).map((u,i)=>`<div class="th">${u.file.type==='application/pdf'?esc(u.file.name):`<img src="${u.url}" alt="">`}<button type="button" class="rm" data-rm="${k}:${i}" aria-label="Rimuovi">×</button></div>`).join('');
+function renderModal(){
+  const M=S.modal,box=$('#modal');if(!M){box.innerHTML='';return}
+  if(M.type==='detail'){
+    const arch=!S.pr.has(M.id);const p=S.pr.get(M.id)||S.es.get(M.id)?.snap;if(!p){closeModal();return}
+    const st=statoOf(M.id,p),e=S.es.get(M.id),fa=fascia(p.fascia);
+    const maps='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(p.indirizzo||'');
+    const canDo=!arch&&st!=='fatta'&&(S.admin||tecsOf(p).includes(S.me));
+    const mats=(e?.materiali||[]).map(s=>{const u=S.un.get(sk(s));return `<div class="sv ok"><code>${esc(s)}</code><span>${esc(u?prodName(u.prodottoId):'')}</span></div>`}).join('');
+    box.innerHTML=shell(`${isAnti(M.id,p)&&!arch?`<div class="antib" style="margin:0 0 12px;font-size:15px"><b>ANTICIPO</b><span>prevista ${esc(dayName(p.data))}: falla appena puoi</span></div>`:''}${arch?'<div class="dupw" style="margin:0 0 12px">Pratica in archivio: la scheda originale è stata eliminata, restano i dati essenziali.</div>':''}<div class="top2">${tipoTag(p)}<span class="tag c-${esc(p.committente)}">${esc(p.committente)}</span>${reteTag(p)}${(([c,l])=>`<span class="pill ${c}">${l}</span>`)(stLab(M.id,st))}</div>
+      <h3>${p.indirizzo?`<a class="alink" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener">${esc(p.indirizzo)}${ic('pin')}</a>`:'Indirizzo non indicato'}</h3><div class="note" style="text-transform:capitalize">${esc(dayName(p.data))} · ${fa.a}–${fa.b}${p.ora?' · ore '+esc(p.ora):''}</div>
+      ${Array.isArray(p.rimod)&&p.rimod.length?`<div class="dupw" style="margin:10px 0 0"><b>Rimodulata ${p.rimod.length===1?'1 volta':p.rimod.length+' volte'}</b>${p.rimod.map(r=>`<div style="margin-top:4px">${esc(dmy(r.daData))} ${esc(fascia(r.daFascia).a)} → <b>${esc(dmy(r.aData))} ${esc(fascia(r.aFascia).a)}–${esc(fascia(r.aFascia).b)}${r.ora?' ore '+esc(r.ora):''}</b> · ${esc(r.by?tecName(r.by):'gestore')} il ${esc(dt(r.at))}${r.nota?' · '+esc(r.nota):''}</div>`).join('')}</div>`:''}
+      <dl class="kv"><dt>Intervento</dt><dd>${esc(p.tipo||'—')}</dd><dt>Rete</dt><dd>${esc(p.rete||'—')}</dd><dt>Ordine</dt><dd>${esc(p.ordine||'—')}</dd><dt>ID risorsa</dt><dd>${esc(p.idRisorsa||'—')}</dd><dt>PFS</dt><dd>${(()=>{const l=pfsLoc(p);return esc(p.pfs||'—')+(l?`${l.a?' · anello '+esc(l.a):''} <a class="btn sm pri" href="${navLL(l.lat,l.lng)}" target="_blank" rel="noopener">${ic('pin')}Vai al PFS</a>`:'')})()}</dd><dt>Numero permuta</dt><dd>${esc(pv(M.id,p,'permuta')||'—')}</dd><dt>Splitter</dt><dd>${esc(pv(M.id,p,'splitter')||'—')}</dd>
+        <dt>Indirizzo</dt><dd>${p.indirizzo?`<a class="alink" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener">${esc(p.indirizzo)}</a> <a class="btn sm pri" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener">${ic('pin')}Naviga</a>`:'—'}</dd>
+        <dt>Telefono</dt><dd>${p.telefono?`<a href="tel:${esc(p.telefono.replace(/[^\d+]/g,''))}">${esc(p.telefono)}</a> <button class="btn sm" data-copy="${esc(p.telefono)}">Copia</button>`:'—'}</dd>
+        <dt>${tecsOf(p).length>1?'Tecnici':'Tecnico'}</dt><dd>${tecsOf(p).length?tecsOf(p).map(id=>esc(tecName(id))+(S.tec.get(id)?.telefono?' · '+esc(S.tec.get(id).telefono):'')).join('<br>'):(p.tecniciNomi?.length?esc(p.tecniciNomi.join(' + ')):'Non assegnata')}</dd></dl>
+      ${e&&e.esitoAss?`<div class="esito"><h4 style="color:var(--${e.esitoAss==='positiva'?'ok':'ko'})">Esito ${e.esitoAss==='positiva'?'positivo':'negativo'} · ${esc(dt(e.completedAt))}${e.byAdmin?' dal gestore':e.by?' da '+esc(tecName(e.by)):''}</h4><div class="lbl">Nota</div><p style="margin:0;white-space:pre-wrap">${esc(e.nota||'—')}</p></div>`:''}
+      ${e&&!e.esitoAss?`<div class="esito"><h4>Completata ${e.completedAt?'il '+esc(dt(e.completedAt)):''}${e.byAdmin?' dal gestore':e.by?' da '+esc(tecName(e.by)):''}</h4>
+        <div class="lbl">Nota</div><p style="margin:0 0 12px;white-space:pre-wrap">${esc(e.nota||'—')}</p>
+        <div class="lbl">Materiale installato</div><div class="sval" style="margin:0 0 12px">${mats||'<span class="note">—</span>'}</div>
+        <div class="lbl">Foto ID risorsa</div><div class="gal">${thumbs(e.fotoIdRisorsa)||'<span class="note">—</span>'}</div>
+        <div class="lbl">Foto</div><div class="gal">${thumbs(e.foto)||'<span class="note">—</span>'}</div>
+        <div class="lbl">Caratterizzazione</div><div class="gal">${thumbs(e.caratterizzazione)||'<span class="note">—</span>'}</div></div>`:''}
+      <div class="acts">${canDo?`<button class="btn yel" data-act="complete">${isAss(p)?'Chiudi intervento':'Completa pratica'}</button>`:''}${S.admin&&!arch?'<button class="btn" data-act="edit">Modifica</button>':''}${S.admin&&e&&!arch?'<button class="btn" data-act="reopen">Riapri</button>':''}${S.admin&&!arch?'<button class="btn dng" data-act="del">Elimina</button>':''}${S.admin&&arch?'<button class="btn dng" data-act="delarch">Elimina dall\'archivio</button>':''}</div>`);
+  }else if(M.type==='complete'&&isAss(S.pr.get(M.id))){
+    const p=S.pr.get(M.id)||{};S.up={fotoIdRisorsa:[],foto:[],caratterizzazione:[]};
+    box.innerHTML=shell(`<h3>Chiudi intervento Assurance</h3><div class="note">${esc(p.committente||'')} · Ordine ${esc(p.ordine||'—')} · ID risorsa ${esc(p.idRisorsa||'—')}</div>
+      <form id="cf" data-ass="1" style="margin-top:16px">
+        <label class="f">Nota<textarea class="in" name="nota" rows="3" placeholder="Cosa è stato fatto o perché"></textarea></label>
+        <div class="lbl">Esito <span class="req">*</span></div>
+        <div class="seg esa">${[['positiva','Positiva'],['negativa','Negativa'],['rimodulato','Rimodulato']].map(([k,l])=>`<label><input type="radio" name="esitoAss" value="${k}"><span class="k-${k}">${l}</span></label>`).join('')}</div>
+        <div id="rimbox" hidden><div class="card" style="padding:14px;margin-bottom:12px;box-shadow:none"><div class="lbl">Nuovo appuntamento</div>
+          <div class="grid2"><label class="f">Data <span class="req">*</span><input class="in" type="date" name="rData" min="${today()}" value="${esc(p.data>=today()?p.data:today())}"></label><label class="f">Ora concordata (facoltativa)<input class="in" type="time" name="rOra"></label></div>
+          <div class="lbl">Fascia oraria <span class="req">*</span></div><div class="seg fasce" style="margin-bottom:0">${F.map(f=>`<label><input type="radio" name="rFascia" value="${f.k}"><span>${f.a}<small>${f.b}</small></span></label>`).join('')}</div></div></div>
+        <div class="err" id="cerr"></div><div class="acts"><button class="btn yel" type="submit">Conferma</button><button class="btn" type="button" data-back>Indietro</button></div></form>`);
+  }else if(M.type==='complete'){
+    const p=S.pr.get(M.id)||{};S.up=S.up||{fotoIdRisorsa:[],foto:[],caratterizzazione:[]};
+    const blk=(k,t,req,acc,mul)=>`<div class="up"><div class="lbl">${t} ${req?'<span class="req">*</span>':''}</div><div class="gal" id="g-${k}">${prev(k)}</div><label class="btn sm">${ic('cam')}Aggiungi ${mul?'file':'foto'}<input class="fh" type="file" data-k="${k}" accept="${acc}" ${mul?'multiple':''}></label></div>`;
+    box.innerHTML=shell(`<h3>Completa pratica</h3><div class="note">${esc(p.tipo?p.tipo+' · ':'')}${esc(p.committente||'')} · Ordine ${esc(p.ordine||'—')} · ID risorsa ${esc(p.idRisorsa||'—')}</div>
+      <form id="cf" style="margin-top:16px">
+        <label class="f">Nota<textarea class="in" name="nota" rows="3" placeholder="Esito lavoro, eventuali problemi"></textarea></label>
+        <div class="grid2"><label class="f">Numero permuta <span class="req">*</span><input class="in" name="permuta" value="${esc(p.permuta||'')}" autocomplete="off" required></label><label class="f">Splitter <span class="req">*</span><input class="in" name="splitter" value="${esc(p.splitter||'')}" autocomplete="off" required></label></div>
+        ${serBox('ins','Materiale installato · codici a barre dei seriali','Scansiona il codice a barre del seriale installato (uno per riga)')}
+        ${S.assets?`${blk('fotoIdRisorsa','Foto ID risorsa (facoltativa)',false,'image/*',false)}${blk('foto','Foto (facoltative)',false,'image/*',true)}${blk('caratterizzazione','Caratterizzazione · foto o PDF (facoltativa)',false,'image/*,application/pdf',true)}`:'<p class="note">Il caricamento di foto non è disponibile per il tuo account: puoi completare la pratica senza foto, oppure chiedi al gestore di condividerti l\'app come Collaboratore o Editor.</p>'}
+        <div class="err" id="cerr"></div><div class="acts"><button class="btn yel" type="submit">Conferma completamento</button><button class="btn" type="button" data-back>Indietro</button></div></form>`);
+  }else if(M.type==='prod'){
+    const p=S.pd.get(M.id)||{};
+    box.innerHTML=shell(`<h3>Modifica prodotto</h3><form id="pform" style="margin-top:14px"><label class="f">Nome prodotto<input class="in" name="nome" value="${esc(p.nome||'')}"></label>
+      <label class="f" style="margin-bottom:6px">Codice a barre prodotto<input class="in mono" id="pcod" name="codice" value="${esc(p.codice||'')}"></label>${scanBtn('pcod')}
+      <div class="err" id="perr"></div><div class="acts"><button class="btn pri" type="submit">Salva</button><button class="btn" type="button" data-close>Annulla</button></div></form>`);
+  }else if(M.type==='confirm'){
+    box.innerHTML=shell(`<h3>${esc(M.title)}</h3><p>${esc(M.text)}</p><div class="err" id="xerr"></div><div class="acts"><button class="btn ${M.danger?'dng':'pri'}" data-ok>${esc(M.ok)}</button><button class="btn" data-close>Annulla</button></div>`);
+  }else if(M.type==='pw'){
+    box.innerHTML=shell(`<h3>Nuova password</h3><p class="note">Per ${esc(tecName(M.id))}. Comunicagliela: potrà cambiarla dal suo profilo.</p><form id="pwf"><label class="f">Password (almeno 6 caratteri)<input class="in" name="pw" type="text" autocomplete="off" value="${Math.random().toString(36).slice(2,10)}"></label><div class="err" id="pwerr"></div><div class="acts"><button class="btn yel" type="submit">Imposta</button><button class="btn" type="button" data-close>Annulla</button></div></form>`);
+  }else if(M.type==='conn'){
+    box.innerHTML=shell(`<h3>Collega il foglio Google</h3><p class="note">Incolla l'indirizzo dell'app web di Apps Script (finisce con <code>/exec</code>). Le istruzioni sono nel file README del progetto e nella scheda ISTRUZIONI del foglio.</p><form id="connf"><label class="f">Indirizzo<input class="in mono" name="api" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></label><div class="err" id="cnerr"></div><div class="acts"><button class="btn yel" type="submit">Collega</button><button class="btn" type="button" data-close>Annulla</button></div></form>`);
+  }else if(M.type==='photo'){
+    box.innerHTML=shell(`<div class="big"><img src="${esc(M.src)}" alt="Foto"></div><div class="acts"><a class="btn" href="${esc(M.src)}" target="_blank" rel="noopener">Apri originale</a></div>`);
+  }
+}
+async function setUnits(keys,body){return pool(keys.filter(k=>S.un.has(k)),k=>S.db.doc('unita/'+k).update(body),6)}
+async function revertUnits(pid){const e=S.es.get(pid);const keys=(e?.materiali||[]).map(sk).filter(k=>S.un.get(k)?.praticaId===pid);
+  await pool(keys,k=>{const u=S.un.get(k);return S.db.doc('unita/'+k).update({stato:u.tecnicoId?'tecnico':'magazzino',praticaId:'',ordine:'',idRisorsa:'',installedAt:''})},6)}
+$('#modal').addEventListener('click',async e=>{
+  const t=e.target;
+  if(t.id==='ov'||t.closest('[data-close]')){if(!S.busy){const back=S.modal?.back;closeModal();if(back){S.modal=back;renderModal()}}return}
+  const big=t.closest('[data-big]');if(big){S.modal={type:'photo',src:big.dataset.big,back:S.modal};renderModal();return}
+  const cp=t.closest('[data-copy]');if(cp){try{await navigator.clipboard.writeText(cp.dataset.copy);toast('Numero copiato')}catch(x){toast('Copia non riuscita')}return}
+  const rm=t.closest('[data-rm]');if(rm){const [k,i]=rm.dataset.rm.split(':');const u=S.up[k].splice(+i,1)[0];if(u)URL.revokeObjectURL(u.url);$('#g-'+k).innerHTML=prev(k);return}
+  if(t.closest('[data-back]')){const id=S.modal.id;closeModal();S.modal={type:'detail',id};renderModal();return}
+  const okb=t.closest('[data-ok]');if(okb&&S.modal?.type==='confirm'){const M=S.modal;S.busy=true;okb.disabled=true;try{await M.fn();S.busy=false;closeModal();toast(M.done)}catch(x){S.busy=false;okb.disabled=false;$('#xerr').textContent=errText(x)}return}
+  const a=t.closest('[data-act]');if(!a)return;
+  const id=S.modal.id,p=S.pr.get(id);
+  if(a.dataset.act==='complete'){S.up=null;S.modal={type:'complete',id};renderModal()}
+  else if(a.dataset.act==='edit'){closeModal();S.editId=id;S.dupOk=null;show('nuova')}
+  else if(a.dataset.act==='reopen'){S.modal={type:'confirm',title:'Riaprire la pratica?',text:'Il completamento verrà rimosso e i seriali installati torneranno in carico al tecnico.',ok:'Riapri',done:'Pratica riaperta',back:{type:'detail',id},fn:async()=>{await revertUnits(id);await S.db.doc('esiti/'+id).delete()}};renderModal()}
+  else if(a.dataset.act==='del'){const done=S.es.has(id);S.modal={type:'confirm',danger:true,title:'Eliminare la pratica?',text:done?`Ordine ${p?.ordine||''}: la scheda viene tolta dall'agenda, ma resta nell'Archivio con i dati essenziali, foto e seriali installati.`:`Ordine ${p?.ordine||''}: la pratica verrà eliminata.`,ok:'Elimina',done:done?'Pratica spostata in archivio':'Pratica eliminata',back:{type:'detail',id},fn:async()=>{const e=S.es.get(id);if(e&&!e.snap)await S.db.doc('esiti/'+id).update({snap:snapOf(id)});if(!done)await revertUnits(id);await S.db.doc('pratiche/'+id).delete()}};renderModal()}
+  else if(a.dataset.act==='delarch'){S.modal={type:'confirm',danger:true,title:'Eliminare dall\'archivio?',text:`Ordine ${p?.ordine||''}: i dati di questa pratica completata verranno eliminati definitivamente. I seriali restano registrati come installati.`,ok:'Elimina',done:'Eliminata dall\'archivio',fn:()=>S.db.doc('esiti/'+id).delete()};renderModal()}
+});
+$('#modal').addEventListener('change',e=>{
+  if(e.target.name==='esitoAss'){const b=$('#rimbox');if(b)b.hidden=e.target.value!=='rimodulato';return}
+  const inp=e.target.closest('input[type=file][data-k]');if(!inp)return;const k=inp.dataset.k;const files=[...inp.files];if(!files.length)return;
+  if(k==='fotoIdRisorsa'){S.up[k].forEach(u=>URL.revokeObjectURL(u.url));S.up[k]=[]}
+  for(const f of files)S.up[k].push({file:f,url:URL.createObjectURL(f)});inp.value='';$('#g-'+k).innerHTML=prev(k);
+});
+$('#modal').addEventListener('submit',async e=>{
+  if(e.target.id==='pwf'){e.preventDefault();const p=String(new FormData(e.target).get('pw')||'');try{await S.call('setPassword',{userId:S.modal.id===S.me?undefined:S.modal.id,password:p});closeModal();toast('Password impostata')}catch(x){$('#pwerr').textContent=x.message}return}
+  if(e.target.id==='connf'){e.preventDefault();const u=String(new FormData(e.target).get('api')||'').trim();if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)){$('#cnerr').textContent='L\'indirizzo deve iniziare con https://script.google.com/';return}
+    try{const r=await fetch(u);const j=await r.json();if(j.app!=='GoFiber')throw 0}catch(x){$('#cnerr').textContent='Non risponde come server GoFiber: controlla il deployment (accesso: Chiunque).';return}
+    LS.set('gofiber-api',u);location.reload();return}
+  if(e.target.id==='pform'){e.preventDefault();const fd=new FormData(e.target);const nome=String(fd.get('nome')||'').trim(),codice=String(fd.get('codice')||'').trim();if(!nome){$('#perr').textContent='Inserisci il nome.';return}
+    try{await S.db.doc('prodotti/'+S.modal.id).update({nome,codice});closeModal();toast('Prodotto aggiornato')}catch(x){$('#perr').textContent=errText(x)}return}
+  if(e.target.id!=='cf')return;e.preventDefault();
+  const er=$('#cerr'),btn=e.target.querySelector('button[type=submit]');
+  if(e.target.dataset.ass){
+    const fd=new FormData(e.target),g=k=>String(fd.get(k)||'').trim();const esito=g('esitoAss'),nota=g('nota');
+    if(!esito){er.textContent='Scegli l\'esito: Positiva, Negativa o Rimodulato.';return}
+    const id=S.modal.id,p=S.pr.get(id)||{},now=new Date().toISOString();
+    if(esito==='rimodulato'){const nd=g('rData'),nf=g('rFascia'),ora=g('rOra');
+      if(!nd||!nf){er.textContent='Indica la nuova data e la fascia oraria.';return}
+      btn.disabled=true;S.busy=true;
+      try{const r={daData:p.data||'',daFascia:p.fascia||'',daOra:p.ora||'',aData:nd,aFascia:nf,ora,nota,by:S.admin?'':(S.me||''),at:now};
+        await S.db.doc('pratiche/'+id).update({data:nd,fascia:nf,ora,anticipo:false,rimodulata:true,rimod:[...(Array.isArray(p.rimod)?p.rimod:[]),r],updatedAt:now});
+        S.busy=false;closeModal();toast(`Rimodulata a ${dmy(nd)} ${fascia(nf).a}–${fascia(nf).b}${ora?' ore '+ora:''}`);
+        if(S.view==='agenda'){S.f.range='giorno';S.f.day=nd;render()}
+      }catch(x){S.busy=false;btn.disabled=false;er.textContent=errText(x)}
+      return}
+    btn.disabled=true;S.busy=true;
+    try{await S.db.doc('esiti/'+id).set({nota,esitoAss:esito,fotoIdRisorsa:[],foto:[],caratterizzazione:[],materiali:[],by:S.me||'',byAdmin:S.admin,completedAt:now,snap:snapOf(id)});
+      S.busy=false;closeModal();toast(esito==='positiva'?'Chiusa con esito positivo':'Chiusa con esito negativo');S.modal={type:'detail',id};renderModal()}
+    catch(x){S.busy=false;btn.disabled=false;er.textContent=errText(x)}
+    return}
+  const sr=VAL.ins(serials('ins'));const bad=sr.filter(r=>r[1]==='ko');
+  if(bad.length){er.textContent='Controlla i seriali: '+bad.map(r=>r[0]+' ('+r[2]+')').join(', ');return}
+  const cfd=new FormData(e.target);const nota=String(cfd.get('nota')||'').trim(),permuta=String(cfd.get('permuta')||'').trim(),splitter=String(cfd.get('splitter')||'').trim();
+  if(!permuta||!splitter){er.textContent='Inserisci '+[!permuta&&'il numero permuta',!splitter&&'lo splitter'].filter(Boolean).join(' e ')+'.';return}
+  const all=['fotoIdRisorsa','foto','caratterizzazione'].flatMap(k=>S.up[k].map(u=>[k,u.file]));
+  const out={fotoIdRisorsa:[],foto:[],caratterizzazione:[]};
+  S.busy=true;btn.disabled=true;er.textContent='';
+  try{
+    let i=0;
+    for(const [k,f] of all){i++;btn.textContent=`Carico ${i} di ${all.length}…`;const {blob,type}=await prep(f);
+      let r;try{r=await S.assets.upload(blob,{type})}catch(x){if(x?.code==='store_unavailable'){await new Promise(z=>setTimeout(z,1200));r=await S.assets.upload(blob,{type})}else throw x}
+      out[k].push({id:r.id,type:r.contentType||type})}
+    btn.textContent='Salvo…';
+    const id=S.modal.id,p=S.pr.get(id)||{},mats=sr.map(r=>r[0]),now=new Date().toISOString();
+    await S.db.doc('esiti/'+id).set({nota,...out,materiali:mats,permuta,splitter,by:S.me||'',byAdmin:S.admin,completedAt:now,snap:{...snapOf(id),permuta,splitter}});
+    const team=tecsOf(p);
+    const errs=await pool(mats.map(sk).filter(k=>S.un.has(k)),k=>{const u=S.un.get(k);const tid=team.includes(u.tecnicoId)?u.tecnicoId:(team.includes(S.me)?S.me:(team[0]||S.me||''));return S.db.doc('unita/'+k).update({stato:'installato',tecnicoId:tid,praticaId:id,ordine:p.ordine||'',idRisorsa:p.idRisorsa||'',installedAt:now})},6);
+    S.busy=false;closeModal();toast(errs.length?`Pratica completata, ma ${errs.length} seriali non aggiornati`:'Pratica completata');S.modal={type:'detail',id};renderModal();
+  }catch(x){
+    S.busy=false;btn.disabled=false;btn.textContent='Conferma completamento';
+    er.textContent=x instanceof Error?x.message:x?.code==='too_large'?'Un file è troppo grande (max 20 MB).':x?.code==='unsupported_type'?'Formato non supportato: usa JPG, PNG o PDF.':x?.code==='quota_or_state'?'Spazio esaurito per gli allegati.':x?.code==='rate_limited'?'Troppi caricamenti: attendi e riprova.':errText(x);
+  }
+});
+async function prep(file){
+  if(file.type==='application/pdf'||/\.pdf$/i.test(file.name))return{blob:file,type:'application/pdf'};
+  try{const bmp=await createImageBitmap(file);const k=Math.min(1,1600/Math.max(bmp.width,bmp.height));const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);bmp.close&&bmp.close();
+    const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.82));if(b)return{blob:b,type:'image/jpeg'}}catch(x){}
+  if(['image/jpeg','image/png','image/webp','image/gif'].includes(file.type))return{blob:file,type:file.type};
+  throw new Error('Impossibile leggere il file '+file.name+': usa una foto JPG/PNG o un PDF.');
+}
+
+/* ---------- posizioni PFS ---------- */
+function rebuildPfs(){S.pfsImp.clear();let at='';for(const [,d] of [...S.pfsDocs].sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true}))){if(d.at>at)at=d.at;for(const r of d.items||[]){const [n,a,lat,lng,note]=r;if(n&&isFinite(lat)&&isFinite(lng))S.pfsImp.set(pk(n),{n,a:a||'',lat:+lat,lng:+lng,note:note||''})}}S.pfsAt=at;
+  S.pfs=new Map(S.pfsBase);for(const [k,v] of S.pfsImp)S.pfs.set(k,v)}
+async function loadPfsBase(){
+  try{let d;if(S.remote){const r=await S.call('pfs',{});if(r.missing)throw 0;d=JSON.parse(r.text)}else{const r=await fetch('./pfs-data.json');if(!r.ok)throw 0;d=await r.json()}const m=new Map();
+    for(const [n,ai,la,lo,ni] of d.items||[])m.set(pk(n),{n,a:d.anelli[ai]||'',lat:la/1e5,lng:lo/1e5,note:d.note[ni]||''});
+    S.pfsBase=m;S.pfsBaseAt=d.at||'';S.pfsBaseState='ok'}catch(e){S.pfsBaseState='err'}
+  rebuildPfs();if(S.view==='nuova'&&S.state==='ok'){renderPfsSug();const c=$('#pfsCount');if(c)c.innerHTML=pfsCountHTML()}if(S.view==='agenda')renderList();if(S.modal?.type==='detail')renderModal();
+}
+function pfsCountHTML(){return S.pfsBaseState==='load'?'Caricamento posizioni PFS…':`<b>${S.pfs.size.toLocaleString('it-IT')}</b> PFS con posizione: ${S.pfsBase.size.toLocaleString('it-IT')} dall'elenco FiberTools del ${esc(dt(S.pfsBaseAt))}${S.pfsImp.size?` + ${S.pfsImp.size.toLocaleString('it-IT')} importati o corretti${S.pfsAt?' il '+esc(dt(S.pfsAt)):''}`:''}.${S.pfsBaseState==='err'?' L\'elenco incluso non si è caricato: riapri l\'app.':''}`}
+function renderPfsSug(){
+  const box=$('#pfsSug'),inp=$('#pfsIn');if(!box||!inp)return;const v=inp.value,q=pk(v);
+  if(!S.pfs.size){box.innerHTML='';return}
+  if(q.length<2){box.innerHTML='';return}
+  const ex=S.pfs.get(q);const list=[];
+  for(const [k,e] of S.pfs){if(k!==q&&k.includes(q)){list.push([k,e]);if(list.length>300)break}}
+  list.sort((a,b)=>(b[0].startsWith(q)-a[0].startsWith(q))||a[0].length-b[0].length||a[0].localeCompare(b[0],undefined,{numeric:true}));
+  let h='';
+  if(ex)h+=`<div class="pfsok">${ic('pin')}<div><b>${esc(ex.n)}</b> · posizione trovata${ex.a?' · anello '+esc(ex.a):''}${ex.note?`<div class="note">${esc(ex.note)}</div>`:''}</div><a class="btn sm pri" href="${navLL(ex.lat,ex.lng)}" target="_blank" rel="noopener">Vai al PFS</a></div>`;
+  else if(!list.length)h+='<p class="note" style="margin:-6px 0 12px">PFS non presente tra le posizioni: puoi salvarlo lo stesso.</p>';
+  if(list.length)h+=`<div class="sugl">${list.slice(0,6).map(([,e])=>`<button type="button" class="sug" data-pfspick="${esc(e.n)}"><b>${esc(e.n)}</b><span>${esc(e.a||'')}${e.note?' · '+esc(e.note.slice(0,60)):''}</span></button>`).join('')}</div>`;
+  box.innerHTML=h;
+}
+function parseKml(text){
+  const doc=new DOMParser().parseFromString(text,'application/xml');
+  if(doc.getElementsByTagName('parsererror').length)throw new Error('Il file non è un KML valido.');
+  const ct=(el,tag)=>{for(const c of el.children)if(c.localName===tag)return(c.textContent||'').trim();return ''};
+  const out=[];
+  for(const pm of doc.getElementsByTagName('Placemark')){
+    const name=ct(pm,'name');const ce=pm.getElementsByTagName('Point')[0]?.getElementsByTagName('coordinates')[0];if(!name||!ce)continue;
+    const [lng,lat]=ce.textContent.trim().split(/[\s,]+/).map(Number);if(!isFinite(lat)||!isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180)continue;
+    let p=pm.parentElement,folder='';while(p&&p.localName!=='Folder')p=p.parentElement;if(p)folder=ct(p,'name');
+    const desc=ct(pm,'description').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+    const ext={};for(const d of pm.getElementsByTagName('Data'))ext[d.getAttribute('name')]=(d.getElementsByTagName('value')[0]?.textContent||'').trim();
+    const full=/\b([A-Z]{2,4}_\d{1,3}[\/\s-]\d{1,3}[EW]\d{1,3})\b/i.exec(desc);
+    const n=(full?full[1]:name).toUpperCase().replace(/\s+/g,' ');
+    const note=('note' in ext?ext.note:(/Specification\s*:/i.test(desc)?'':desc)).slice(0,120);
+    out.push([n,ext.anello||folder||'',+lat.toFixed(6),+lng.toFixed(6),note]);
+  }
+  return out;
+}
+async function importPfs(file){
+  const msg=$('#pfsMsg');const say=t=>{if(msg)msg.textContent=t};
+  if(/\.kmz$/i.test(file.name)){say('Il file è KMZ: in FiberTools usa “Condividi posizioni”, che crea un file KML.');return}
+  let items;try{items=parseKml(await file.text())}catch(x){say(x.message||'File non leggibile.');return}
+  if(!items.length){say('Nessun PFS con coordinate trovato nel file.');return}
+  const m=new Map();for(const [k,e] of S.pfsImp)m.set(k,[e.n,e.a,e.lat,e.lng,e.note]);
+  const near=(a,b)=>Math.abs(a-b)<0.00002;
+  let nuovi=0,agg=0;for(const r of items){const k=pk(r[0]);const o=S.pfs.get(k);if(!o)nuovi++;else if(!near(o.lat,r[2])||!near(o.lng,r[3]))agg++;else continue;m.set(k,r)}
+  if(!nuovi&&!agg){say('Nessun PFS nuovo o spostato: le posizioni sono già aggiornate.');return}
+  const all=[...m.values()].sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true}));const CH=S.remote?300:1500,n=Math.ceil(all.length/CH),at=new Date().toISOString();
+  S.busy=true;
+  try{
+    for(let i=0;i<n;i++){say(`Salvo ${Math.min((i+1)*CH,all.length)} di ${all.length}…`);await S.db.doc('pfsdb/c'+i).set({items:all.slice(i*CH,(i+1)*CH),at})}
+    for(const id of [...S.pfsDocs.keys()]){const i=+id.slice(1);if(!(i<n))await S.db.doc('pfsdb/'+id).delete()}
+    S.busy=false;toast(`Posizioni PFS: ${nuovi} nuove, ${agg} spostate`);if(S.view==='nuova')render();
+  }catch(x){S.busy=false;say(errText(x))}
+}
+
+/* ---------- report ---------- */
+const PER={sett:'Settimana',mese:'Mese',anno:'Anno'};
+function repRange(){const r=S.rep,d=parse(r.ref);
+  if(r.per==='sett'){const wd=(d.getDay()+6)%7;const a=new Date(d);a.setDate(d.getDate()-wd);const b=new Date(a);b.setDate(a.getDate()+6);return[iso(a),iso(b)]}
+  if(r.per==='anno')return[d.getFullYear()+'-01-01',d.getFullYear()+'-12-31'];
+  return[iso(new Date(d.getFullYear(),d.getMonth(),1)),iso(new Date(d.getFullYear(),d.getMonth()+1,0))]}
+function repLabel(){const r=S.rep,[lo,hi]=repRange();
+  if(r.per==='sett'){const a=parse(lo),b=parse(hi);return 'Settimana '+a.getDate()+(a.getMonth()!==b.getMonth()?' '+a.toLocaleDateString('it-IT',{month:'short'}):'')+' – '+b.toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'})}
+  if(r.per==='anno')return 'Anno '+lo.slice(0,4);return parse(lo).toLocaleDateString('it-IT',{month:'long',year:'numeric'})}
+function repShift(n){const r=S.rep,d=parse(r.ref);if(r.per==='sett')d.setDate(d.getDate()+7*n);else if(r.per==='anno')d.setFullYear(d.getFullYear()+n);else{d.setDate(1);d.setMonth(d.getMonth()+n)}r.ref=iso(d)}
+function repData(){
+  const [lo,hi]=repRange(),r=S.rep,inR=s=>s&&s.slice(0,10)>=lo&&s.slice(0,10)<=hi;
+  const okP=p=>(!r.comm||p.committente===r.comm)&&(!r.tipo||normT(p.tipo)===r.tipo)&&(!r.tec||tecsOf(p).includes(r.tec));
+  const closed=[];for(const [id,e] of S.es){const p=S.pr.get(id)||e.snap;if(!p||!inR(e.completedAt)||!okP(p))continue;closed.push({id,p,e})}
+  const rim=[];const seen=new Set();
+  for(const [id,p] of S.pr){seen.add(id);if(!okP(p))continue;for(const x of p.rimod||[])if(inR(x.at))rim.push({id,p,x})}
+  for(const [id,e] of S.es){if(seen.has(id)||!e.snap||!okP(e.snap))continue;for(const x of e.snap.rimod||[])if(inR(x.at))rim.push({id,p:e.snap,x})}
+  const open=[],t=today();for(const [id,p] of S.pr){if(S.es.has(id)||!okP(p)||!inR(p.data))continue;open.push({id,p,late:p.data<t})}
+  const inst=[...S.un.values()].filter(u=>u.stato==='installato'&&inR(u.installedAt)&&(!r.comm||u.committente===r.comm||(!u.committente&&S.pr.get(u.praticaId)?.committente===r.comm))&&(!r.tec||u.tecnicoId===r.tec)&&(!r.tipo||r.tipo==='Delivery'));
+  const prel=[...S.un.values()].filter(u=>inR(u.prelevatoAt)&&(!r.tec||u.prelevatoDa===r.tec)&&(!r.comm||u.committente===r.comm));
+  return {lo,hi,closed,rim,open,inst,prel};
+}
+const kind=({p,e})=>e.esitoAss==='positiva'?'pos':e.esitoAss==='negativa'?'neg':isAss(p)?'pos':'del';
+const pct=(a,b)=>b?Math.round(a/b*100)+'%':'—';
+const avg=(a,b)=>b?(a/b).toLocaleString('it-IT',{maximumFractionDigits:1}):'—';
+function repTable(id,title,head,rows,foot){
+  return `<div class="card" style="margin-bottom:14px;padding:16px"><div class="ph" style="margin-bottom:8px"><h3 style="margin:0">${title}</h3><div class="sp"><button class="btn sm" data-repcopy="${id}">Copia per Excel</button></div></div>
+  ${rows.length?`<div class="tw" style="box-shadow:none"><table class="t stack" id="rt-${id}"><thead><tr>${head.map((h,i)=>`<th${i?' style="text-align:right"':''}>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td${i?' style="text-align:right;white-space:nowrap"':''}>${i?esc(c):c}</td>`).join('')}</tr>`).join('')}</tbody>${foot?`<tfoot><tr>${foot.map((c,i)=>`<td${i?' style="text-align:right"':''}><b>${esc(c)}</b></td>`).join('')}</tr></tfoot>`:''}</table></div>`:'<p class="note">Nessun dato nel periodo.</p>'}</div>`}
+function reportHTML(personal){const r=S.rep;S.repMine=!!personal;if(personal){r.tec=S.me}
+  return `<div class="ph"><div><h1>${personal?'La mia resa':'Riepilogo e resa'}</h1><div class="sub" id="repLab">${esc(repLabel())}</div></div>
+   <div class="sp"><div class="subt" style="margin:0" id="rper">${Object.entries(PER).map(([k,l])=>`<button class="chip ${r.per===k?'on':''}" data-per="${k}">${l}</button>`).join('')}</div>
+   <button class="btn sm" data-repmv="-1" aria-label="Periodo precedente">‹</button><input class="in" type="date" id="rref" value="${esc(r.ref)}" style="width:auto" aria-label="Giorno del periodo"><button class="btn sm" data-repmv="1" aria-label="Periodo successivo">›</button></div></div>
+  <div class="filters"><span class="q note" style="align-self:center">${personal?'Le tue pratiche chiuse, rimodulate e il materiale installato nel periodo.':'Filtra:'}</span>
+   <select class="in" id="rti"><option value="">Assurance e delivery</option>${TIPI.map(t=>`<option ${r.tipo===t?'selected':''}>${t}</option>`).join('')}</select>
+   <select class="in" id="rcm"><option value="">Tutti i committenti</option>${COMM.map(c=>`<option ${r.comm===c?'selected':''}>${c}</option>`).join('')}</select>
+   ${personal?'<span></span>':`<select class="in" id="rtc">${tecOpts(r.tec,'Tutti i tecnici')}</select>`}<span></span></div>
+  <div id="repBody"></div>`}
+function bindReport(){
+  const go=()=>{$('#repLab').textContent=repLabel();$('#rref').value=S.rep.ref;renderReport()};
+  $('#rref').onchange=e=>{if(e.target.value){S.rep.ref=e.target.value;go()}};
+  $('#rper').onclick=e=>{const b=e.target.closest('[data-per]');if(!b)return;S.rep.per=b.dataset.per;$('#rper').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b));go()};
+  document.querySelectorAll('[data-repmv]').forEach(b=>b.onclick=()=>{repShift(+b.dataset.repmv);go()});
+  [['rti','tipo'],['rcm','comm'],['rtc','tec']].forEach(([i,k])=>{const el=$('#'+i);if(el)el.onchange=e=>{S.rep[k]=e.target.value;renderReport()}});
+  $('#repBody').onclick=async e=>{const b=e.target.closest('[data-repcopy]');if(!b)return;const t=$('#rt-'+b.dataset.repcopy);if(!t)return;
+    const tsv=[...t.rows].map(tr=>[...tr.cells].map(c=>c.textContent.replace(/\s+/g,' ').trim()).join('\t')).join('\n');
+    try{await navigator.clipboard.writeText(repLabel()+'\n'+tsv);toast('Tabella copiata: incollala in Excel')}catch(x){toast('Copia non riuscita')}};
+}
+function renderReport(){
+  const B=$('#repBody');if(!B)return;if(S.repMine)S.rep.tec=S.me;const D=repData();const c=D.closed,mine=S.repMine;
+  const n={del:0,pos:0,neg:0};for(const x of c)n[kind(x)]++;
+  const coppia=c.filter(x=>tecsOf(x.p).length>1).length,late=D.open.filter(x=>x.late).length;
+  const giorni=new Set(c.map(x=>x.e.completedAt.slice(0,10))).size;
+  let h=`<div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+   <div class="kpi"><b>${c.length}</b><span>Pratiche chiuse</span></div><div class="kpi"><b>${n.del}</b><span>Delivery completate</span></div>
+   <div class="kpi k-ok"><b>${n.pos}</b><span>Assurance positive · ${pct(n.pos,n.pos+n.neg)}</span></div><div class="kpi k-ko"><b>${n.neg}</b><span>Assurance negative</span></div>
+   <div class="kpi k-wait"><b>${D.rim.length}</b><span>Rimodulazioni</span></div><div class="kpi"><b>${D.inst.length}</b><span>Pezzi installati</span></div>
+   <div class="kpi"><b>${giorni}</b><span>Giorni lavorati · ${avg(c.length,giorni)} al giorno</span></div>
+   <div class="kpi"><b>${D.open.length}</b><span>${mine?'Ancora da fare':'Ancora aperte'}${late?` · <b style="display:inline;font-size:inherit;color:var(--ko)">${late} in ritardo</b>`:''}</span></div>
+   ${mine?`<div class="kpi"><b>${D.prel.length}</b><span>Pezzi prelevati</span></div>`:`<div class="kpi"><b>${coppia}</b><span>Uscite in coppia</span></div>`}</div>`;
+  const days={},byMonth=S.rep.per==='anno';for(const x of c){const d=x.e.completedAt.slice(0,byMonth?7:10);(days[d]=days[d]||{del:0,pos:0,neg:0})[kind(x)]++}
+  const keys=[];if(byMonth){for(let m=1;m<=12;m++)keys.push(D.lo.slice(0,4)+'-'+pad(m))}else{for(let d=D.lo;d<=D.hi;d=addDays(d,1))keys.push(d)}
+  const mx=Math.max(1,...keys.map(k=>{const v=days[k];return v?v.del+v.pos+v.neg:0}));
+  h+=`<div class="card" style="margin-bottom:14px;padding:16px"><h3 style="margin:0 0 4px">Chiusure ${byMonth?'per mese':'per giorno'}</h3><div class="leg" style="margin-bottom:10px"><span><span class="dot" style="background:var(--pri)"></span>Delivery</span><span><span class="dot" style="background:var(--ok)"></span>Assurance positive</span><span><span class="dot" style="background:var(--ko)"></span>Assurance negative</span></div>
+   <div class="bars">${keys.map(k=>{const v=days[k]||{del:0,pos:0,neg:0},tot=v.del+v.pos+v.neg,lab=byMonth?parse(k+'-01').toLocaleDateString('it-IT',{month:'short'}):(S.rep.per==='sett'?parse(k).toLocaleDateString('it-IT',{weekday:'short',day:'numeric'}):String(+k.slice(8)));const wd=!byMonth&&[0,6].includes(parse(k).getDay());
+     return `<div class="bcol${wd?' we':''}" title="${esc(byMonth?k:dmy(k))}: ${tot} chiuse (${v.del} delivery, ${v.pos} positive, ${v.neg} negative)"><span class="bn">${tot||''}</span><div class="bst" style="height:${tot/mx*100}%"><i style="flex:${v.neg};background:var(--ko)"></i><i style="flex:${v.pos};background:var(--ok)"></i><i style="flex:${v.del};background:var(--pri)"></i></div><span class="bl">${lab}</span></div>`}).join('')}</div></div>`;
+  if(!mine){
+    const T={};const tr=id=>T[id]=T[id]||{chiuse:0,del:0,pos:0,neg:0,coppia:0,rim:0,pezzi:0,prel:0,gg:new Set()};
+    for(const x of c){const k=kind(x);for(const id of tecsOf(x.p)){const o=tr(id);o.chiuse++;o[k]++;o.gg.add(x.e.completedAt.slice(0,10));if(tecsOf(x.p).length>1)o.coppia++}}
+    for(const x of D.rim){const id=x.x.by;if(id)tr(id).rim++;else for(const t of tecsOf(x.p))tr(t).rim++}
+    for(const u of D.inst)if(u.tecnicoId)tr(u.tecnicoId).pezzi++;
+    for(const u of D.prel)if(u.prelevatoDa)tr(u.prelevatoDa).prel++;
+    const list=Object.entries(T).sort((a,b)=>b[1].chiuse-a[1].chiuse);
+    const trows=list.map(([id,o],i)=>[`${i<3&&o.chiuse?`<span class="pill ${['ok','wait','neu'][i]}">${i+1}°</span> `:''}${esc(tecName(id))}`,o.chiuse,o.gg.size,avg(o.chiuse,o.gg.size),o.del,o.pos,o.neg,pct(o.pos,o.pos+o.neg),o.rim,o.pezzi,o.prel,o.coppia]);
+    const sum=i=>trows.reduce((s,r)=>s+(+r[i]||0),0);
+    h+=repTable('tec','Resa per tecnico',['Tecnico','Chiuse','Giorni','Media/giorno','Delivery','Ass. +','Ass. −','% positive','Rimodulate','Pezzi install.','Prelevati','In coppia'],trows,trows.length>1?['Totale',c.length,giorni,avg(c.length,giorni),n.del,n.pos,n.neg,pct(n.pos,n.pos+n.neg),D.rim.length,D.inst.length,D.prel.length,coppia]:null);
+  }
+  const C={};const cr=k=>C[k]=C[k]||{chiuse:0,del:0,pos:0,neg:0,rim:0,pezzi:0,aperte:0};
+  for(const x of c){const o=cr(x.p.committente||'—');o.chiuse++;o[kind(x)]++}
+  for(const x of D.rim)cr(x.p.committente||'—').rim++;
+  for(const u of D.inst)cr(u.committente||S.pr.get(u.praticaId)?.committente||'—').pezzi++;
+  for(const x of D.open)cr(x.p.committente||'—').aperte++;
+  const crows=Object.entries(C).sort((a,b)=>b[1].chiuse-a[1].chiuse).map(([k,o])=>[ctag(k==='—'?'':k),o.chiuse,o.del,o.pos,o.neg,pct(o.pos,o.pos+o.neg),o.rim,o.pezzi,o.aperte]);
+  const sm=i=>crows.reduce((s,r)=>s+(+r[i]||0),0);
+  h+=repTable('com','Per committente',['Committente','Chiuse','Delivery','Ass. +','Ass. −','% positive','Rimodulate','Pezzi','Aperte'],crows,crows.length>1?['Totale',sm(1),sm(2),sm(3),sm(4),pct(sm(3),sm(3)+sm(4)),sm(6),sm(7),sm(8)]:null);
+  if(mine)h+=repTable('mie','Le mie pratiche chiuse',['Pratica','Chiusa il','Esito','Indirizzo'],c.sort((a,b)=>(b.e.completedAt||'').localeCompare(a.e.completedAt||'')).slice(0,300).map(({id,p,e})=>[`<button class="lnk" data-open="${esc(id)}">${esc(p.ordine||'—')}</button> ${tipoTag(p)}${ctag(p.committente)}`,dt(e.completedAt),ESA[e.esitoAss]?.[1]||'Completata',p.indirizzo||'']));
+  const M={};for(const u of D.inst){const k=u.prodottoId+'|'+(u.committente||'');M[k]=(M[k]||0)+1}
+  h+=repTable('mat','Materiale installato',['Prodotto','Committente','Pezzi'],Object.entries(M).sort((a,b)=>b[1]-a[1]).map(([k,v])=>[esc(prodName(k.split('|')[0])),k.split('|')[1]||'—',v]));
+  h+=repTable('rim','Rimodulazioni',['Pratica','Da','A','Da chi','Nota'],D.rim.sort((a,b)=>(b.x.at||'').localeCompare(a.x.at||'')).slice(0,200).map(({id,p,x})=>[`<button class="lnk" data-open="${esc(id)}">${esc(p.ordine||'—')}</button> ${ctag(p.committente)}`,dmy(x.daData)+' '+fascia(x.daFascia).a,dmy(x.aData)+' '+fascia(x.aFascia).a+(x.ora?' ore '+x.ora:''),x.by?tecName(x.by):'Ufficio',x.nota||'']));
+  if(late)h+=repTable('late','Aperte in ritardo',['Pratica','Data','Tecnici','Stato'],D.open.filter(x=>x.late).sort((a,b)=>a.p.data.localeCompare(b.p.data)).map(({id,p})=>[`<button class="lnk" data-open="${esc(id)}">${esc(p.ordine||'—')}</button> ${tipoTag(p)}`,dmy(p.data)+' '+fascia(p.fascia).a,teamNames(p),ST[statoOf(id,p)]]));
+  B.innerHTML=h;
+}
+
+/* ---------- importazione pratiche ---------- */
+const HK={ordine:['ordine','numeroordine','nordine','order','ordinelavoro','odl','wo','workorder','numeropratica','pratica','codiceordine'],idRisorsa:['idrisorsa','risorsa','idris','codicerisorsa','id'],
+  indirizzo:['indirizzo','via','address','ubicazione','indirizzocliente'],comune:['comune','citta','localita','paese','city'],civico:['civico','numerocivico','ncivico'],
+  telefono:['telefono','tel','cellulare','cell','recapito','telefonocliente','numerotelefono','contatto'],pfs:['pfs','codicepfs'],permuta:['permuta','numeropermuta','npermuta'],splitter:['splitter','spl'],
+  data:['data','dataappuntamento','giorno','date','dataintervento','appuntamento'],fascia:['fascia','fasciaoraria','ora','orario','oraappuntamento','fasce'],
+  rete:['rete','operatore','operatorerete','retefibra','infrastruttura'],tipo:['tipo','tipointervento','intervento','tipologia','attivita'],committente:['committente','ditta','impresa','azienda','commessa'],tecnico:['tecnico','tecnici','squadra','operatore','assegnato']};
+const hk=h=>{const k=String(h||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');for(const [f,al] of Object.entries(HK))if(al.includes(k))return f;return null};
+function parseDate(v){const r=parseDate0(v);if(!r)return r;const [y,m,d]=r.split('-').map(Number);const t=new Date(y,m-1,d);return t.getFullYear()===y&&t.getMonth()===m-1&&t.getDate()===d&&y>2000&&y<2100?r:null}
+function parseDate0(v){v=String(v||'').trim();if(!v)return '';let m;
+  if(m=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(v))return m[1]+'-'+pad(+m[2])+'-'+pad(+m[3]);
+  if(m=/^(\d{1,2})[\/.\-](\d{1,2})(?:[\/.\-](\d{2,4}))?$|^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})[ T]/.exec(v)){if(m[4]){m=[m[0],m[4],m[5],m[6]]}}if(m&&m[1]&&!/^\d{4}/.test(v)){let y=m[3]?+m[3]:new Date().getFullYear();if(y<100)y+=2000;return y+'-'+pad(+m[2])+'-'+pad(+m[1])}
+  if(/^\d{5}(\.\d+)?$/.test(v)){const d=new Date(Date.UTC(1899,11,30)+Math.floor(+v)*864e5);return d.toISOString().slice(0,10)}
+  return null}
+function parseFascia(v){v=String(v||'').trim().toLowerCase();if(!v)return{f:'',ora:''};
+  const m=/(\d{1,2})[:.,h](\d{2})?/.exec(v)||/^(\d{1,2})$/.exec(v);
+  if(!m){if(/matt/.test(v))return{f:'0830',ora:''};if(/pome/.test(v))return{f:'1430',ora:''};return{f:null,ora:''}}
+  const t=+m[1]*60+(+(m[2]||0));const rng=F.map(f=>[f.k,+f.a.slice(0,2)*60+ +f.a.slice(3),+f.b.slice(0,2)*60+ +f.b.slice(3)]);
+  let f=rng.find(([,a,b])=>t>=a&&t<b);if(!f)f=rng.reduce((best,x)=>Math.abs(x[1]-t)<Math.abs(best[1]-t)?x:best);
+  const ora=pad(+m[1])+':'+pad(+(m[2]||0));return{f:f[0],ora:F.some(x=>x.a===ora)?'':ora}}
+function matchTec(v){const parts=String(v||'').split(/\s*[+,;\/&]\s*|\s+e\s+/i).map(s=>s.trim().toLowerCase()).filter(Boolean);const ids=[],bad=[];
+  for(const s of parts){const hit=activeTecs().find(([,t])=>(t.nome||'').toLowerCase()===s)||activeTecs().find(([,t])=>(t.nome||'').toLowerCase().includes(s)||s.includes((t.nome||'').toLowerCase().split(' ')[0]));if(hit)ids.push(hit[0]);else bad.push(s)}
+  return{ids:[...new Set(ids)],bad}}
+function splitText(t){t=t.replace(/\r/g,'').replace(/^﻿/,'');const lines=t.split('\n').filter(l=>l.trim());if(!lines.length)return[];
+  const d=lines[0].includes('\t')?'\t':(lines[0].split(';').length>=lines[0].split(',').length?';':',');
+  return lines.map(l=>{const out=[];let cur='',q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){if(q&&l[i+1]==='"'){cur+='"';i++}else q=!q}else if(ch===d&&!q){out.push(cur);cur=''}else cur+=ch}out.push(cur);return out.map(x=>x.trim())})}
+const ORDER0=['ordine','idRisorsa','indirizzo','telefono','pfs','permuta','splitter','data','fascia'];
+function buildImport(rows){
+  if(!rows.length)return null;let cols=rows[0].map(hk);let body=rows.slice(1);
+  if(cols.filter(Boolean).length<2){cols=ORDER0.slice(0,rows[0].length);body=rows}
+  const D=S.imp.def,seenO=new Set(),seenR=new Set();
+  const list=body.filter(r=>r.some(c=>String(c).trim())).map((r,i)=>{
+    const g={};cols.forEach((c,j)=>{if(c&&r[j]!=null&&String(r[j]).trim()!==''){g[c]=g[c]?g[c]+' '+String(r[j]).trim():String(r[j]).trim()}});
+    const o={tipo:'',committente:'',ordine:g.ordine||'',idRisorsa:g.idRisorsa||'',indirizzo:[g.indirizzo,g.civico,g.comune].filter(Boolean).join(', '),telefono:g.telefono||'',pfs:g.pfs||'',permuta:g.permuta||'',splitter:g.splitter||'',data:'',fascia:'',ora:'',tecnici:[]};
+    const err=[],warn=[];
+    const t=g.tipo?(/ass|guast|ripar/i.test(g.tipo)?'Assurance':/deliv|attiv|install|nuov/i.test(g.tipo)?'Delivery':null):null;o.tipo=t||D.tipo;if(g.tipo&&!t)warn.push('tipo “'+g.tipo+'” non riconosciuto');
+    const rt=g.rete?(/open|^of$/i.test(g.rete)?'Open Fiber':/fiber ?cop|^fc$|tim/i.test(g.rete)?'FiberCop':null):null;o.rete=rt||D.rete||'';if(g.rete&&!rt)warn.push('rete “'+g.rete+'” non riconosciuta');else if(!o.rete)warn.push('rete non indicata');
+    const cm=g.committente?COMM.find(c=>g.committente.toLowerCase().includes(c.toLowerCase().slice(0,5))):null;o.committente=cm||D.comm;if(g.committente&&!cm)warn.push('committente “'+g.committente+'” non riconosciuto');
+    const dd=g.data?parseDate(g.data):'';o.data=dd||D.data;if(g.data&&dd===null)err.push('data “'+g.data+'” non valida');
+    const fz=g.fascia?parseFascia(g.fascia):{f:'',ora:''};o.fascia=fz.f||D.fascia;o.ora=fz.ora||'';if(g.fascia&&fz.f===null)warn.push('fascia “'+g.fascia+'” non riconosciuta');
+    if(g.tecnico){const m=matchTec(g.tecnico);o.tecnici=m.ids;if(m.bad.length)warn.push('tecnico non iscritto: '+m.bad.join(', '))}else if(D.tec)o.tecnici=[D.tec];
+    if(!o.ordine)err.push('manca ordine');if(!o.tipo)err.push('manca tipo');if(!o.committente)err.push('manca committente');if(!o.data)err.push('manca data');if(!o.fascia)err.push('manca fascia');
+    const ko=o.ordine.toLowerCase(),kr=o.idRisorsa.toLowerCase();
+    const dup=[...S.pr.values()].some(p=>(ko&&String(p.ordine||'').toLowerCase()===ko)||(kr&&String(p.idRisorsa||'').toLowerCase()===kr));
+    const dupIn=(ko&&seenO.has(ko))||(kr&&seenR.has(kr));if(ko)seenO.add(ko);if(kr)seenR.add(kr);
+    if(dup)warn.push('ordine o ID risorsa già presente');if(dupIn)warn.push('doppione nel file');
+    const l=S.pfs.get(pk(o.pfs));if(o.pfs&&l){o.pfs=l.n;o.pfsLat=l.lat;o.pfsLng=l.lng;o.pfsAnello=l.a||''}else if(o.pfs)warn.push('PFS senza posizione');
+    return{i:i+1,o,err,warn,dup:dup||dupIn};
+  });
+  return{cols:cols.filter(Boolean),list};
+}
+function importHTML(){const D=S.imp.def;
+  return `<div class="card pf" style="max-width:none"><h3>Importa pratiche da Excel</h3>
+   <p class="note" style="margin-top:-4px">Copia le righe da Excel (con la riga delle intestazioni) e incollale qui, oppure carica il file .xlsx o .csv. Riconosco colonne come <b>Ordine, ID risorsa, Indirizzo, Comune, Telefono, PFS, Permuta, Splitter, Data, Fascia/Ora, Tipo, Committente, Rete, Tecnico</b>. Quello che manca lo prendo dai valori qui sotto.</p>
+   <textarea class="in mono" id="impTxt" rows="6" placeholder="Ordine&#9;ID risorsa&#9;Indirizzo&#9;Telefono&#9;PFS&#9;Data&#9;Fascia">${esc(S.imp.txt||'')}</textarea>
+   <div class="acts" style="margin-bottom:14px"><label class="btn sm">Carica file Excel o CSV<input class="fh" type="file" id="impFile" accept=".xlsx,.xls,.csv,.txt,.tsv"></label><span class="note" id="impMsg"></span></div>
+   <div class="lbl">Valori da usare quando nel file mancano</div>
+   <div class="grid2"><div><div class="note">Tipo</div><div class="seg tipo">${TIPI.map(t=>`<label><input type="radio" name="dtipo" value="${t}" ${D.tipo===t?'checked':''}><span class="k-${t}">${t}</span></label>`).join('')}</div></div>
+    <div><div class="note">Committente</div>${commSeg('dcomm',D.comm)}</div></div>
+   <div class="note">Rete</div><div class="seg rete">${RETI.map(r=>`<label><input type="radio" name="drete" value="${r}" ${D.rete===r?'checked':''}><span class="k-${rk(r)}">${r}</span></label>`).join('')}</div>
+   <div class="grid2"><label class="f">Data<input class="in" type="date" id="ddata" value="${esc(D.data)}"></label><label class="f">Tecnico<select class="in" id="dtec">${tecOpts(D.tec,'Nessuno (da assegnare)')}</select></label></div>
+   <div class="note">Fascia</div><div class="seg fasce">${F.map(f=>`<label><input type="radio" name="dfascia" value="${f.k}" ${D.fascia===f.k?'checked':''}><span>${f.a}<small>${f.b}</small></span></label>`).join('')}</div>
+   <label class="ckline" style="background:var(--soft);border-color:var(--line)"><input type="checkbox" id="dskip" ${S.imp.skip?'checked':''}><span>Salta le righe con ordine o ID risorsa già presenti</span></label>
+   <div id="impPrev"></div></div>`}
+function bindImport(){
+  const upd=()=>renderImport();
+  $('#impTxt').addEventListener('input',e=>{S.imp.txt=e.target.value;S.imp.rows=null;upd()});
+  $('#ddata').onchange=e=>{S.imp.def.data=e.target.value;upd()};$('#dtec').onchange=e=>{S.imp.def.tec=e.target.value;upd()};$('#dskip').onchange=e=>{S.imp.skip=e.target.checked;upd()};
+  $('#main').querySelectorAll('[name=dtipo],[name=dcomm],[name=drete],[name=dfascia]').forEach(r=>r.onchange=e=>{S.imp.def[{dtipo:'tipo',dcomm:'comm',drete:'rete',dfascia:'fascia'}[e.target.name]]=e.target.value;upd()});
+  $('#impFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const msg=$('#impMsg');
+    try{if(/\.xlsx?$/i.test(f.name)){msg.textContent='Leggo il file Excel…';const X=await loadXLSX();const wb=X.read(await f.arrayBuffer(),{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];
+        S.imp.rows=X.utils.sheet_to_json(ws,{header:1,raw:false,dateNF:'yyyy-mm-dd',defval:''}).map(r=>r.map(c=>String(c??'')));S.imp.txt='';$('#impTxt').value='';msg.textContent=f.name+' · foglio '+wb.SheetNames[0]}
+      else{S.imp.txt=await f.text();S.imp.rows=null;$('#impTxt').value=S.imp.txt;msg.textContent=f.name}
+      upd()}catch(x){msg.textContent='File non leggibile: prova a copiare e incollare le righe da Excel.'}};
+  upd();
+}
+let xlP=null;function loadXLSX(){return xlP||(xlP=new Promise((ok,ko)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=()=>ok(window.XLSX);s.onerror=()=>{xlP=null;ko(new Error('lib'))};document.head.appendChild(s)}))}
+function renderImport(){
+  const P=$('#impPrev');if(!P)return;const rows=S.imp.rows||splitText(S.imp.txt||'');const R=buildImport(rows);S.imp.res=R;
+  if(!R||!R.list.length){P.innerHTML='';return}
+  const ok=R.list.filter(x=>!x.err.length&&!(S.imp.skip&&x.dup));const nErr=R.list.filter(x=>x.err.length).length,nDup=R.list.filter(x=>!x.err.length&&x.dup).length;
+  P.innerHTML=`<div class="dupw" style="margin:4px 0 12px"><b>${R.list.length} righe lette</b> · colonne riconosciute: ${R.cols.length?esc([...new Set(R.cols)].join(', ')):'nessuna intestazione, uso l\'ordine Ordine, ID risorsa, Indirizzo, Telefono, PFS, Permuta, Splitter, Data, Fascia'}${nErr?` · <span style="color:var(--ko)">${nErr} con errori (non importate)</span>`:''}${nDup?` · ${nDup} già presenti${S.imp.skip?' (saltate)':''}`:''}</div>
+  <div class="tw" style="box-shadow:none;max-height:420px;overflow:auto"><table class="t stack"><thead><tr><th>#</th><th>Esito</th><th>Tipo</th><th>Ordine</th><th>ID risorsa</th><th>Indirizzo</th><th>PFS</th><th>Data</th><th>Tecnici</th></tr></thead><tbody>${R.list.slice(0,500).map(x=>{const o=x.o,st=x.err.length?['ko','Errore: '+x.err.join(', ')]:x.dup&&S.imp.skip?['neu','Saltata: '+x.warn.join(', ')]:x.warn.length?['wait',x.warn.join(', ')]:['ok','Pronta'];
+    return `<tr><td>${x.i}</td><td><span class="pill ${st[0]}">${esc(st[1])}</span></td><td><div class="top2" style="margin:0">${tipoTag(o)}${ctag(o.committente)}${reteTag(o)}</div></td><td><b>${esc(o.ordine)}</b></td><td>${esc(o.idRisorsa)}</td><td>${esc(o.indirizzo)}</td><td>${o.pfsLat!=null?`${ic('pin')}`:''}${esc(o.pfs)}</td><td>${esc(o.data?dmy(o.data):'')} ${esc(fascia(o.fascia).a)}${o.ora?' ore '+esc(o.ora):''}</td><td>${esc(o.tecnici.map(tecName).join(' + ')||'—')}</td></tr>`}).join('')}</tbody></table></div>
+  <div class="err" id="impErr"></div><div class="acts"><button class="btn yel" id="impGo" ${ok.length?'':'disabled'}>Importa ${ok.length} ${ok.length===1?'pratica':'pratiche'}</button></div>`;
+  $('#impGo').onclick=async()=>{const b=$('#impGo');b.disabled=true;S.busy=true;const now=new Date().toISOString();
+    const errs=await pool(ok,x=>{const o={...x.o,tecnicoId:x.o.tecnici[0]||'',anticipo:false,createdAt:now,updatedAt:now,importato:true};if(o.pfsLat==null){o.pfsLat=null;o.pfsLng=null;o.pfsAnello=''}return S.db.collection('pratiche').add(o)},4,d=>b.textContent=`Salvo ${d} di ${ok.length}…`);
+    S.busy=false;toast(`${ok.length-errs.length} pratiche importate`);if(errs.length){$('#impErr').textContent=`${errs.length} non salvate: ${errText(errs[0][1])}`;b.disabled=false;return}
+    S.imp.txt='';S.imp.rows=null;S.nuovaMode='one';const first=ok.map(x=>x.o.data).sort()[0];S.f.range='tutte';show('agenda')};
+}
+
+/* ---------- archivio ---------- */
+function snapOf(id){const p=S.pr.get(id)||{};const t=tecsOf(p);return {rete:p.rete||'',ora:p.ora||'',rimod:Array.isArray(p.rimod)?p.rimod:[],pfsLat:p.pfsLat??null,pfsLng:p.pfsLng??null,pfsAnello:p.pfsAnello||'',tipo:p.tipo||'',committente:p.committente||'',ordine:p.ordine||'',idRisorsa:p.idRisorsa||'',indirizzo:p.indirizzo||'',telefono:p.telefono||'',pfs:p.pfs||'',permuta:p.permuta||'',splitter:p.splitter||'',data:p.data||'',fascia:p.fascia||'',tecnici:t,tecnicoId:t[0]||'',tecniciNomi:t.map(x=>tecName(x))}}
+function archItems(){
+  const a=S.ar,q=a.q.trim().toLowerCase(),out=[];
+  for(const [id,e] of S.es){
+    const p=S.pr.get(id)||e.snap;if(!p)continue;const team=tecsOf(p);
+    if(!S.admin&&!team.includes(S.me)&&e.by!==S.me)continue;
+    if(a.mese&&!(e.completedAt||'').startsWith(a.mese)&&!(p.data||'').startsWith(a.mese))continue;
+    if(a.tipo&&p.tipo!==a.tipo)continue;if(a.comm&&p.committente!==a.comm)continue;
+    if(S.admin&&a.tec&&!team.includes(a.tec))continue;
+    const names=team.length?team.map(tecName).join(' + '):(p.tecniciNomi||[]).join(' + ');
+    if(q&&![p.ordine,p.idRisorsa,p.indirizzo,p.pfs,e.permuta||p.permuta,e.splitter||p.splitter,p.telefono,names,(e.materiali||[]).join(' ')].join(' ').toLowerCase().includes(q))continue;
+    out.push({id,p,e,names});
+  }
+  return out.sort((x,y)=>(y.e.completedAt||'').localeCompare(x.e.completedAt||''));
+}
+function archHTML(){const a=S.ar;
+  return `<div class="ph"><div><h1>Archivio</h1><div class="sub" style="text-transform:none">Pratiche completate con i dati essenziali${S.admin?'':' · solo le tue'}</div></div><div class="sp"><button class="btn sm" id="arcopy">Copia tabella</button></div></div>
+  <div class="filters"><input class="in q" id="aq" type="search" placeholder="Cerca ordine, ID risorsa, indirizzo, seriale, tecnico" value="${esc(a.q)}">
+   <input class="in" id="am" type="month" aria-label="Mese" value="${esc(a.mese)}">
+   <select class="in" id="ati" aria-label="Tipo"><option value="">Assurance e delivery</option>${TIPI.map(t=>`<option ${a.tipo===t?'selected':''}>${t}</option>`).join('')}</select>
+   <select class="in" id="acm" aria-label="Committente"><option value="">Tutti i committenti</option>${COMM.map(c=>`<option ${a.comm===c?'selected':''}>${c}</option>`).join('')}</select>
+   ${S.admin?`<select class="in" id="atc" aria-label="Tecnico">${tecOpts(a.tec,'Tutti i tecnici')}</select>`:'<span></span>'}</div>
+  <div id="alist"></div>`}
+function bindArch(){
+  const on=(id,k,ev)=>{const el=$('#'+id);if(el)el.addEventListener(ev||'change',e=>{S.ar[k]=e.target.value;renderArch()})};
+  on('aq','q','input');on('am','mese');on('ati','tipo');on('acm','comm');on('atc','tec');
+  $('#arcopy').onclick=async()=>{const rows=archItems();const h=['Completata','Data','Fascia','Tipo','Esito','Rimodulazioni','Committente','Rete','Ordine','ID risorsa','PFS','Numero permuta','Splitter','Indirizzo','Tecnici','Seriali installati','Nota'];
+    const cl=v=>String(v??'').replace(/[\t\n\r]+/g,' ');
+    const tsv=[h.join('\t'),...rows.map(({p,e,names})=>[dt(e.completedAt),p.data,fascia(p.fascia).a+'-'+fascia(p.fascia).b,p.tipo,ESA[e.esitoAss]?.[1]||'Completata',(p.rimod||[]).length,p.committente,p.rete,p.ordine,p.idRisorsa,p.pfs,e.permuta||p.permuta,e.splitter||p.splitter,p.indirizzo,names,(e.materiali||[]).join(' '),e.nota].map(cl).join('\t'))].join('\n');
+    try{await navigator.clipboard.writeText(tsv);toast(rows.length+' righe copiate: incollale in Excel')}catch(x){toast('Copia non riuscita')}};
+}
+function renderArch(){
+  const L=$('#alist');if(!L)return;const all=archItems(),l=all.slice(0,500);
+  if(!all.length){L.innerHTML='<div class="empty">Nessuna pratica completata con questi filtri.</div>';return}
+  L.innerHTML=`<p class="note">${all.length} pratiche completate${all.length>500?' · mostrate le ultime 500':''}</p><div class="tw"><table class="t stack"><thead><tr><th>Completata</th><th>Data</th><th>Intervento</th><th>Esito</th><th>Ordine</th><th>ID risorsa</th><th>Permuta</th><th>Splitter</th><th>Indirizzo</th><th>Tecnici</th><th>Seriali</th></tr></thead><tbody>${l.map(({id,p,e,names})=>`<tr data-open="${esc(id)}"><td>${esc(dt(e.completedAt))}</td><td>${esc(p.data||'')} ${esc(fascia(p.fascia).a)}</td><td><div class="top2" style="margin:0">${tipoTag(p)}${ctag(p.committente)}${reteTag(p)}</div></td><td>${ESA[e.esitoAss]?`<span class="pill ${ESA[e.esitoAss][0]}">${ESA[e.esitoAss][1]}</span>`:'Completata'}${p.rimod?.length?`<div class="note">rimodulata ${p.rimod.length}×</div>`:''}</td><td><b>${esc(p.ordine||'—')}</b></td><td>${esc(p.idRisorsa||'—')}</td><td>${esc(e.permuta||p.permuta||'')}</td><td>${esc(e.splitter||p.splitter||'')}</td><td>${esc(p.indirizzo||'')}</td><td>${esc(names||'—')}</td><td>${(e.materiali||[]).map(x=>`<code>${esc(x)}</code>`).join(' ')}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+/* ---------- utenti e accesso ---------- */
+const RUOLI={tecnico:'Tecnico',ufficio:'Ufficio',admin:'Amministratore'};
+function roleInfo(id){const r=S.roles.get(id),t=S.tec.get(id);
+  if(r&&r.stato)return{ruolo:r.ruolo||'tecnico',stato:r.stato};
+  if(t&&!t.richiesta)return{ruolo:'tecnico',stato:'attivo'};
+  if(t)return{ruolo:t.ruoloRichiesto||'tecnico',stato:'attesa'};return null}
+const activeTecs=()=>[...S.tec].filter(([id])=>{const r=roleInfo(id);return r&&r.stato==='attivo'&&r.ruolo==='tecnico'}).sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||''));
+function computeRole(){
+  if(S.isOwner)return{role:'admin',gate:null};
+  if(!S.me)return{role:'tecnico',gate:'noid'};
+  if(!S.loaded.tec||!S.loaded.ro)return{role:S.role||'tecnico',gate:S.gate===undefined?'load':S.gate};
+  const r=roleInfo(S.me);if(!r)return{role:'tecnico',gate:'nuovo'};
+  if(r.stato==='attivo')return{role:r.ruolo,gate:null};
+  return{role:r.ruolo,gate:r.stato==='attesa'?'attesa':'bloccato'};
+}
+function applyRole(){const c=computeRole();const ch=c.role!==S.role||c.gate!==S.gate;S.role=c.role;S.gate=c.gate;S.admin=c.role==='admin'||c.role==='ufficio';S.boss=c.role==='admin';if(ch&&!views().includes(S.view))S.view='agenda';return ch}
+function accessHTML(){
+  const g=S.gate,me=S.tec.get(S.me)||{};
+  const hero=`<div style="text-align:center;margin-bottom:18px"><span class="mk" style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;display:inline-grid;place-items:center;box-shadow:0 14px 30px -12px var(--pri)"><svg class="i" viewBox="0 0 24 24" style="width:38px;height:38px;stroke-width:2.2"><path d="M3 17c4 0 5-10 9-10s5 10 9 10"/><circle cx="12" cy="7" r="1.6"/></svg></span><h1 style="margin:12px 0 2px;font-size:38px">GoFiber</h1><div class="note">Pratiche e magazzino FTTH</div></div>`;
+  if(g==='load')return `<div class="msg">${hero}<p class="note" style="text-align:center">Verifica dell'accesso…</p></div>`;
+  if(g==='noid')return `<div class="card msg">${hero}<h3>Accesso non riconosciuto</h3><p>Non è stato possibile identificare il tuo account. Accedi a Claude e riapri il link.</p></div>`;
+  if(g==='attesa')return `<div class="card msg">${hero}<h3>Richiesta inviata</h3><p>Ciao <b>${esc(me.nome||'')}</b>, la tua registrazione come <b>${esc(RUOLI[me.ruoloRichiesto]||'Tecnico')}</b> è in attesa di conferma. Appena il responsabile la approva, questa pagina si aggiorna da sola.</p><div class="acts"><button class="btn sm" id="regEdit">Modifica i dati</button>${S.remote?'<button class="btn sm" onclick="logout()">Esci</button>':''}</div></div>`;
+  if(g==='bloccato')return `<div class="card msg">${hero}<h3>Accesso non attivo</h3><p>Il tuo accesso a GoFiber non è stato confermato o è stato sospeso. Contatta il responsabile.</p></div>`;
+  return `<form class="card pf msg" id="regf2">${hero}<h3>Registrati</h3><p class="note" style="margin-top:-4px">${S.remote?'Completa il profilo':'Accedi con il tuo account Claude: non serve una password'}. Dopo la registrazione il responsabile deve confermare il tuo accesso.</p>
+   <label class="f">Nome e cognome <span class="req">*</span><input class="in" name="nome" value="${esc(me.nome||'')}" autocomplete="name"></label>
+   <label class="f">Telefono <span class="req">*</span><input class="in" name="telefono" type="tel" value="${esc(me.telefono||'')}" autocomplete="tel"></label>
+   <div class="lbl">Ruolo <span class="req">*</span></div><div class="seg">${Object.entries(RUOLI).map(([k,l])=>`<label><input type="radio" name="ruolo" value="${k}" ${(me.ruoloRichiesto||'tecnico')===k?'checked':''}><span>${l}</span></label>`).join('')}</div>
+   <div class="err" id="rerr2"></div><div class="acts"><button class="btn yel" type="submit">Invia registrazione</button></div></form>`;
+}
+function bindAccess(){
+  const e=$('#regEdit');if(e)e.onclick=()=>{S.gate='nuovo';S.forceReg=true;render()};
+  const f=$('#regf2');if(!f)return;
+  f.onsubmit=async ev=>{ev.preventDefault();const fd=new FormData(f),g=k=>String(fd.get(k)||'').trim();const er=$('#rerr2');
+    if(!g('nome')){er.textContent='Inserisci nome e cognome.';return}if(!g('telefono')){er.textContent='Inserisci il telefono.';return}
+    const b=f.querySelector('button[type=submit]');b.disabled=true;
+    try{const old=S.tec.get(S.me)||{};await S.db.doc('tecnici/'+S.me).set({...old,nome:g('nome'),telefono:g('telefono'),ruoloRichiesto:g('ruolo')||'tecnico',richiesta:true,email:S.email||old.email||'',createdAt:old.createdAt||new Date().toISOString()});S.forceReg=false;toast('Registrazione inviata')}
+    catch(x){b.disabled=false;er.textContent=x?.code==='invalid_argument'?'Non hai i permessi per registrarti: chiedi al responsabile di condividerti l\'app come Collaboratore o Editor.':errText(x)}};
+}
+function utentiHTML(){
+  const t=today(),all=[...S.tec].map(([id,x])=>({id,x,r:roleInfo(id)||{ruolo:'tecnico',stato:'attesa'}}));
+  const pend=all.filter(u=>u.r.stato==='attesa'),act=all.filter(u=>u.r.stato==='attivo'),off=all.filter(u=>u.r.stato!=='attesa'&&u.r.stato!=='attivo');
+  const can=S.canApprove;
+  const stats=id=>{let oggi=0,aperte=0,fatte=0;for(const [pid,p] of S.pr)if(tecsOf(p).includes(id)){const st=statoOf(pid,p);if(st==='fatta')fatte++;else{aperte++;if(p.data===t)oggi++}}const mat=[...S.un.values()].filter(u=>u.stato==='tecnico'&&u.tecnicoId===id).length;return `<span class="meta"><span>Oggi <b>${oggi}</b></span><span>Aperte <b>${aperte}</b></span><span>Completate <b>${fatte}</b></span><span>Materiale <b>${mat}</b></span></span>`};
+  const sel=(u)=>`<select class="in" style="width:auto;min-height:36px" data-urole="${esc(u.id)}" ${can?'':'disabled'}>${Object.entries(RUOLI).map(([k,l])=>`<option value="${k}" ${u.r.ruolo===k?'selected':''}>${l}</option>`).join('')}</select>`;
+  return `<div class="ph"><div><h1>Utenti</h1><div class="sub" style="text-transform:none">${act.length} attivi · ${pend.length} da confermare</div></div></div>
+  ${!can?'<div class="dupw">Per confermare le registrazioni e cambiare i ruoli devi essere il proprietario dell\'app o averla condivisa come Editor.</div>':''}
+  <h2 class="cond" style="font-size:24px;margin:8px 0 10px">Da confermare</h2>
+  <div class="tlist" style="margin-bottom:22px">${pend.length?pend.map(u=>`<div class="trow" style="border-color:var(--wait)"><div class="nm">${esc(u.x.nome||'—')}<div class="note" style="font-weight:400">${esc(u.x.telefono||'')} · chiede: ${esc(RUOLI[u.x.ruoloRichiesto]||'Tecnico')} · ${esc(dt(u.x.createdAt))}</div></div>${sel(u)}<button class="btn sm yel" data-uok="${esc(u.id)}" ${can?'':'disabled'}>Conferma</button><button class="btn sm dng" data-uno="${esc(u.id)}" ${can?'':'disabled'}>Rifiuta</button></div>`).join(''):'<div class="empty">Nessuna registrazione in attesa.</div>'}</div>
+  <h2 class="cond" style="font-size:24px;margin:8px 0 10px">Attivi</h2>
+  <div class="tlist" style="margin-bottom:22px">${S.isOwner?`<div class="trow"><div class="nm">Tu<div class="note" style="font-weight:400">Proprietario dell'app</div></div><span class="pill ok">Amministratore</span></div>`:''}${act.map(u=>`<div class="trow"><div class="nm">${esc(u.x.nome||'—')}<div class="note" style="font-weight:400">${esc(u.x.telefono||'')}${u.x.email?' · '+esc(u.x.email):''}</div></div>${u.r.ruolo==='tecnico'?stats(u.id):''}${sel(u)}${u.r.ruolo==='tecnico'?`<button class="btn sm" data-tf="${esc(u.id)}">Pratiche</button>`:''}${S.remote&&can?`<button class="btn sm" data-upw="${esc(u.id)}">Nuova password</button>`:''}<button class="btn sm dng" data-ublk="${esc(u.id)}" ${can&&u.id!==S.me?'':'disabled'}>Sospendi</button></div>`).join('')}</div>
+  ${off.length?`<h2 class="cond" style="font-size:24px;margin:8px 0 10px">Sospesi o rifiutati</h2><div class="tlist" style="margin-bottom:22px">${off.map(u=>`<div class="trow"><div class="nm">${esc(u.x.nome||'—')}<div class="note" style="font-weight:400">${esc(u.x.telefono||'')} · ${u.r.stato==='rifiutato'?'rifiutato':'sospeso'}</div></div>${sel(u)}<button class="btn sm" data-uok="${esc(u.id)}" ${can?'':'disabled'}>Riattiva</button>${S.isOwner?`<button class="btn sm dng" data-trm="${esc(u.id)}">Elimina</button>`:''}</div>`).join('')}</div>`:''}
+  <div class="card"><h3>Come far registrare una persona</h3><ol class="steps"><li>Dal menu <b>Condividi</b> di questa app su Claude aggiungila come <b>Collaboratore</b> (Contributor) o <b>Editor</b>.</li><li>Apre il link, accede a Claude e si registra con nome, telefono e ruolo.</li><li>La trovi qui in “Da confermare”: scegli il ruolo e premi <b>Conferma</b>.</li></ol>
+   <p class="note"><b>Tecnico</b>: vede solo le sue pratiche, le esegue e le chiude, e usa FiberTools. <b>Ufficio</b>: agenda, pratiche, importazione, archivio, riepilogo e magazzino. <b>Amministratore</b>: tutto, compresa la gestione degli utenti.</p></div>`;
+}
+async function setRole(id,body){try{await S.db.doc('ruoli/'+id).set({...(S.roles.get(id)||{}),...body,by:S.me||'',at:new Date().toISOString()});return true}catch(x){toast(x?.code==='invalid_argument'?'Serve essere proprietario o Editor per confermare gli utenti':errText(x));return false}}
+document.addEventListener('click',async e=>{
+  const ok=e.target.closest('[data-uok]');if(ok){const id=ok.dataset.uok;const r=document.querySelector(`[data-urole="${CSS.escape(id)}"]`)?.value||'tecnico';if(await setRole(id,{ruolo:r,stato:'attivo'}))toast(`${tecName(id)} confermato come ${RUOLI[r]}`);return}
+  const no=e.target.closest('[data-uno]');if(no){const id=no.dataset.uno;if(await setRole(id,{ruolo:roleInfo(id)?.ruolo||'tecnico',stato:'rifiutato'}))toast('Registrazione rifiutata');return}
+  const pw=e.target.closest('[data-upw]');if(pw){S.modal={type:'pw',id:pw.dataset.upw};renderModal();return}
+  const bl=e.target.closest('[data-ublk]');if(bl){const id=bl.dataset.ublk;S.modal={type:'confirm',danger:true,title:'Sospendere l\'accesso?',text:`${tecName(id)} non potrà più usare GoFiber finché non lo riattivi. Pratiche e materiale restano assegnati.`,ok:'Sospendi',done:'Accesso sospeso',fn:async()=>{if(!await setRole(id,{ruolo:roleInfo(id)?.ruolo||'tecnico',stato:'bloccato'}))throw{code:'x'}}};renderModal()}
+});
+document.addEventListener('change',async e=>{const s=e.target.closest('[data-urole]');if(!s)return;const id=s.dataset.urole,r=roleInfo(id);if(r?.stato==='attivo'||r?.stato==='bloccato'||r?.stato==='rifiutato'){if(r.stato==='attivo'&&await setRole(id,{ruolo:s.value,stato:'attivo'}))toast(`${tecName(id)} ora è ${RUOLI[s.value]}`)}});
+
+/* ---------- tecnici ---------- */
+function tecniciHTML(){
+  const t=today();
+  const rows=[...S.tec].sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||'')).map(([id,x])=>{
+    let oggi=0,aperte=0,fatte=0;for(const [pid,p] of S.pr)if(tecsOf(p).includes(id)){const st=statoOf(pid,p);if(st==='fatta')fatte++;else{aperte++;if(p.data===t)oggi++}}
+    const mat=[...S.un.values()].filter(u=>u.stato==='tecnico'&&u.tecnicoId===id).length;
+    return `<div class="trow"><div class="nm">${esc(x.nome||'Tecnico')}<div class="note" style="font-weight:400">${esc(x.telefono||'')}</div></div>
+      <span class="meta"><span>Oggi <b>${oggi}</b></span><span>Aperte <b>${aperte}</b></span><span>Completate <b>${fatte}</b></span><span>Materiale <b>${mat}</b></span></span>
+      <button class="btn sm" data-tf="${esc(id)}">Pratiche</button><button class="btn sm dng" data-trm="${esc(id)}">Rimuovi</button></div>`}).join('');
+  return `<div class="ph"><h1>Tecnici</h1></div><div class="grid2" style="align-items:start">
+   <div class="tlist">${rows||'<div class="empty">Nessun tecnico iscritto.</div>'}</div>
+   <div class="card"><h3>Come iscrivere un tecnico</h3>
+    <ol class="steps"><li>Apri il menu <b>Condividi</b> di questa app su Claude e aggiungi il tecnico come <b>Collaboratore</b> (Contributor) o <b>Editor</b>.</li>
+    <li>Il tecnico apre il link dal telefono, accede a Claude e inserisce nome e telefono.</li>
+    <li>Compare qui: puoi assegnargli pratiche e materiale dal Magazzino.</li></ol>
+    <p class="note">Ogni tecnico vede solo le sue pratiche e il suo materiale, e conferma i lavori con nota, seriali installati, foto ID risorsa, foto e caratterizzazione.</p></div></div>`;
+}
+
+/* ---------- profilo ---------- */
+function profileHTML(first){
+  const me=S.tec.get(S.me)||{};
+  if(!S.me)return `<div class="card msg"><h3>Accesso non riconosciuto</h3><p>Non è stato possibile identificare il tuo account. Accedi a Claude e riapri il link.</p></div>`;
+  return `<form class="card pf msg" id="regf"><h3 style="font-size:32px">${first?'Iscriviti come tecnico':'Il tuo profilo'}</h3>
+   ${first?'<p class="note" style="margin-top:-6px">Inserisci i tuoi dati: il gestore potrà assegnarti pratiche e materiale.</p>':''}
+   <label class="f">Nome e cognome <span class="req">*</span><input class="in" name="nome" value="${esc(me.nome||'')}" autocomplete="name"></label>
+   <label class="f">Telefono<input class="in" name="telefono" type="tel" value="${esc(me.telefono||'')}" autocomplete="tel"></label>
+   <div class="err" id="rerr"></div><div class="acts"><button class="btn yel" type="submit">${first?'Iscriviti':'Salva'}</button>${S.remote?`<button type="button" class="btn" data-upw="${esc(S.me)}">Cambia password</button><button type="button" class="btn" onclick="logout()">Esci</button>`:''}</div></form>`;
+}
+function bindProfile(){
+  const f=$('#regf');if(!f)return;
+  f.onsubmit=async e=>{e.preventDefault();const fd=new FormData(f);const nome=String(fd.get('nome')||'').trim(),telefono=String(fd.get('telefono')||'').trim();
+    const er=$('#rerr');if(!nome){er.textContent='Inserisci nome e cognome.';return}const b=f.querySelector('button');b.disabled=true;
+    try{const old=S.tec.get(S.me)||{};await S.db.doc('tecnici/'+S.me).set({...old,nome,telefono,createdAt:old.createdAt||new Date().toISOString()});toast(S.needReg?'Iscrizione completata':'Profilo salvato')}
+    catch(x){er.textContent=x?.code==='invalid_argument'?'Non hai i permessi per iscriverti: chiedi al gestore di condividerti l\'app come Collaboratore o Editor.':errText(x)}
+    b.disabled=false};
+}
+
+/* ---------- modalità Google (foglio + Apps Script, es. GitHub Pages) ---------- */
+const LS={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}};
+async function apiCall(api,action,body){
+  const r=await fetch(api,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...body})});
+  if(!r.ok)throw new Error('Il server non risponde ('+r.status+')');
+  const j=await r.json();if(j.error)throw new Error(j.error);return j;
+}
+function loginHTML(api,msg){return `<form class="card pf msg" id="loginf" novalidate><div style="text-align:center;margin-bottom:14px"><span style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;display:inline-grid;place-items:center;box-shadow:0 14px 30px -12px var(--pri)"><svg class="i" viewBox="0 0 24 24" style="width:38px;height:38px;stroke-width:2.2"><path d="M3 17c4 0 5-10 9-10s5 10 9 10"/><circle cx="12" cy="7" r="1.6"/></svg></span><h1 style="margin:12px 0 2px;font-size:38px">GoFiber</h1><div class="note">Pratiche e magazzino FTTH</div></div>
+  <div class="subt" id="lmode"><button type="button" class="chip on" data-lm="login">Accedi</button><button type="button" class="chip" data-lm="reg">Crea account</button></div>
+  <label class="f">Email<input class="in" name="email" type="email" autocomplete="username" inputmode="email"></label>
+  <label class="f">Password<input class="in" name="password" type="password" autocomplete="current-password"></label>
+  <label class="f" id="lpw2" hidden>Ripeti la password<input class="in" name="password2" type="password" autocomplete="new-password"></label>
+  <p class="note" id="lnote">Entra con l'account che ti ha dato il responsabile, oppure crea il tuo: dopo la registrazione deve confermarlo.</p>
+  <div class="err" id="lerr">${esc(msg||'')}</div><div class="acts"><button class="btn yel" type="submit" id="lgo">Accedi</button></div>
+  <p class="note" style="margin-top:14px">Server: ${esc(api.replace(/^https:\/\/script\.google\.com\/macros\/s\/(.{6}).*$/,'Google Apps Script ($1…)'))} · <button type="button" class="lnk" id="lchg">cambia</button></p></form>`}
+function waitLogin(api,msg){return new Promise(res=>{
+  $('#tabs').innerHTML='';$('#who').textContent='Accesso';
+  $('#main').innerHTML=loginHTML(api,msg);let mode='login';const f=$('#loginf');
+  $('#lmode').onclick=e=>{const b=e.target.closest('[data-lm]');if(!b)return;mode=b.dataset.lm;$('#lmode').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b));$('#lpw2').hidden=mode!=='reg';$('#lgo').textContent=mode==='reg'?'Crea account':'Accedi'};
+  $('#lchg').onclick=()=>{LS.set('gofiber-api',null);LS.set('gofiber-token',null);location.search='';location.reload()};
+  f.onsubmit=async e=>{e.preventDefault();const fd=new FormData(f),em=String(fd.get('email')||'').trim(),pw=String(fd.get('password')||'');const er=$('#lerr');er.textContent='';
+    if(!em||!pw){er.textContent='Inserisci email e password.';return}
+    if(mode==='reg'&&pw!==String(fd.get('password2')||'')){er.textContent='Le due password non coincidono.';return}
+    const b=$('#lgo');b.disabled=true;b.textContent='Attendi…';
+    try{const r=await apiCall(api,mode==='reg'?'register':'login',{email:em,password:pw});LS.set('gofiber-token',r.token);res(r.token)}
+    catch(x){er.textContent=x.message==='Failed to fetch'?'Impossibile raggiungere il server: controlla la connessione o l\'indirizzo.':x.message;b.disabled=false;b.textContent=mode==='reg'?'Crea account':'Accedi'}};
+})}
+async function remoteClaude(api){
+  S.remote=true;S.api=api;let token=LS.get('gofiber-token'),me=null,msg='';
+  for(;;){
+    if(!token)token=await waitLogin(api,msg);
+    try{me=await apiCall(api,'me',{token});break}catch(x){msg=x.message==='auth'?'Sessione scaduta: accedi di nuovo.':x.message;if(x.message==='auth'){token=null;LS.set('gofiber-token',null)}else{$('#main').innerHTML=`<div class="card msg"><h3>Server non raggiungibile</h3><p>${esc(msg)}</p><div class="acts"><button class="btn yel" onclick="location.reload()">Riprova</button></div></div>`;await new Promise(()=>{})}}
+  }
+  S.email=me.email;S.token=token;
+  const call=(a,b)=>apiCall(api,a,{token,...b}).catch(x=>{if(x.message==='auth'){LS.set('gofiber-token',null);location.reload()}throw x});
+  S.call=call;
+  const docs=new Map(),subs=[];let since=0,synced=false,syncing=null;
+  const colOf=p=>p.split('/').slice(0,-1).join('/');
+  const snap=c=>{const n=c.split('/').length+1;const out=[];for(const [k,v] of docs)if(k.startsWith(c+'/')&&k.split('/').length===n)out.push({id:k.split('/').pop(),exists:true,data:()=>v,metadata:{fromCache:false,hasPendingWrites:false}});return{docs:out.sort((a,b)=>a.id<b.id?-1:1),metadata:{fromCache:false,hasPendingWrites:false}}};
+  const notify=cols=>subs.forEach(([c,f])=>{if(!cols||cols.has(c))try{f(snap(c))}catch(e){}});
+  async function sync(){if(syncing)return syncing;syncing=(async()=>{try{const r=await call('sync',{since});const cols=new Set();
+      for(const [p,j] of r.docs){cols.add(colOf(p));if(j==null)docs.delete(p);else try{docs.set(p,JSON.parse(j))}catch(e){}}
+      since=r.now;const first=!synced;synced=true;notify(first?null:cols);S.netErr=false}catch(x){S.netErr=true}finally{syncing=null}})();return syncing}
+  // scritture raggruppate
+  let queue=[],timer=null;
+  function flush(){const q=queue;queue=[];timer=null;if(!q.length)return;
+    call('write',{ops:q.map(x=>x.op)}).then(r=>{const bad=new Set(r.errors||[]);q.forEach(x=>bad.has(x.op.path)?x.rej({code:'invalid_argument'}):x.res());if(bad.size)sync()},e=>{q.forEach(x=>x.rej({code:'unavailable',message:e.message}));since=0;docs.clear();sync()})}
+  function write(op){const cols=new Set([colOf(op.path)]);
+    if(op.op==='delete')docs.delete(op.path);else if(op.op==='update'){const c=docs.get(op.path);if(!c)return Promise.reject({code:'invalid_argument'});docs.set(op.path,deep(c,op.data))}else docs.set(op.path,JSON.parse(JSON.stringify(op.data)));
+    notify(cols);return new Promise((res,rej)=>{queue.push({op,res,rej});if(queue.length>=150)flush();else if(!timer)timer=setTimeout(flush,80)})}
+  const deep=(a,b)=>{const o={...a};for(const k in b){const v=b[k];o[k]=v&&typeof v==='object'&&!Array.isArray(v)&&o[k]&&typeof o[k]==='object'&&!Array.isArray(o[k])?deep(o[k],v):JSON.parse(JSON.stringify(v))}return o};
+  const rid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+  const doc=p=>({id:p.split('/').pop(),path:p,get:async()=>{if(!synced)await sync();return{id:p.split('/').pop(),exists:docs.has(p),data:()=>docs.get(p)}},
+    set:d=>write({op:'set',path:p,data:d}),update:d=>write({op:'update',path:p,data:d}),delete:()=>write({op:'delete',path:p})});
+  const col=p=>({path:p,doc:id=>doc(p+'/'+(id||rid())),add:async d=>{const r=doc(p+'/'+rid());await r.set(d);return r},
+    onSnapshot:f=>{const e=[p,f];subs.push(e);if(synced)setTimeout(()=>f(snap(p)),0);return()=>{const i=subs.indexOf(e);if(i>=0)subs.splice(i,1)}}});
+  await sync();
+  setInterval(()=>{if(document.visibilityState!=='hidden')sync()},12000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')sync()});
+  const db={doc,collection:col};
+  const user={isOwner:async()=>!!me.owner,canEdit:async()=>!!me.owner||(me.attivo&&me.ruolo==='admin'),id:async()=>me.id,can:async()=>true};
+  const assets={upload:async(blob,o)=>{const b64=await new Promise((ok,ko)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(',')[1]);fr.onerror=ko;fr.readAsDataURL(blob)});
+    try{const r=await call('upload',{b64,type:o?.type||blob.type,name:(blob.name||'foto')+'-'+Date.now()});return{id:r.id,url:bUrl(r.id),contentType:r.contentType,sizeBytes:blob.size}}catch(x){throw{code:'upstream_error',message:x.message}}}};
+  return{use:async k=>k==='db'?db:k==='user'?user:k==='assets'?assets:null};
+}
+const bUrl=id=>String(id).startsWith('gd:')?'https://drive.google.com/thumbnail?id='+encodeURIComponent(id.slice(3))+'&sz=w1600':'/_blob/'+id;
+const bLink=id=>String(id).startsWith('gd:')?'https://drive.google.com/file/d/'+encodeURIComponent(id.slice(3))+'/view':'/_blob/'+id;
+window.logout=()=>logout();
+function logout(){const t=LS.get('gofiber-token');LS.set('gofiber-token',null);if(S.api&&t)apiCall(S.api,'logout',{token:t}).catch(()=>{}).finally(()=>location.reload());else location.reload()}
+
+/* ---------- modalità locale (fuori da Claude, es. GitHub Pages) ---------- */
+function localClaude(){
+  S.local=true;const KEY='gofiber-db';let store={};try{store=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+  const subs=[];const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){toast('Spazio del browser esaurito: esporta e libera i dati')}};
+  const snap=p=>{const n=p.split('/').length+1;return{docs:Object.keys(store).filter(k=>k.startsWith(p+'/')&&k.split('/').length===n).sort().map(k=>({id:k.split('/').pop(),exists:true,data:()=>store[k],metadata:{fromCache:false,hasPendingWrites:false}})),metadata:{fromCache:false,hasPendingWrites:false}}};
+  const notify=()=>subs.forEach(([p,f])=>{try{f(snap(p))}catch(e){}});
+  addEventListener('storage',e=>{if(e.key===KEY){try{store=JSON.parse(e.newValue||'{}')}catch(x){}notify()}});
+  const rid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+  const doc=p=>({id:p.split('/').pop(),path:p,get:async()=>({id:p.split('/').pop(),exists:p in store,data:()=>store[p]}),
+    set:async d=>{store[p]=JSON.parse(JSON.stringify(d));save();notify()},
+    update:async d=>{if(!(p in store))throw{code:'invalid_argument'};store[p]={...store[p],...JSON.parse(JSON.stringify(d))};save();notify()},
+    delete:async()=>{delete store[p];save();notify()}});
+  const col=p=>({path:p,doc:id=>doc(p+'/'+(id||rid())),add:async d=>{const r=doc(p+'/'+rid());await r.set(d);return r},
+    onSnapshot:(f)=>{const e=[p,f];subs.push(e);setTimeout(()=>f(snap(p)),0);return()=>{const i=subs.indexOf(e);if(i>=0)subs.splice(i,1)}}});
+  const db={doc,collection:col};
+  const user={isOwner:async()=>true,canEdit:async()=>true,id:async()=>'locale',can:async()=>true};
+  return{use:async k=>k==='db'?db:k==='user'?user:null};
+}
+
+/* ---------- avvio ---------- */
+function sub(path,key,map){
+  const t=setTimeout(()=>{if(!S.loaded[key]){S.slow=true;S.loaded[key]=true;live()}},10000);
+  S.db.collection(path).onSnapshot(snap=>{
+    map.clear();for(const d of snap.docs){let v=d.data();if(path==='pratiche')v=fixT(v);else if(path==='esiti'&&v?.snap?.tipo==='Guasto')v={...v,snap:fixT(v.snap)};map.set(d.id,v)}
+    if(path==='pfsdb')rebuildPfs();
+    if(!snap.metadata.fromCache){clearTimeout(t);S.loaded[key]=true;if(Object.values(S.loaded).every(Boolean))S.slow=false}
+    live();
+  },e=>{clearTimeout(t);S.loaded[key]=true;S.err=e?.code||'err';live()});
+}
+(async()=>{
+  let api=new URLSearchParams(location.search).get('api');if(api){LS.set('gofiber-api',api);history.replaceState(null,'',location.pathname+location.hash)}
+  api=(window.GOFIBER_API||'').trim()||LS.get('gofiber-api')||'';
+  const C=(window.claude&&typeof window.claude.use==='function')?window.claude:api?await remoteClaude(api):localClaude();
+  const [db,user,assets]=await Promise.all([C.use('db'),C.use('user'),C.use('assets')]);
+  if(!db){S.state='nodb';render();return}
+  S.db=db;S.user=user;S.assets=assets;
+  S.isOwner=user?!!(await user.isOwner()):false;S.me=user?await user.id():null;S.canApprove=S.isOwner||(user?!!(await user.canEdit()):false);applyRole();
+  const h=location.hash.slice(1);S.view=views().includes(h)?h:'agenda';
+  S.state='ok';if(S.remote){const b=document.createElement('button');b.className='thm';b.title='Esci';b.setAttribute('aria-label','Esci');b.innerHTML='<svg class="i" viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h11"/></svg>';b.onclick=logout;$('.hr').appendChild(b)}
+  if(S.local)$('#localbar').innerHTML='<div class="wrap"><div class="dupw" style="margin:12px 0 0"><b>Modalità locale.</b> I dati restano solo in questo browser e su questo dispositivo, senza foto e senza utenti condivisi. <button class=\"lnk\" id=\"connGs\">Collega il foglio Google</button> per lavorare in squadra.</div></div>';if($('#connGs'))$('#connGs').onclick=()=>{S.modal={type:'conn'};renderModal()};render();
+  sub('tecnici','tec',S.tec);sub('ruoli','ro',S.roles);sub('pratiche','pr',S.pr);sub('esiti','es',S.es);sub('prodotti','pd',S.pd);sub('unita','un',S.un);sub('pfsdb','pfsx',S.pfsDocs);loadPfsBase();
+})();
+}
+</script>
+</body>
+</html>
