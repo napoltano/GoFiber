@@ -113,10 +113,20 @@ tr[data-open]{cursor:pointer}tr[data-open]:hover td{background:var(--soft)}
 .bars{display:flex;gap:3px;align-items:stretch;height:190px;padding-top:16px;overflow-x:auto}
 .bcol{flex:1 0 18px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative;min-width:18px}
 .bcol.we .bl{color:var(--ko)}
+.bars.g3 .bcol{flex:1 0 30px}
+.grp3{display:flex;align-items:stretch;gap:2px;flex:1;min-height:0;width:100%;justify-content:center}
+.gb{flex:1;max-width:14px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.gb i{display:block;width:100%;border-radius:4px 4px 1px 1px;min-height:0}.gb .bn{font-size:10px}
 .bst{width:100%;max-width:34px;display:flex;flex-direction:column-reverse;border-radius:6px 6px 2px 2px;overflow:hidden;min-height:0;background:transparent}
 .bst i{display:block;min-height:0}
 .bn{font-size:11px;color:var(--mute);margin-bottom:2px;min-height:14px}.bl{font-size:11px;color:var(--mute);margin-top:4px;white-space:nowrap}
 tfoot td{border-top:2px solid var(--line)}
+.bell{position:relative}.bell i{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:99px;background:var(--ko);color:#fff;font:700 11px/20px var(--bf);font-style:normal;padding:0 5px}
+#ntoasts{position:fixed;top:12px;right:12px;z-index:45;display:grid;gap:8px;width:min(360px,calc(100vw - 24px))}
+.ntoast{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--ok);border-radius:14px;padding:12px 14px;box-shadow:0 14px 34px -12px rgba(0,0,0,.35);cursor:pointer;display:grid;gap:2px;animation:up .2s ease-out}
+.ntoast.ko{border-left-color:var(--ko)}.ntoast.wait{border-left-color:var(--wait)}.ntoast span{font-size:14px;color:var(--mute)}
+.csec{margin-bottom:22px}.csech{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.csech .tag{font-size:15px;padding:4px 12px}.csech .btn{margin-inline-start:auto}
 .dupw{background:color-mix(in srgb,var(--wait) 14%,transparent);border:1px solid color-mix(in srgb,var(--wait) 45%,transparent);border-radius:10px;padding:10px 12px;font-size:14px;margin:-4px 0 14px}.dupw b{font-weight:600}.dupw button{margin-inline-start:4px}
 .r-OF{background:#13a538}.r-FC{background:#e2001a}
 .seg.rete input:checked+span.k-OF{background:#13a538;border-color:#13a538;color:#fff}.seg.rete input:checked+span.k-FC{background:#e2001a;border-color:#e2001a;color:#fff}
@@ -240,12 +250,13 @@ body.auth main{min-height:100vh;min-height:100dvh;display:grid;place-items:cente
 <header class="app"><div class="wrap">
   <a class="logo" href="#agenda"><span class="mk"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"> <defs> <linearGradient id="bgH" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0ea5e9"/><stop offset=".55" stop-color="#0284c7"/><stop offset="1" stop-color="#4f46e5"/></linearGradient> <radialGradient id="glowH" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".35" stop-color="#e0f2fe" stop-opacity=".55"/><stop offset="1" stop-color="#e0f2fe" stop-opacity="0"/></radialGradient> <linearGradient id="shineH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient> </defs> <rect width="512" height="512" rx="112" fill="url(#bgH)"/> <rect width="512" height="512" rx="112" fill="url(#shineH)"/> <g fill="none" stroke-linecap="round"> <path d="M86 352 C170 352 186 176 256 176 S342 352 426 352" stroke="#fff" stroke-opacity=".18" stroke-width="58"/> <path d="M86 352 C170 352 186 176 256 176 S342 352 426 352" stroke="#fff" stroke-width="26"/> <path d="M86 392 C170 392 190 236 256 236 S342 392 426 392" stroke="#7dd3fc" stroke-width="9" stroke-opacity=".9"/> <path d="M86 312 C170 312 182 128 256 128 S342 312 426 312" stroke="#c7d2fe" stroke-width="9" stroke-opacity=".75"/> </g> <circle cx="256" cy="176" r="74" fill="url(#glowH)"/> <circle cx="256" cy="176" r="22" fill="#fff"/> <circle cx="148" cy="303" r="10" fill="#fff"/> <circle cx="364" cy="303" r="10" fill="#fff"/> </svg></span><span><b>GoFiber</b><small>Pratiche e magazzino FTTH</small></span></a>
   <nav id="tabs"></nav>
-  <div class="hr"><span class="who" id="who">Caricamento…</span><a class="thm ft" href="https://napoltano.github.io/fiber-tools/" target="_blank" rel="noopener" title="FiberTools" aria-label="Apri FiberTools"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3.6 17.1a1.8 1.8 0 0 0 2.6 2.6l5.7-5.7a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.3-.6-.6-2.3z"/></svg><span>FiberTools</span></a><button class="thm" id="thm" aria-label="Cambia tema"></button></div>
+  <div class="hr"><span class="who" id="who">Caricamento…</span><button class="thm bell" id="bell" hidden aria-label="Notifiche"><svg class="i" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/></svg><i hidden></i></button><a class="thm ft" href="https://napoltano.github.io/fiber-tools/" target="_blank" rel="noopener" title="FiberTools" aria-label="Apri FiberTools"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3.6 17.1a1.8 1.8 0 0 0 2.6 2.6l5.7-5.7a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.3-.6-.6-2.3z"/></svg><span>FiberTools</span></a><button class="thm" id="thm" aria-label="Cambia tema"></button></div>
 </div></header>
 <div id="localbar"></div>
 <main class="wrap" id="main"><p class="note">Caricamento…</p></main>
 <div id="modal"></div>
 <div id="toast"></div>
+<div id="ntoasts"></div>
 
 <script>
 {
@@ -295,6 +306,7 @@ function setAuth(on){document.body.classList.toggle('auth',!!on);let t=document.
 function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('pf-theme',t)}catch(e){}const a=document.getElementById('auththm');if(a)a.innerHTML=ic(t==='dark'?'sun':'moon');const b=$('#thm');b.innerHTML=ic(t==='dark'?'sun':'moon');b.title=t==='dark'?'Tema chiaro':'Tema scuro'}
 {let t=null;try{t=localStorage.getItem('pf-theme')}catch(e){}if(t!=='dark'&&t!=='light')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';setTheme(t)}
 if(!(window.claude&&window.claude.use))setAuth(true);
+$('#bell').onclick=()=>{NT.list.forEach(x=>x.r=true);notifSave();bellRender();S.modal={type:'notif'};renderModal()};
 $('#thm').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
 
 const S={db:null,user:null,assets:null,admin:false,me:null,state:'load',
@@ -322,7 +334,7 @@ const prodName=id=>S.pd.get(id)?.nome||'Prodotto';
 const unitsOf=pid=>[...S.un.values()].filter(u=>u.prodottoId===pid);
 function uLab(u){if(!u)return['ko','Non presente in magazzino'];if(u.stato==='scaricato')return['ko','Scaricato'+(u.motivoScarico?' · '+u.motivoScarico:'')];if(u.stato==='installato')return['ok','Installato · ordine '+(u.ordine||'—')];if(u.stato==='tecnico')return['wait','Assegnato a '+tecName(u.tecnicoId)];return['neu','In magazzino']}
 
-function toast(t){const el=$('#toast');el.innerHTML='<div class="toast" role="status">'+esc(t)+'</div>';clearTimeout(toast.t);toast.t=setTimeout(()=>el.innerHTML='',3400)}
+function toast(t,quiet){if(!quiet)play(/non |errore|impossibil|non riuscit/i.test(t)?'err':'ok');const el=$('#toast');el.innerHTML='<div class="toast" role="status">'+esc(t)+'</div>';clearTimeout(toast.t);toast.t=setTimeout(()=>el.innerHTML='',3400)}
 async function pool(items,fn,n,onp){let i=0,done=0;const errs=[];const w=async()=>{while(i<items.length){const it=items[i++];try{await fn(it)}catch(e){errs.push([it,e])}done++;onp&&onp(done)}};await Promise.all(Array.from({length:Math.min(n,items.length)},w));return errs}
 const errText=x=>x?.code==='invalid_argument'?'Non hai i permessi per salvare qui.':x?.code==='quota_exceeded'?'Archivio pieno: elimina dati vecchi.':'Salvataggio non riuscito, riprova.';
 
@@ -339,9 +351,9 @@ document.addEventListener('change',async e=>{
   const tgt=document.getElementById(inp.dataset.scan);const files=[...inp.files];inp.value='';if(!tgt||!files.length)return;
   toast('Lettura codice in corso…');const found=[];
   for(const f of files){try{found.push(...await scanFile(f))}catch(x){}}
-  if(!found.length){toast('Nessun codice trovato: avvicina la fotocamera e riprova');return}
+  if(!found.length){toast('Nessun codice trovato: avvicina la fotocamera e riprova',true);play('err');return}play('scan');
   if(tgt.tagName==='TEXTAREA'){tgt.value=(tgt.value.trim()?tgt.value.trim()+'\n':'')+found.join('\n')}else tgt.value=found[0];
-  tgt.dispatchEvent(new Event('input',{bubbles:true}));toast(found.length===1?'Letto: '+found[0]:found.length+' codici letti');
+  tgt.dispatchEvent(new Event('input',{bubbles:true}));toast(found.length===1?'Letto: '+found[0]:found.length+' codici letti',true);
 });
 const scanBtn=(tid,l)=>`<label class="btn sm">${ic('cam')}${l||'Leggi da foto'}<input class="fh" type="file" accept="image/*" multiple data-scan="${tid}"></label>`;
 
@@ -362,7 +374,7 @@ function sbUpdate(id){
   c.textContent=l.length?`${l.length} seriali · ${n('ok')+n('wait')} validi${n('ko')?' · '+n('ko')+' con errore':''}`:'';
   document.getElementById('sbv-'+id).innerHTML=r.slice(0,300).map(([s,k,t])=>`<div class="sv ${k}"><code>${esc(s)}</code><span>${esc(t)}</span></div>`).join('')+(r.length>300?`<div class="note">…e altri ${r.length-300}</div>`:'');
 }
-document.addEventListener('input',e=>{const t=e.target;if(t.id?.startsWith('sb-'))sbUpdate(t.id.slice(3))});
+document.addEventListener('input',e=>{const t=e.target;if(t.id?.startsWith('sb-')){sbUpdate(t.id.slice(3));if(e.inputType==='insertLineBreak'||/\n$/.test(t.value))play('scan')}});
 
 /* ---------- navigazione ---------- */
 const views=()=>S.boss?['agenda','nuova','archivio','report','magazzino','tecnici']:S.admin?['agenda','nuova','archivio','report','magazzino']:['agenda','materiale','resa','profilo'];
@@ -392,7 +404,7 @@ function render(){
   else if(v==='magazzino'){m.innerHTML=magHTML();magBind()}
   else{m.innerHTML=agendaHTML();bindAgenda();renderList()}
 }
-function live(){
+function live(){notifCheck();bellRender();
   const fr=S.forceReg;if(applyRole()&&!fr){render()}
   else if(S.gate){tabs();if(!fr&&S.gate!=='nuovo')render()}
   else if(S.view==='agenda'){renderList();fillTecFilter();tabs()}
@@ -564,9 +576,10 @@ const ctag=c=>c?`<span class="tag c-${esc(c)}">${esc(c)}</span>`:'<span class="n
 const inC=u=>!S.mag.comm||u.committente===S.mag.comm;
 function counts(list){const c={magazzino:0,tecnico:0,installato:0,scaricato:0};for(const u of list)c[u.stato]=(c[u.stato]||0)+1;return c}
 function magKpi(){const l=[...S.un.values()].filter(inC),c=counts(l);return `<div class="kpi"><b>${c.magazzino}</b><span>In magazzino</span></div><div class="kpi k-wait"><b>${c.tecnico}</b><span>Ai tecnici</span></div><div class="kpi k-ok"><b>${c.installato}</b><span>Installati</span></div><div class="kpi k-ko"><b>${c.scaricato}</b><span>Scaricati</span></div>`}
+const magSub=()=>`${S.pd.size} prodotti · ${[...S.un.values()].filter(u=>u.stato!=='scaricato').length} pezzi a seriale attivi`;
 function magHTML(){
   const M=S.mag;const tb=[['prodotti','Prodotti'],['carica','Carica'],['assegna','Assegna ai tecnici'],['scarico','Scarico'],['cerca','Controlla seriale']];
-  return `<div class="ph"><div><h1>Magazzino</h1><div class="sub" style="text-transform:none">${S.pd.size} prodotti · ${[...S.un.values()].filter(u=>u.stato!=='scaricato').length} pezzi a seriale attivi</div></div></div>
+  return `<div class="ph"><div><h1>Magazzino</h1><div class="sub" style="text-transform:none" id="msub">${magSub()}</div></div></div>
   <div class="bar" id="mcomm"><span class="note">Committente:</span>${[['','Tutti'],...COMM.map(c=>[c,c])].map(([k,l])=>`<button class="chip ${M.comm===k?'on':''}" data-mc="${k}">${l}</button>`).join('')}</div>
   <div class="kpis" id="mkpi">${magKpi()}</div>
   <div class="subt" id="mtabs">${tb.map(([k,l])=>`<button class="chip ${M.tab===k?'on':''}" data-mt="${k}">${l}</button>`).join('')}</div>
@@ -582,21 +595,24 @@ function magBind(){
   if(t==='prodotti'&&S.mag.prod&&$('#pq')){$('#pq').oninput=e=>{S.mag.pq=e.target.value;$('#ptab').innerHTML=prodTable()}}
 }
 function magRefresh(){
-  const t=S.mag.tab;if($('#mkpi'))$('#mkpi').innerHTML=magKpi();
+  const t=S.mag.tab;if($('#mkpi'))$('#mkpi').innerHTML=magKpi();if($('#msub'))$('#msub').textContent=magSub();
   if(t==='prodotti'){if(S.mag.prod&&$('#ptab')){$('#ptab').innerHTML=prodTable();$('#phead').innerHTML=prodHead()}else if(!S.mag.prod)$('#magbody').innerHTML=prodListHTML()}
   else if(t==='cerca'&&$('#cres'))$('#cres').innerHTML=cercaRes();
   else{['car','ass','rie','sca'].forEach(sbUpdate);if($('#qav'))qAvail();if($('#prelist'))$('#prelist').innerHTML=prelHTML()}
 }
 function stockBar(c){const tot=c.magazzino+c.tecnico+c.installato||1;return `<div class="stock"><i style="width:${c.magazzino/tot*100}%;background:var(--neu)"></i><i style="width:${c.tecnico/tot*100}%;background:var(--wait)"></i><i style="width:${c.installato/tot*100}%;background:var(--ok)"></i></div>`}
+function prodCard(id,p,us,cm){const u=us.filter(x=>cm==='—'?!x.committente:x.committente===cm),c=counts(u);
+  return `<button class="prod" data-prod="${esc(id)}" data-pc="${esc(cm==='—'?'':cm)}"><h4>${esc(p.nome)}</h4><div class="cod">${ic('bc')}${esc(p.codice||'Senza codice a barre')}</div>${stockBar(c)}
+    <div class="leg"><span><span class="dot" style="background:var(--neu)"></span><b>${c.magazzino}</b> in magazzino</span><span><span class="dot" style="background:var(--wait)"></span><b>${c.tecnico}</b> ai tecnici</span><span><span class="dot" style="background:var(--ok)"></span><b>${c.installato}</b> installati</span>${c.scaricato?`<span><b>${c.scaricato}</b> scaricati</span>`:''}</div></button>`}
 function prodListHTML(){
   if(!S.pd.size)return `<div class="empty">Nessun prodotto in magazzino.<div style="margin-top:12px"><button class="btn yel" data-mt2="carica">${ic('plus')}Carica i primi prodotti</button></div></div>`;
-  const list=[...S.pd].sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||'')).map(([id,p])=>[id,p,unitsOf(id)]).filter(([,,u])=>!S.mag.comm||u.some(inC));
-  if(!list.length)return `<div class="empty">Nessun prodotto per ${esc(S.mag.comm)}.</div>`;
-  return `<div class="pgrid">${list.map(([id,p,us])=>{const u=us.filter(inC),c=counts(u);
-    const per=COMM.map(k=>[k,us.filter(x=>x.committente===k&&x.stato!=='scaricato').length]).filter(x=>x[1]);
-    return `<button class="prod" data-prod="${esc(id)}"><h4>${esc(p.nome)}</h4><div class="cod">${ic('bc')}${esc(p.codice||'Senza codice a barre')}</div>${stockBar(c)}
-    <div class="leg"><span><span class="dot" style="background:var(--neu)"></span><b>${c.magazzino}</b> in magazzino</span><span><span class="dot" style="background:var(--wait)"></span><b>${c.tecnico}</b> ai tecnici</span><span><span class="dot" style="background:var(--ok)"></span><b>${c.installato}</b> installati</span>${c.scaricato?`<span><b>${c.scaricato}</b> scaricati</span>`:''}</div>
-    ${!S.mag.comm&&per.length?`<div class="top2" style="margin-top:8px">${per.map(([k,n])=>`<span class="tag c-${k}">${k} ${n}</span>`).join('')}</div>`:''}</button>`}).join('')}</div>`;
+  const prods=[...S.pd].sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||'')).map(([id,p])=>[id,p,unitsOf(id)]);
+  const comms=S.mag.comm?[S.mag.comm]:[...COMM,...(prods.some(([,,u])=>u.some(x=>!x.committente))?['—']:[])];
+  const sec=comms.map(cm=>{const has=([,,u])=>u.some(x=>cm==='—'?!x.committente:x.committente===cm);const list=prods.filter(has);
+    const all=[...S.un.values()].filter(x=>cm==='—'?!x.committente:x.committente===cm),c=counts(all);
+    return `<section class="csec"><div class="csech">${cm==='—'?'<span class="tag" style="background:var(--neu)">Senza committente</span>':ctag(cm)}<span class="leg"><span><b>${c.magazzino}</b> in magazzino</span><span><b>${c.tecnico}</b> ai tecnici</span><span><b>${c.installato}</b> installati</span>${c.scaricato?`<span><b>${c.scaricato}</b> scaricati</span>`:''}</span>${cm!=='—'?`<button class="btn sm" data-mt2="carica" data-cc="${cm}">${ic('plus')}Carica per ${cm}</button>`:''}</div>
+      ${list.length?`<div class="pgrid">${list.map(([id,p,us])=>prodCard(id,p,us,cm)).join('')}</div>`:`<div class="empty" style="padding:16px">Nessun materiale ${cm==='—'?'':'per '+cm}.</div>`}</section>`}).join('');
+  return sec;
 }
 function prodHead(){const p=S.pd.get(S.mag.prod)||{},all=unitsOf(S.mag.prod),c=counts(all.filter(inC));
   return `<div class="ph" style="margin-bottom:8px"><div><button class="lnk" data-back-prod>← Tutti i prodotti</button><h1 style="margin-top:6px">${esc(p.nome)}</h1><div class="sub" style="text-transform:none">Codice a barre: <code>${esc(p.codice||'—')}</code>${S.mag.comm?' · solo '+esc(S.mag.comm):''}</div></div>
@@ -658,7 +674,7 @@ function assegnaHTML(){const m=S.mag.mode;
    <div class="seg">${[['ser','Assegna per seriale'],['qty','Assegna per quantità'],['rie','Rientro in magazzino']].map(([k,l])=>`<label><input type="radio" name="amode" value="${k}" ${m===k?'checked':''}><span>${l}</span></label>`).join('')}</div>
    ${m!=='rie'?`<label class="f">Tecnico <span class="req">*</span><select class="in" id="atec">${tecOpts('','Scegli tecnico')}</select></label>`:''}
    ${m==='ser'?serBox('ass','Seriali da consegnare'):''}
-   ${m==='qty'?`<div class="grid2"><label class="f">Committente<select class="in" id="qcom"><option value="">Qualsiasi committente</option>${COMM.map(c=>`<option ${S.mag.comm===c?'selected':''}>${c}</option>`).join('')}</select></label><label class="f">Prodotto<select class="in" id="qprod">${[...S.pd].sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||'')).map(([id,p])=>`<option value="${esc(id)}">${esc(p.nome)}</option>`).join('')}</select></label></div><label class="f" style="max-width:220px">Quantità<input class="in" id="qn" type="number" min="1" value="1" inputmode="numeric"></label><p class="note" id="qav"></p>`:''}
+   ${m==='qty'?`<div class="grid2"><label class="f">Committente <span class="req">*</span><select class="in" id="qcom">${COMM.map(c=>`<option ${(S.mag.comm||S.mag.lastComm||COMM[0])===c?'selected':''}>${c}</option>`).join('')}</select></label><label class="f">Prodotto<select class="in" id="qprod">${[...S.pd].sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||'')).map(([id,p])=>`<option value="${esc(id)}">${esc(p.nome)}</option>`).join('')}</select></label></div><label class="f" style="max-width:220px">Quantità<input class="in" id="qn" type="number" min="1" value="1" inputmode="numeric"></label><p class="note" id="qav"></p>`:''}
    ${m==='rie'?serBox('rie','Seriali che rientrano in magazzino'):''}
    <div class="err" id="aerr"></div><div class="acts"><button class="btn yel" type="submit">${m==='rie'?'Registra rientro':'Assegna'}</button></div></form>
   <h2 class="cond" style="font-size:24px;margin:22px 0 10px">Prelievi fatti dai tecnici · ultimi 30 giorni</h2><div id="prelist">${prelHTML()}</div>`}
@@ -724,9 +740,11 @@ function cercaRes(){
 function matListHTML(){
   const mine=[...S.un.values()].filter(u=>u.tecnicoId===S.me);
   const inCar=mine.filter(u=>u.stato==='tecnico'),inst=mine.filter(u=>u.stato==='installato').sort((a,b)=>(b.installedAt||'').localeCompare(a.installedAt||''));
-  const g={};for(const u of inCar){const k=u.prodottoId+'|'+(u.committente||'');(g[k]=g[k]||[]).push(u)}
-  return `<div class="kpis"><div class="kpi k-wait"><b>${inCar.length}</b><span>In carico</span></div><div class="kpi k-ok"><b>${inst.length}</b><span>Installati</span></div></div>
-  ${Object.keys(g).length?Object.entries(g).sort((a,b)=>a[0].localeCompare(b[0])).map(([k,l])=>`<details class="grp"><summary>${ic('box')}${esc(prodName(k.split('|')[0]))}${k.split('|')[1]?ctag(k.split('|')[1]):''}<b>${l.length}</b></summary><div class="sl">${l.map(u=>`<code>${esc(u.seriale)}</code>`).join('')}</div></details>`).join(''):'<div class="empty">Nessun materiale in carico.</div>'}
+  const byC={};for(const u of inCar){const c=u.committente||'—';((byC[c]=byC[c]||{})[u.prodottoId]=byC[c][u.prodottoId]||[]).push(u)}
+  const order=[...COMM,'—'].filter(c=>byC[c]);
+  return `<div class="kpis"><div class="kpi k-wait"><b>${inCar.length}</b><span>In carico</span></div><div class="kpi k-ok"><b>${inst.length}</b><span>Installati</span></div>${COMM.map(c=>{const n=inCar.filter(u=>u.committente===c).length;return n?`<div class="kpi"><b>${n}</b><span>${c}</span></div>`:''}).join('')}</div>
+  ${order.length?order.map(c=>`<section class="csec"><div class="csech">${c==='—'?'<span class="tag" style="background:var(--neu)">Senza committente</span>':ctag(c)}<span class="leg"><span><b>${Object.values(byC[c]).flat().length}</b> pezzi in carico</span></span></div>
+    ${Object.entries(byC[c]).sort((a,b)=>prodName(a[0]).localeCompare(prodName(b[0]))).map(([pid,l])=>`<details class="grp"><summary>${ic('box')}${esc(prodName(pid))}<b>${l.length}</b></summary><div class="sl">${l.map(u=>`<code>${esc(u.seriale)}</code>`).join('')}</div></details>`).join('')}</section>`).join(''):'<div class="empty">Nessun materiale in carico.</div>'}
   ${inst.length?`<h2 class="cond" style="font-size:26px;margin:26px 0 10px">Installati di recente</h2>${unitRows(inst.slice(0,50),true)}`:''}`;
 }
 function materialeHTML(){
@@ -751,9 +769,9 @@ document.addEventListener('click',e=>{
   const t=e.target;
   if(t.closest('a[href]'))return;
   const r=t.closest('[data-open]');if(r){S.modal={type:'detail',id:r.dataset.open};renderModal();return}
-  const pr=t.closest('[data-prod]');if(pr){S.mag.prod=pr.dataset.prod;S.mag.pst='';S.mag.pq='';render();window.scrollTo(0,0);return}
+  const pr=t.closest('[data-prod]');if(pr){S.mag.prod=pr.dataset.prod;if(pr.dataset.pc!==undefined&&pr.dataset.pc)S.mag.comm=pr.dataset.pc;S.mag.pst='';S.mag.pq='';render();window.scrollTo(0,0);return}
   if(t.closest('[data-back-prod]')){S.mag.prod=null;render();return}
-  const m2=t.closest('[data-mt2]');if(m2){S.mag.tab=m2.dataset.mt2;S.mag.preProd=m2.dataset.pp||'';S.mag.prod=null;render();return}
+  const m2=t.closest('[data-mt2]');if(m2){if(m2.dataset.cc)S.mag.lastComm=m2.dataset.cc;S.mag.tab=m2.dataset.mt2;S.mag.preProd=m2.dataset.pp||'';S.mag.prod=null;render();return}
   const ps=t.closest('[data-pst]');if(ps){S.mag.pst=ps.dataset.pst;render();return}
   if(t.closest('[data-pedit]')){S.modal={type:'prod',id:S.mag.prod};renderModal();return}
   if(t.closest('[data-pdel]')){const id=S.mag.prod;S.modal={type:'confirm',danger:true,title:'Eliminare il prodotto?',text:`${prodName(id)} non ha pezzi e verrà eliminato.`,ok:'Elimina',done:'Prodotto eliminato',fn:async()=>{await S.db.doc('prodotti/'+id).delete();S.mag.prod=null;render()}};renderModal();return}
@@ -799,7 +817,7 @@ function renderModal(){
     const p=S.pr.get(M.id)||{};S.up={fotoIdRisorsa:[],foto:[],caratterizzazione:[]};
     box.innerHTML=shell(`<h3>Chiudi intervento Assurance</h3><div class="note">${esc(p.committente||'')} · Ordine ${esc(p.ordine||'—')} · ID risorsa ${esc(p.idRisorsa||'—')}</div>
       <form id="cf" data-ass="1" style="margin-top:16px">
-        <label class="f">Nota<textarea class="in" name="nota" rows="3" placeholder="Cosa è stato fatto o perché"></textarea></label>
+        <label class="f">Nota <span class="req">*</span><textarea class="in" name="nota" rows="3" placeholder="Cosa è stato fatto o perché" required></textarea></label>
         <div class="lbl">Esito <span class="req">*</span></div>
         <div class="seg esa">${[['positiva','Positiva'],['negativa','Negativa'],['rimodulato','Rimodulato']].map(([k,l])=>`<label><input type="radio" name="esitoAss" value="${k}"><span class="k-${k}">${l}</span></label>`).join('')}</div>
         <div id="rimbox" hidden><div class="card" style="padding:14px;margin-bottom:12px;box-shadow:none"><div class="lbl">Nuovo appuntamento</div>
@@ -825,6 +843,8 @@ function renderModal(){
     box.innerHTML=shell(`<h3>${esc(M.title)}</h3><p>${esc(M.text)}</p><div class="err" id="xerr"></div><div class="acts"><button class="btn ${M.danger?'dng':'pri'}" data-ok>${esc(M.ok)}</button><button class="btn" data-close>Annulla</button></div>`);
   }else if(M.type==='pw'){
     box.innerHTML=shell(`<h3>Nuova password</h3><p class="note">Per ${esc(tecName(M.id))}. Comunicagliela: potrà cambiarla dal suo profilo.</p><form id="pwf"><label class="f">Password (almeno 6 caratteri)<input class="in" name="pw" type="text" autocomplete="off" value="${Math.random().toString(36).slice(2,10)}"></label><div class="err" id="pwerr"></div><div class="acts"><button class="btn yel" type="submit">Imposta</button><button class="btn" type="button" data-close>Annulla</button></div></form>`);
+  }else if(M.type==='notif'){box.innerHTML=shell(notifHTML());
+  }else if(M.type==='install'){box.innerHTML=shell(installHTML());
   }else if(M.type==='conn'){
     box.innerHTML=shell(`<h3>Collega il foglio Google</h3><p class="note">Incolla l'indirizzo dell'app web di Apps Script (finisce con <code>/exec</code>). Le istruzioni sono nel file README del progetto e nella scheda ISTRUZIONI del foglio.</p><form id="connf"><label class="f">Indirizzo<input class="in mono" name="api" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></label><div class="err" id="cnerr"></div><div class="acts"><button class="btn yel" type="submit">Collega</button><button class="btn" type="button" data-close>Annulla</button></div></form>`);
   }else if(M.type==='photo'){
@@ -841,6 +861,10 @@ $('#modal').addEventListener('click',async e=>{
   const cp=t.closest('[data-copy]');if(cp){try{await navigator.clipboard.writeText(cp.dataset.copy);toast('Numero copiato')}catch(x){toast('Copia non riuscita')}return}
   const rm=t.closest('[data-rm]');if(rm){const [k,i]=rm.dataset.rm.split(':');const u=S.up[k].splice(+i,1)[0];if(u)URL.revokeObjectURL(u.url);$('#g-'+k).innerHTML=prev(k);return}
   if(t.closest('[data-back]')){const id=S.modal.id;closeModal();S.modal={type:'detail',id};renderModal();return}
+  if(t.closest('[data-nperm]')){try{const p=await Notification.requestPermission();toast(p==='granted'?'Notifiche di sistema attive':'Notifiche non consentite dal browser')}catch(x){}renderModal();return}
+  if(t.closest('[data-snd]')){SND.on=!SND.on;try{localStorage.setItem('gofiber-snd',SND.on?'1':'0')}catch(x){}if(SND.on)play('ok');renderModal();return}
+  if(t.closest('[data-nclear]')){NT.list=[];notifSave();bellRender();renderModal();return}
+  if(t.closest('[data-install]')&&deferredInstall){deferredInstall.prompt();const r=await deferredInstall.userChoice.catch(()=>({}));deferredInstall=null;closeModal();if(r.outcome==='accepted')toast('GoFiber installata');return}
   const okb=t.closest('[data-ok]');if(okb&&S.modal?.type==='confirm'){const M=S.modal;S.busy=true;okb.disabled=true;try{await M.fn();S.busy=false;closeModal();toast(M.done)}catch(x){S.busy=false;okb.disabled=false;$('#xerr').textContent=errText(x)}return}
   const a=t.closest('[data-act]');if(!a)return;
   const id=S.modal.id,p=S.pr.get(id);
@@ -867,6 +891,7 @@ $('#modal').addEventListener('submit',async e=>{
   const er=$('#cerr'),btn=e.target.querySelector('button[type=submit]');
   if(e.target.dataset.ass){
     const fd=new FormData(e.target),g=k=>String(fd.get(k)||'').trim();const esito=g('esitoAss'),nota=g('nota');
+    if(!nota){er.textContent='Scrivi la nota: è obbligatoria.';return}
     if(!esito){er.textContent='Scegli l\'esito: Positiva, Negativa o Rimodulato.';return}
     const id=S.modal.id,p=S.pr.get(id)||{},now=new Date().toISOString();
     if(esito==='rimodulato'){const nd=g('rData'),nf=g('rFascia'),ora=g('rOra');
@@ -1034,10 +1059,11 @@ function renderReport(){
    ${mine?`<div class="kpi"><b>${D.prel.length}</b><span>Pezzi prelevati</span></div>`:`<div class="kpi"><b>${coppia}</b><span>Uscite in coppia</span></div>`}</div>`;
   const days={},byMonth=S.rep.per==='anno';for(const x of c){const d=x.e.completedAt.slice(0,byMonth?7:10);(days[d]=days[d]||{del:0,pos:0,neg:0})[kind(x)]++}
   const keys=[];if(byMonth){for(let m=1;m<=12;m++)keys.push(D.lo.slice(0,4)+'-'+pad(m))}else{for(let d=D.lo;d<=D.hi;d=addDays(d,1))keys.push(d)}
-  const mx=Math.max(1,...keys.map(k=>{const v=days[k];return v?v.del+v.pos+v.neg:0}));
-  h+=`<div class="card" style="margin-bottom:14px;padding:16px"><h3 style="margin:0 0 4px">Chiusure ${byMonth?'per mese':'per giorno'}</h3><div class="leg" style="margin-bottom:10px"><span><span class="dot" style="background:var(--pri)"></span>Delivery</span><span><span class="dot" style="background:var(--ok)"></span>Assurance positive</span><span><span class="dot" style="background:var(--ko)"></span>Assurance negative</span></div>
-   <div class="bars">${keys.map(k=>{const v=days[k]||{del:0,pos:0,neg:0},tot=v.del+v.pos+v.neg,lab=byMonth?parse(k+'-01').toLocaleDateString('it-IT',{month:'short'}):(S.rep.per==='sett'?parse(k).toLocaleDateString('it-IT',{weekday:'short',day:'numeric'}):String(+k.slice(8)));const wd=!byMonth&&[0,6].includes(parse(k).getDay());
-     return `<div class="bcol${wd?' we':''}" title="${esc(byMonth?k:dmy(k))}: ${tot} chiuse (${v.del} delivery, ${v.pos} positive, ${v.neg} negative)"><span class="bn">${tot||''}</span><div class="bst" style="height:${tot/mx*100}%"><i style="flex:${v.neg};background:var(--ko)"></i><i style="flex:${v.pos};background:var(--ok)"></i><i style="flex:${v.del};background:var(--pri)"></i></div><span class="bl">${lab}</span></div>`}).join('')}</div></div>`;
+  const mx=Math.max(1,...keys.map(k=>{const v=days[k];return v?Math.max(v.del,v.pos,v.neg):0}));
+  h+=`<div class="card" style="margin-bottom:14px;padding:16px"><h3 style="margin:0 0 4px">Chiusure ${byMonth?'per mese':'per giorno'}</h3><div class="leg" style="margin-bottom:10px"><span><span class="dot" style="background:var(--pri)"></span>Delivery <b>${n.del}</b></span><span><span class="dot" style="background:var(--ok)"></span>Assurance positive <b>${n.pos}</b></span><span><span class="dot" style="background:var(--ko)"></span>Assurance negative <b>${n.neg}</b></span></div>
+   <div class="bars g3">${keys.map(k=>{const v=days[k]||{del:0,pos:0,neg:0},tot=v.del+v.pos+v.neg,lab=byMonth?parse(k+'-01').toLocaleDateString('it-IT',{month:'short'}):(S.rep.per==='sett'?parse(k).toLocaleDateString('it-IT',{weekday:'short',day:'numeric'}):String(+k.slice(8)));const wd=!byMonth&&[0,6].includes(parse(k).getDay());
+     const bar=(n,c)=>`<div class="gb"><span class="bn">${n||''}</span><i style="height:${n/mx*100}%;background:var(--${c})"></i></div>`;
+     return `<div class="bcol${wd?' we':''}" title="${esc(byMonth?k:dmy(k))}: ${tot} chiuse (${v.del} delivery, ${v.pos} positive, ${v.neg} negative)"><div class="grp3">${bar(v.del,'pri')}${bar(v.pos,'ok')}${bar(v.neg,'ko')}</div><span class="bl">${lab}</span></div>`}).join('')}</div></div>`;
   if(!mine){
     const T={};const tr=id=>T[id]=T[id]||{chiuse:0,del:0,pos:0,neg:0,coppia:0,rim:0,pezzi:0,prel:0,gg:new Set()};
     for(const x of c){const k=kind(x);for(const id of tecsOf(x.p)){const o=tr(id);o.chiuse++;o[k]++;o.gg.add(x.e.completedAt.slice(0,10));if(tecsOf(x.p).length>1)o.coppia++}}
@@ -1193,6 +1219,65 @@ function renderArch(){
   L.innerHTML=`<p class="note">${all.length} pratiche completate${all.length>500?' · mostrate le ultime 500':''}</p><div class="tw"><table class="t stack"><thead><tr><th>Completata</th><th>Data</th><th>Intervento</th><th>Esito</th><th>Ordine</th><th>ID risorsa</th><th>Permuta</th><th>Splitter</th><th>Indirizzo</th><th>Tecnici</th><th>Seriali</th></tr></thead><tbody>${l.map(({id,p,e,names})=>`<tr data-open="${esc(id)}"><td>${esc(dt(e.completedAt))}</td><td>${esc(p.data||'')} ${esc(fascia(p.fascia).a)}</td><td><div class="top2" style="margin:0">${tipoTag(p)}${ctag(p.committente)}${reteTag(p)}</div></td><td>${ESA[e.esitoAss]?`<span class="pill ${ESA[e.esitoAss][0]}">${ESA[e.esitoAss][1]}</span>`:'Completata'}${p.rimod?.length?`<div class="note">rimodulata ${p.rimod.length}×</div>`:''}</td><td><b>${esc(p.ordine||'—')}</b></td><td>${esc(p.idRisorsa||'—')}</td><td>${esc(e.permuta||p.permuta||'')}</td><td>${esc(e.splitter||p.splitter||'')}</td><td>${esc(p.indirizzo||'')}</td><td>${esc(names||'—')}</td><td>${(e.materiali||[]).map(x=>`<code>${esc(x)}</code>`).join(' ')}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
+/* ---------- suoni ---------- */
+const SND={on:LS0('gofiber-snd')!=='0',ctx:null};
+function LS0(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function sndCtx(){if(!SND.ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;SND.ctx=new A()}if(SND.ctx.state==='suspended')SND.ctx.resume();return SND.ctx}
+addEventListener('pointerdown',()=>{try{sndCtx()}catch(e){}},{once:true});
+function tone(c,f,t0,d,type,vol){const o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,c.currentTime+t0);g.gain.setValueAtTime(0.0001,c.currentTime+t0);g.gain.exponentialRampToValueAtTime(vol||0.18,c.currentTime+t0+0.012);g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+t0+d);o.connect(g).connect(c.destination);o.start(c.currentTime+t0);o.stop(c.currentTime+t0+d+0.02)}
+function play(k){if(!SND.on)return;let c;try{c=sndCtx()}catch(e){return}if(!c)return;
+  if(k==='ok'){tone(c,660,0,.12,'sine',.16);tone(c,990,.09,.18,'sine',.14)}
+  else if(k==='err'){tone(c,220,0,.18,'square',.08);tone(c,165,.16,.22,'square',.07)}
+  else if(k==='scan'){tone(c,1760,0,.08,'square',.06)}
+  else if(k==='notify'){tone(c,784,0,.16,'triangle',.2);tone(c,1047,.14,.16,'triangle',.2);tone(c,1319,.28,.32,'triangle',.18)}
+  else if(k==='tap'){tone(c,520,0,.05,'sine',.06)}}
+document.addEventListener('click',e=>{const b=e.target.closest('.chip,[data-mt],[data-per],nav#tabs a');if(b)play('tap')},true);
+new MutationObserver(ms=>{for(const m of ms){const t=m.target;if(t.classList&&t.classList.contains('err')&&t.textContent.trim()&&!/…$/.test(t.textContent.trim())&&t.dataset.snd!==t.textContent){t.dataset.snd=t.textContent;play('err')}}}).observe(document.body,{childList:true,subtree:true,characterData:true});
+
+/* ---------- notifiche chiusure ---------- */
+const NT={seen:null,list:[]};
+try{NT.list=JSON.parse(LS0('gofiber-notif')||'[]')}catch(e){NT.list=[]}
+function notifSave(){try{localStorage.setItem('gofiber-notif',JSON.stringify(NT.list.slice(0,40)))}catch(e){}}
+function notifCheck(){
+  if(!S.admin||!S.loaded.es||!S.loaded.pr)return;
+  if(!NT.seen){NT.seen=new Set(S.es.keys());for(const [id,p] of S.pr){const r=lastRim(p);if(r&&r.at)NT.seen.add('r:'+id+':'+r.at)}return}
+  const fresh=[];for(const [id,e] of S.es){if(NT.seen.has(id))continue;NT.seen.add(id);if(e.by&&e.by===S.me)continue;if(Date.now()-Date.parse(e.completedAt||0)>3600e3)continue;fresh.push([id,e])}
+  for(const x of [...S.pr]){const p=x[1],r=lastRim(p);if(!r||!r.at)continue;const key='r:'+x[0]+':'+r.at;if(NT.seen.has(key))continue;NT.seen.add(key);if(!r.by||r.by===S.me)continue;if(Date.now()-Date.parse(r.at)>3600e3)continue;fresh.push([x[0],{rimod:r}])}
+  for(const [id,e] of fresh){const p=S.pr.get(id)||e.snap||{};
+    const what=e.rimod?`Rimodulata a ${dmy(e.rimod.aData)} ${fascia(e.rimod.aFascia).a}`:e.esitoAss==='positiva'?'Chiusa: esito positivo':e.esitoAss==='negativa'?'Chiusa: esito NEGATIVO':'Completata';
+    const who=e.rimod?(e.rimod.by?tecName(e.rimod.by):''):(e.by?tecName(e.by):'');
+    const n={id,at:new Date().toISOString(),t:`${p.tipo||'Pratica'} ${p.ordine||''}`.trim(),b:`${what}${who?' · '+who:''}${p.indirizzo?' · '+p.indirizzo:''}`,k:e.rimod?'wait':e.esitoAss==='negativa'?'ko':'ok',r:false};
+    NT.list.unshift(n);showNotif(n)}
+  if(fresh.length){notifSave();bellRender()}
+}
+function showNotif(n){play('notify');
+  const el=document.createElement('div');el.className='ntoast '+n.k;el.innerHTML=`<b>${esc(n.t)}</b><span>${esc(n.b)}</span>`;el.onclick=()=>{el.remove();S.modal={type:'detail',id:n.id};renderModal()};
+  $('#ntoasts').appendChild(el);setTimeout(()=>el.remove(),9000);
+  try{if('Notification' in window&&Notification.permission==='granted'&&document.visibilityState!=='visible'){const o={body:n.b,icon:'icons/icon-192.png',badge:'icons/favicon-32.png',tag:n.id};
+    navigator.serviceWorker?.getRegistration?.().then(r=>r?r.showNotification('GoFiber · '+n.t,o):new Notification('GoFiber · '+n.t,o)).catch(()=>{try{new Notification('GoFiber · '+n.t,o)}catch(e){}})}}catch(e){}
+}
+function bellRender(){const b=$('#bell');if(!b)return;b.hidden=!S.admin||!!S.gate;const u=NT.list.filter(x=>!x.r).length;b.querySelector('i').textContent=u||'';b.querySelector('i').hidden=!u}
+function notifHTML(){const canN='Notification' in window&&!S.inClaude;
+  return `<h3>Notifiche</h3><p class="note">Avvisi quando un tecnico chiude o rimodula un intervento, con suono, mentre GoFiber è aperta.</p>
+  <div class="acts" style="margin:10px 0 14px">${canN?`<button class="btn sm ${Notification.permission==='granted'?'':'yel'}" data-nperm>${Notification.permission==='granted'?'Notifiche di sistema attive':'Attiva notifiche di sistema'}</button>`:''}<button class="btn sm" data-snd>${SND.on?'Suoni attivi · disattiva':'Suoni spenti · attiva'}</button>${NT.list.length?'<button class="btn sm" data-nclear>Svuota</button>':''}</div>
+  <div class="tlist">${NT.list.length?NT.list.slice(0,40).map(n=>`<button class="trow" data-open="${esc(n.id)}" style="text-align:left;cursor:pointer;border-left:4px solid var(--${n.k})"><div class="nm" style="font-size:15px">${esc(n.t)}<div class="note" style="font-weight:400">${esc(n.b)}</div></div><span class="note">${esc(dt(n.at))}</span></button>`).join(''):'<div class="empty">Nessuna notifica per ora.</div>'}</div>`}
+
+/* ---------- installazione ---------- */
+let deferredInstall=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;maybeInstall()});
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function maybeInstall(force){
+  if(S.inClaude||isStandalone()||S.state!=='ok'||S.modal)return;
+  if(!force&&LS0('gofiber-install-seen'))return;
+  if(!deferredInstall&&!isIOS()&&!force)return;
+  S.modal={type:'install'};renderModal();try{localStorage.setItem('gofiber-install-seen','1')}catch(e){}
+}
+function installHTML(){return `<div style="text-align:center"><div class="authlogo" style="width:84px;height:84px;border-radius:22px">${logoSvg()}</div><h3 style="margin:14px 0 4px;padding:0">Installa GoFiber</h3><p class="note">Aggiungila alla schermata Home: si apre a tutto schermo come un'app, senza cercare il link.</p></div>
+  ${deferredInstall?`<div class="acts" style="justify-content:center;margin-top:12px"><button class="btn yel" data-install>Installa</button><button class="btn" data-close>Non ora</button></div>`
+  :isIOS()?`<ol class="steps" style="margin:12px 0"><li>Tocca il pulsante <b>Condividi</b> di Safari (il quadrato con la freccia in su).</li><li>Scegli <b>Aggiungi alla schermata Home</b>.</li><li>Premi <b>Aggiungi</b>.</li></ol><div class="acts" style="justify-content:center"><button class="btn yel" data-close>Ho capito</button></div>`
+  :`<ol class="steps" style="margin:12px 0"><li>Apri il menu del browser (⋮ in alto a destra).</li><li>Scegli <b>Installa app</b> o <b>Aggiungi a schermata Home</b>.</li></ol><div class="acts" style="justify-content:center"><button class="btn yel" data-close>Ho capito</button></div>`}`}
+
 /* ---------- utenti e accesso ---------- */
 const RUOLI={tecnico:'Tecnico',ufficio:'Ufficio',admin:'Amministratore'};
 function roleInfo(id){const r=S.roles.get(id),t=S.tec.get(id);
@@ -1282,7 +1367,7 @@ function profileHTML(first){
    ${first?'<p class="note" style="margin-top:-6px">Inserisci i tuoi dati: il gestore potrà assegnarti pratiche e materiale.</p>':''}
    <label class="f">Nome e cognome <span class="req">*</span><input class="in" name="nome" value="${esc(me.nome||'')}" autocomplete="name"></label>
    <label class="f">Telefono<input class="in" name="telefono" type="tel" value="${esc(me.telefono||'')}" autocomplete="tel"></label>
-   <div class="err" id="rerr"></div><div class="acts"><button class="btn yel" type="submit">${first?'Iscriviti':'Salva'}</button>${S.remote?`<button type="button" class="btn" data-upw="${esc(S.me)}">Cambia password</button><button type="button" class="btn" onclick="logout()">Esci</button>`:''}</div></form>`;
+   <div class="err" id="rerr"></div><div class="acts"><button class="btn yel" type="submit">${first?'Iscriviti':'Salva'}</button>${!S.inClaude&&!isStandalone()?'<button type="button" class="btn" onclick="window.__inst()">Installa app</button>':''}${S.remote?`<button type="button" class="btn" data-upw="${esc(S.me)}">Cambia password</button><button type="button" class="btn" onclick="logout()">Esci</button>`:''}</div></form>`;
 }
 function bindProfile(){
   const f=$('#regf');if(!f)return;
@@ -1367,7 +1452,7 @@ async function remoteClaude(api){
 }
 const bUrl=id=>String(id).startsWith('gd:')?'https://drive.google.com/thumbnail?id='+encodeURIComponent(id.slice(3))+'&sz=w1600':'/_blob/'+id;
 const bLink=id=>String(id).startsWith('gd:')?'https://drive.google.com/file/d/'+encodeURIComponent(id.slice(3))+'/view':'/_blob/'+id;
-window.logout=()=>logout();
+window.logout=()=>logout();window.__inst=()=>maybeInstall(true);
 function logout(){const t=LS.get('gofiber-token');LS.set('gofiber-token',null);if(S.api&&t)apiCall(S.api,'logout',{token:t}).catch(()=>{}).finally(()=>location.reload());else location.reload()}
 
 /* ---------- modalità locale (fuori da Claude, es. GitHub Pages) ---------- */
@@ -1402,7 +1487,7 @@ function sub(path,key,map){
 (async()=>{
   let api=new URLSearchParams(location.search).get('api');if(api){LS.set('gofiber-api',api);history.replaceState(null,'',location.pathname+location.hash)}
   api=(window.GOFIBER_API||'').trim()||LS.get('gofiber-api')||'';
-  const inClaude=!!(window.claude&&typeof window.claude.use==='function');
+  const inClaude=!!(window.claude&&typeof window.claude.use==='function');S.inClaude=inClaude;
   const wantLocal=new URLSearchParams(location.search).has('locale');
   if(!inClaude&&!api&&!wantLocal)api=await waitServer();
   const C=inClaude?window.claude:api?await remoteClaude(api):localClaude();
@@ -1413,6 +1498,7 @@ function sub(path,key,map){
   S.db=db;S.user=user;S.assets=assets;
   S.isOwner=user?!!(await user.isOwner()):false;S.me=user?await user.id():null;S.canApprove=S.isOwner||(user?!!(await user.canEdit()):false);applyRole();
   const h=location.hash.slice(1);S.view=views().includes(h)?h:'agenda';
+  setTimeout(()=>maybeInstall(),4000);
   S.state='ok';if(S.remote){const b=document.createElement('button');b.className='thm';b.title='Esci';b.setAttribute('aria-label','Esci');b.innerHTML='<svg class="i" viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h11"/></svg>';b.onclick=logout;$('.hr').appendChild(b)}
   if(S.local)$('#localbar').innerHTML='<div class="wrap"><div class="dupw" style="margin:12px 0 0"><b>Modalità locale.</b> I dati restano solo in questo browser e su questo dispositivo, senza foto e senza utenti condivisi. <button class=\"lnk\" id=\"connGs\">Collega il foglio Google</button> per lavorare in squadra.</div></div>';if($('#connGs'))$('#connGs').onclick=()=>{S.modal={type:'conn'};renderModal()};render();
   sub('tecnici','tec',S.tec);sub('ruoli','ro',S.roles);sub('pratiche','pr',S.pr);sub('esiti','es',S.es);sub('prodotti','pd',S.pd);sub('unita','un',S.un);sub('pfsdb','pfsx',S.pfsDocs);loadPfsBase();
