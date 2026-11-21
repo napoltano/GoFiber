@@ -1304,7 +1304,7 @@ function loginHTML(api,msg){return `<form class="authcard" id="loginf" novalidat
   <div class="subt" id="lmode" style="margin-bottom:16px"><button type="button" class="chip on" data-lm="login">Accedi</button><button type="button" class="chip" data-lm="reg">Registrati</button></div>
   <label class="f">Email<input class="in" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false"></label>
   <label class="f">Password<input class="in" name="password" type="password" autocomplete="current-password"></label>
-  <label class="f" id="lpw2" hidden>Ripeti la password<input class="in" name="password2" type="password" autocomplete="new-password"></label>
+  <label class="f" id="lpw2" hidden style="display:none">Ripeti la password<input class="in" name="password2" type="password" autocomplete="new-password"></label>
   <p class="note" id="lnote" style="margin:-4px 0 10px">Non hai un account? Scegli <b>Registrati</b>: il responsabile conferma il tuo accesso.</p>
   <div class="err" id="lerr">${esc(msg||'')}</div><button class="btn yel" type="submit" id="lgo">Accedi</button>
   <p class="authfoot">Password dimenticata? Chiedila al responsabile.<br><button type="button" class="lnk" id="lchg" style="font-size:13px;margin-top:6px">Cambia server</button></p></form>`}
@@ -1318,7 +1318,7 @@ function waitServer(){return new Promise(res=>{
 function waitLogin(api,msg){return new Promise(res=>{
   setAuth(true);$('#tabs').innerHTML='';$('#who').textContent='Accesso';
   $('#main').innerHTML=loginHTML(api,msg);let mode='login';const f=$('#loginf');
-  $('#lmode').onclick=e=>{const b=e.target.closest('[data-lm]');if(!b)return;mode=b.dataset.lm;$('#lmode').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b));$('#lpw2').hidden=mode!=='reg';$('#lgo').textContent=mode==='reg'?'Crea account':'Accedi';$('#lnote').innerHTML=mode==='reg'?'Dopo la registrazione inserisci nome e ruolo: il responsabile conferma il tuo accesso.':'Non hai un account? Scegli <b>Registrati</b>: il responsabile conferma il tuo accesso.'};
+  $('#lmode').onclick=e=>{const b=e.target.closest('[data-lm]');if(!b)return;mode=b.dataset.lm;$('#lmode').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b));$('#lpw2').hidden=mode!=='reg';$('#lpw2').style.display=mode==='reg'?'':'none';$('#lpw2').querySelector('input').value='';$('#lgo').textContent=mode==='reg'?'Crea account':'Accedi';$('#lnote').innerHTML=mode==='reg'?'Dopo la registrazione inserisci nome e ruolo: il responsabile conferma il tuo accesso.':'Non hai un account? Scegli <b>Registrati</b>: il responsabile conferma il tuo accesso.'};
   $('#lchg').onclick=()=>{LS.set('gofiber-api',null);LS.set('gofiber-token',null);location.search='';location.reload()};
   f.onsubmit=async e=>{e.preventDefault();const fd=new FormData(f),em=String(fd.get('email')||'').trim(),pw=String(fd.get('password')||'');const er=$('#lerr');er.textContent='';
     if(!em||!pw){er.textContent='Inserisci email e password.';return}
