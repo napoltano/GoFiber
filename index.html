@@ -177,6 +177,10 @@ body.auth #netbar{display:none}
 .card h3{margin:0 0 10px;font-size:24px}
 form.pf{max-width:740px}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.apbox{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:16px;background:color-mix(in srgb,var(--card) 92%,var(--pri))}.apbox.on{border-color:var(--pri)}.aph{display:flex;align-items:center;gap:8px;font-size:16px;margin-bottom:10px}.aph .i{width:22px;height:22px}.apbox .seg{margin-bottom:10px}.apbox .seg span{font-size:14px;padding:8px 11px}.apbox .f{margin-bottom:4px}
+.mlist{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.mchip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 12px;font-size:14px}.mchip button{border:0;background:none;color:var(--mute);font-size:18px;line-height:1;cursor:pointer;padding:0 4px}.mform{display:grid;grid-template-columns:130px minmax(0,1fr) auto;gap:8px;align-items:center}.msug{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.apnote{border:1px solid var(--pri);border-radius:12px;padding:10px 12px;margin-bottom:14px;font-size:15px}.apnote div{margin-top:4px}
+@media(max-width:600px){.mform{grid-template-columns:minmax(0,1fr) auto}.mform select{grid-column:1/-1}}
 label.f{display:block;font-size:14px;font-weight:600;margin-bottom:14px}
 label.f>.in{margin-top:6px}
 .lbl{font-size:14px;font-weight:600;margin-bottom:6px}
@@ -315,7 +319,9 @@ const IC={
  sms:'<path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8M8 13h5"/>',
  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
  pin:'<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
- cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'};
+ cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+ wifi:'<path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1"/>',
+ ont:'<rect x="3" y="12" width="18" height="8" rx="2"/><path d="M7 16h.01M10.5 16h.01M14 16h3M12 12V4M9 6.5 12 4l3 2.5"/>'};
 const ic=k=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -363,6 +369,13 @@ const lastRim=p=>Array.isArray(p?.rimod)&&p.rimod.length?p.rimod[p.rimod.length-
 const isAnti=(id,p)=>!!p.anticipo&&!S.es.has(id);
 const tecName=id=>id?(S.tec.get(id)?.nome||'Tecnico rimosso'):'Non assegnata';
 const prodName=id=>S.pd.get(id)?.nome||'Prodotto';
+const APM={cons:'Solo consegna',consinst:'Consegna e installazione',inst:'Solo installazione'},APK={ont:'ONT',modem:'Modem'},APS={cons:'consegna',consinst:'consegna e installazione',inst:'solo installazione'};
+const modelli=cat=>[...S.pd].filter(([,p])=>p.cat===cat).sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||''));
+const apOf=(p,k)=>p&&p[k]&&APM[p[k].m]?p[k]:null;
+const apNome=a=>a?((a.id&&S.pd.get(a.id)?.nome)||a.nome||''):'';
+const apTxt=(p,k)=>{const a=apOf(p,k);return a?(apNome(a)||'del cliente')+' · '+APS[a.m]:''};
+const apCons=a=>a&&(a.m==='cons'||a.m==='consinst');
+const apLab=(k,a)=>{const n=apNome(a);return n?(n.toLowerCase().startsWith(APK[k].toLowerCase())?n:APK[k]+' '+n):APK[k]+' del cliente'};
 const unitsOf=pid=>[...S.un.values()].filter(u=>u.prodottoId===pid);
 function uLab(u){if(!u)return['ko','Non presente in magazzino'];if(u.stato==='scaricato')return['ko','Scaricato'+(u.motivoScarico?' · '+u.motivoScarico:'')];if(u.stato==='installato')return['ok','Installato · ordine '+(u.ordine||'—')];if(u.stato==='tecnico')return['wait','Assegnato a '+tecName(u.tecnicoId)];return['neu','In magazzino']}
 
@@ -452,7 +465,7 @@ function live(){notifCheck();bellRender();
   else if(S.view==='archivio'){renderArch();tabs()}
   else if(S.view==='report'||S.view==='resa'){renderReport();tabs()}
   else if(S.view==='magazzino'){magRefresh();tabs()}
-  else{tabs();if(S.view==='nuova')renderPfsSug()}
+  else{tabs();if(S.view==='nuova'){renderPfsSug();apRefresh()}}
   if(S.modal?.type==='detail')renderModal();
   if(S.modal?.type==='complete')sbUpdate('ins');
 }
@@ -501,7 +514,7 @@ function filtered(){
     if(f.comm&&p.committente!==f.comm)continue;
     if(f.tipo&&p.tipo!==f.tipo)continue;
     if(S.admin&&f.tec){if(f.tec==='__none'?tecsOf(p).length:!tecsOf(p).includes(f.tec))continue}
-    if(q){const mat=(S.es.get(id)?.materiali||[]).join(' ');if(![p.tipo,p.rete,p.ordine,p.idRisorsa,p.indirizzo,p.telefono,p.pfs,pv(id,p,'permuta'),pv(id,p,'splitter'),p.committente,mat].join(' ').toLowerCase().includes(q))continue}
+    if(q){const mat=(S.es.get(id)?.materiali||[]).join(' ');if(![p.tipo,p.rete,p.ordine,p.idRisorsa,p.indirizzo,p.telefono,p.pfs,pv(id,p,'permuta'),pv(id,p,'splitter'),p.committente,mat,apTxt(p,'ont'),apTxt(p,'modem')].join(' ').toLowerCase().includes(q))continue}
     out.push({id,p,st});
   }
   return out.sort((a,b)=>(a.p.data||'').localeCompare(b.p.data||'')||(FI[a.p.fascia]??9)-(FI[b.p.fascia]??9)||(a.p.ordine||'').localeCompare(b.p.ordine||''));
@@ -511,7 +524,7 @@ function rowHTML(id,p,st){const fa=fascia(p.fascia),team=tecsOf(p);
   return `<article class="row st-${st}" tabindex="0" data-open="${esc(id)}">${isAnti(id,p)?`<div class="antib"><b>ANTICIPO</b><span>prevista ${esc(dayName(p.data))} · puoi farla prima</span></div>`:''}<div class="when"><b>${fa.a}</b><span>${fa.b}</span></div>
       <div><div class="top2">${tipoTag(p)}<span class="tag c-${esc(p.committente)}">${esc(p.committente)}</span>${reteTag(p)}${(([c,l])=>`<span class="pill ${c}">${l}</span>`)(stLab(id,st))}${lastRim(p)&&st!=='fatta'?`<span class="pill wait">Rimodulata${p.rimod.length>1?' ×'+p.rimod.length:''} · era ${esc(dmy(lastRim(p).daData))} ${esc(fascia(lastRim(p).daFascia).a)}</span>`:''}${p.ora&&st!=='fatta'?`<span class="pill neu">Ore ${esc(p.ora)}</span>`:''}</div>
       <div class="addr">${p.indirizzo?`<a class="alink" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener" title="Naviga all'indirizzo">${esc(p.indirizzo)}${ic('pin')}</a>`:'Indirizzo non indicato'}</div>
-      <div class="meta"><span>Ordine <b>${esc(p.ordine||'—')}</b></span><span>ID risorsa <b>${esc(p.idRisorsa||'—')}</b></span><span>PFS <b>${pfsHTML(p)}</b></span>${pv(id,p,'permuta')?`<span>Permuta <b>${esc(pv(id,p,'permuta'))}</b></span>`:''}${pv(id,p,'splitter')?`<span>Splitter <b>${esc(pv(id,p,'splitter'))}</b></span>`:''}${p.telefono?`<span>Tel <b>${esc(p.telefono)}</b></span>`:''}${who}</div>${p.telefono&&st!=='fatta'&&telIntl(p.telefono)?`<div class="rowqa"><a href="tel:+${telIntl(p.telefono)}">${ic('phone')}Chiama</a><a class="wa" href="${esc(waLink(telIntl(p.telefono),msgCliente(p,!S.admin&&p.data===today()?'arrivo':'conferma')))}" target="_blank" rel="noopener">${ic('wa')}WhatsApp</a></div>`:''}</div><div class="chev">›</div></article>`}
+      <div class="meta"><span>Ordine <b>${esc(p.ordine||'—')}</b></span><span>ID risorsa <b>${esc(p.idRisorsa||'—')}</b></span><span>PFS <b>${pfsHTML(p)}</b></span>${pv(id,p,'permuta')?`<span>Permuta <b>${esc(pv(id,p,'permuta'))}</b></span>`:''}${pv(id,p,'splitter')?`<span>Splitter <b>${esc(pv(id,p,'splitter'))}</b></span>`:''}${['ont','modem'].map(k=>{const a=apOf(p,k);if(!a)return '';const n=apNome(a);return `<span>${n&&n.toLowerCase().startsWith(APK[k].toLowerCase())?'':APK[k]+' '}<b>${esc(apTxt(p,k))}</b></span>`}).join('')}${p.telefono?`<span>Tel <b>${esc(p.telefono)}</b></span>`:''}${who}</div>${p.telefono&&st!=='fatta'&&telIntl(p.telefono)?`<div class="rowqa"><a href="tel:+${telIntl(p.telefono)}">${ic('phone')}Chiama</a><a class="wa" href="${esc(waLink(telIntl(p.telefono),msgCliente(p,!S.admin&&p.data===today()?'arrivo':'conferma')))}" target="_blank" rel="noopener">${ic('wa')}WhatsApp</a></div>`:''}</div><div class="chev">›</div></article>`}
 function antiBox(){
   if(S.admin)return '';
   const t=today(),l=[...S.pr].filter(([id,p])=>isAnti(id,p)&&tecsOf(p).includes(S.me)&&p.data>t).sort((a,b)=>(a[1].data||'').localeCompare(b[1].data||'')||(FI[a[1].fascia]??9)-(FI[b[1].fascia]??9));
@@ -554,6 +567,8 @@ function formHTML(){
     <div><label class="f">PFS<input class="in" name="pfs" id="pfsIn" value="${esc(v.pfs)}" autocomplete="off" autocapitalize="characters" placeholder="Es. NA_05/08W22"></label><div id="pfsSug"></div></div></div>
    <div class="grid2"><label class="f">Numero permuta<input class="in" name="permuta" value="${esc(v.permuta||'')}" autocomplete="off"></label>
     <label class="f">Splitter<input class="in" name="splitter" value="${esc(v.splitter||'')}" placeholder="Es. SPL 1:8 porta 3" autocomplete="off"></label></div>
+   <div class="lbl">Apparati da consegnare o installare</div>
+   <div class="grid2" id="apg">${apBox('ont',v)}${apBox('modem',v)}</div>
    <label class="f" style="max-width:340px">Data <span class="req">*</span><input class="in" name="data" type="date" value="${esc(v.data)}"></label>
    <div class="lbl">Fascia oraria <span class="req">*</span></div>
    <div class="seg fasce">${F.map(f=>`<label><input type="radio" name="fascia" value="${f.k}" ${v.fascia===f.k?'checked':''}><span>${f.a}<small>${f.b}</small></span></label>`).join('')}</div>
@@ -565,7 +580,39 @@ function formHTML(){
    <div class="acts"><button class="btn pri" type="submit" data-next="agenda">${p?'Salva modifiche':'Salva pratica'}</button>${p?'':'<button class="btn" type="submit" data-next="again">Salva e inserisci un\'altra</button>'}<a class="btn" href="#agenda">Annulla</a></div></form>
   <div class="card pf" style="margin-top:14px"><h3>Posizioni PFS da FiberTools</h3>
    <p class="note" style="margin-top:-4px"><span id="pfsCount">${pfsCountHTML()}</span> Per aggiornarle: in FiberTools apri <b>PFS → Condividi posizioni</b>, crea il file e caricalo qui; vengono aggiunti solo i PFS nuovi o spostati.</p>
-   <div class="acts"><label class="btn yel">${ic('pin')}Importa file KML<input class="fh" type="file" id="pfsFile" accept=".kml,.txt,.xml,application/vnd.google-earth.kml+xml,text/plain,text/xml,application/xml"></label>${S.pfsImp.size?'<button type="button" class="btn dng sm" id="pfsClear">Togli le posizioni importate</button>':''}<span class="note" id="pfsMsg"></span></div></div>`;
+   <div class="acts"><label class="btn yel">${ic('pin')}Importa file KML<input class="fh" type="file" id="pfsFile" accept=".kml,.txt,.xml,application/vnd.google-earth.kml+xml,text/plain,text/xml,application/xml"></label>${S.pfsImp.size?'<button type="button" class="btn dng sm" id="pfsClear">Togli le posizioni importate</button>':''}<span class="note" id="pfsMsg"></span></div></div>
+  <div class="card pf" style="margin-top:14px" id="modwrap">${modHTML()}</div>`;
+}
+const APMS=[['','Non serve'],['cons','Solo consegna'],['consinst','Consegna e installazione'],['inst','Solo installazione']];
+function apOpts(k,sel,m){const ms=modelli(k);return `<option value="">${m==='inst'?'Non indicato (è del cliente)':'Scegli il modello'}</option>${ms.map(([id,p])=>`<option value="${esc(id)}" ${sel===id?'selected':''}>${esc(p.nome)}</option>`).join('')}${sel&&!ms.some(([id])=>id===sel)?`<option value="${esc(sel)}" selected>${esc(S.pd.get(sel)?.nome||'Modello rimosso')}</option>`:''}`}
+function apBox(k,v){const a=apOf(v,k)||{m:'',id:''},n=modelli(k).length;
+  return `<div class="apbox ${a.m?'on':''}" data-ap="${k}"><div class="aph">${ic(k==='ont'?'ont':'wifi')}<b>${APK[k]}</b></div>
+   <div class="seg">${APMS.map(([m,l])=>`<label><input type="radio" name="${k}M" value="${m}" ${a.m===m?'checked':''}><span>${l}</span></label>`).join('')}</div>
+   <div class="apsel" ${a.m?'':'hidden'}><label class="f">Modello ${k==='ont'?'ONT':'modem'} <span class="req" ${a.m==='inst'?'hidden':''}>*</span><select class="in" name="${k}Id">${apOpts(k,a.id,a.m)}</select></label>
+   <p class="note apnone" ${n?'hidden':''}>Nessun modello ${APK[k]} registrato: aggiungilo in “Modelli ONT e modem” qui sotto.</p></div></div>`}
+const MSUG=[['modem','Fastweb Seven'],['modem','Vodafone Seven'],['modem','Vodafone 6'],['ont','ONT ZTE']];
+function modHTML(){const have=new Set([...S.pd.values()].filter(p=>p.cat).map(p=>(p.nome||'').toLowerCase()));const sug=MSUG.filter(([,n])=>!have.has(n.toLowerCase()));
+  return `<h3>Modelli ONT e modem</h3><p class="note" style="margin-top:-4px">Registra qui i modelli: li trovi da scegliere nei riquadri ONT e Modem della pratica. Ogni modello è anche un prodotto del Magazzino, così puoi caricarne i seriali e il tecnico li scansiona quando li consegna.</p>
+   <div class="grid2">${['ont','modem'].map(k=>`<div><div class="lbl">${ic(k==='ont'?'ont':'wifi')} ${APK[k]}</div><div class="mlist">${modelli(k).map(([id,p])=>`<span class="mchip">${esc(p.nome)}<button type="button" data-mdel="${esc(id)}" aria-label="Togli ${esc(p.nome)}" title="Togli">×</button></span>`).join('')||'<span class="note">Nessun modello</span>'}</div></div>`).join('')}</div>
+   <form class="mform" id="modf" novalidate><select class="in" name="cat"><option value="modem">Modem</option><option value="ont">ONT</option></select><input class="in" name="nome" placeholder="Nome del modello" autocomplete="off"><button class="btn yel" type="submit">${ic('plus')}Aggiungi</button></form>
+   <div class="err" id="moderr"></div>
+   ${sug.length?`<div class="msug"><span class="note">Aggiungi al volo:</span>${sug.map(([c,n])=>`<button type="button" class="chip" data-msug="${c}|${esc(n)}">${ic('plus')}${esc(n)}</button>`).join('')}</div>`:''}`}
+async function modAdd(cat,nome){nome=String(nome||'').trim();const er=$('#moderr');if(er)er.textContent='';if(!nome){if(er)er.textContent='Scrivi il nome del modello.';return false}
+  const ex=[...S.pd].find(([,p])=>(p.nome||'').trim().toLowerCase()===nome.toLowerCase());
+  try{if(ex){if(ex[1].cat===cat){toast(nome+' è già registrato');return true}await S.db.doc('prodotti/'+ex[0]).update({cat})}
+    else await S.db.collection('prodotti').add({nome,codice:'',cat,createdAt:new Date().toISOString()});
+    play('ok');toast(`${APK[cat]} ${nome} registrato`);return true}catch(x){if(er)er.textContent=errText(x);return false}}
+function apRefresh(){const w=$('#modwrap');if(w)w.innerHTML=modHTML();const f=$('#pf');if(!f)return;
+  for(const k of ['ont','modem']){const sel=f.elements[k+'Id'],m=f.querySelector(`[name=${k}M]:checked`)?.value||'';if(sel){const v=sel.value;sel.innerHTML=apOpts(k,v,m);sel.value=v}const nn=f.querySelector(`[data-ap=${k}] .apnone`);if(nn)nn.hidden=!!modelli(k).length}}
+function bindAp(){
+  const f=$('#pf');f.addEventListener('change',e=>{const m=e.target.name&&e.target.name.match(/^(ont|modem)M$/);if(!m)return;const k=m[1],v=e.target.value,box=f.querySelector(`[data-ap=${k}]`);
+    box.classList.toggle('on',!!v);box.querySelector('.apsel').hidden=!v;box.querySelector('.req').hidden=v==='inst';const sel=f.elements[k+'Id'];const cur=sel.value;sel.innerHTML=apOpts(k,cur,v);sel.value=cur;
+    if(v&&!sel.value&&modelli(k).length===1&&v!=='inst')sel.value=modelli(k)[0][0]});
+  const w=$('#modwrap');
+  w.addEventListener('submit',async e=>{if(e.target.id!=='modf')return;e.preventDefault();const fd=new FormData(e.target),b=e.target.querySelector('button');b.disabled=true;if(await modAdd(fd.get('cat'),fd.get('nome'))){e.target.elements.nome.value=''}b.disabled=false;apRefresh()});
+  w.addEventListener('click',async e=>{const s=e.target.closest('[data-msug]');if(s){const [c,n]=s.dataset.msug.split('|');s.disabled=true;await modAdd(c,n);apRefresh();return}
+    const d=e.target.closest('[data-mdel]');if(d){const id=d.dataset.mdel,p=S.pd.get(id)||{},nu=unitsOf(id).length;
+      S.modal={type:'confirm',danger:!nu,title:`Togliere ${p.nome||'il modello'}?`,text:nu?`Non comparirà più tra i modelli da scegliere nella pratica. Resta nel Magazzino con i suoi ${nu} pezzi; le pratiche già salvate lo mantengono.`:'Non comparirà più tra i modelli da scegliere. Le pratiche già salvate mantengono il nome del modello.',ok:'Togli',done:'Modello tolto',fn:async()=>{if(nu)await S.db.doc('prodotti/'+id).update({cat:''});else await S.db.doc('prodotti/'+id).delete();apRefresh()}};renderModal()}});
 }
 function findDups(ordine,idr){
   const o=String(ordine||'').trim().toLowerCase(),r=String(idr||'').trim().toLowerCase(),out=[];
@@ -584,7 +631,7 @@ function showDups(){
 function bindForm(){
   const form=$('#pf');let next='agenda';
   form.addEventListener('click',e=>{const b=e.target.closest('button[data-next]');if(b)next=b.dataset.next;const pp=e.target.closest('[data-pfspick]');if(pp){$('#pfsIn').value=pp.dataset.pfspick;renderPfsSug()}});
-  $('#pfsIn').addEventListener('input',renderPfsSug);renderPfsSug();
+  $('#pfsIn').addEventListener('input',renderPfsSug);renderPfsSug();bindAp();
   $('#pfsFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)importPfs(f)};
   if($('#pfsClear'))$('#pfsClear').onclick=()=>{S.modal={type:'confirm',danger:true,title:'Togliere le posizioni importate?',text:`Le ${S.pfsImp.size} posizioni importate verranno tolte; resta l\'elenco FiberTools incluso nell\'app. Le pratiche già salvate mantengono la loro posizione.`,ok:'Svuota',done:'Posizioni svuotate',fn:async()=>{for(const id of [...S.pfsDocs.keys()])await S.db.doc('pfsdb/'+id).delete();if(S.view==='nuova')render()}};renderModal()};
   form.addEventListener('input',e=>{if(e.target.name==='ordine'||e.target.name==='idRisorsa'){S.dupOk=null;showDups()}});
@@ -593,8 +640,9 @@ function bindForm(){
     e.preventDefault();const fd=new FormData(form);const g=k=>String(fd.get(k)||'').trim();
     const o={tipo:g('tipo'),committente:g('committente'),rete:g('rete'),ordine:g('ordine'),idRisorsa:g('idRisorsa'),indirizzo:g('indirizzo'),telefono:g('telefono'),pfs:g('pfs'),permuta:g('permuta'),splitter:g('splitter'),data:g('data'),fascia:g('fascia')};
     o.tecnici=[...new Set(fd.getAll('tecnici').map(String))];o.tecnicoId=o.tecnici[0]||'';o.anticipo=fd.get('anticipo')==='1';
+    {const old=S.editId?S.pr.get(S.editId):null;for(const k of ['ont','modem']){const m=g(k+'M'),id=g(k+'Id');o[k]=APM[m]?{m,id,nome:id?(S.pd.get(id)?.nome||old?.[k]?.nome||''):''}:null}}
     {const l=S.pfs.get(pk(o.pfs));if(l){o.pfs=l.n;o.pfsLat=l.lat;o.pfsLng=l.lng;o.pfsAnello=l.a||''}else{const old=S.editId?S.pr.get(S.editId):null;if(old&&pk(old.pfs)===pk(o.pfs)&&old.pfsLat!=null){o.pfsLat=old.pfsLat;o.pfsLng=old.pfsLng;o.pfsAnello=old.pfsAnello||''}else{o.pfsLat=null;o.pfsLng=null;o.pfsAnello=''}}}
-    const miss=[!o.tipo&&'tipo di intervento (Assurance o Delivery)',!o.committente&&'committente',!o.rete&&'rete (Open Fiber o FiberCop)',!o.ordine&&'ordine',!o.data&&'data',!o.fascia&&'fascia oraria'].filter(Boolean);const er=$('#ferr');
+    const miss=[!o.tipo&&'tipo di intervento (Assurance o Delivery)',!o.committente&&'committente',!o.rete&&'rete (Open Fiber o FiberCop)',!o.ordine&&'ordine',!o.data&&'data',!o.fascia&&'fascia oraria',apCons(o.ont)&&!o.ont.id&&'modello ONT',apCons(o.modem)&&!o.modem.id&&'modello modem'].filter(Boolean);const er=$('#ferr');
     if(miss.length){er.textContent='Manca: '+miss.join(', ')+'.';return}
     const dups=findDups(o.ordine,o.idRisorsa),dk=o.ordine+'|'+o.idRisorsa;showDups();
     if(dups.length&&S.dupOk!==dk){S.dupOk=dk;er.textContent='Attenzione: esiste già una pratica con lo stesso '+[...new Set(dups.map(d=>d.campo))].join(' e ')+'. Controlla qui sopra e premi di nuovo Salva per aggiungerla comunque.';return}
@@ -645,7 +693,7 @@ function lowHTML(){const l=lowStock().filter(x=>!S.mag.comm||x.c===S.mag.comm);i
   return `<div class="lowbox" role="status"><b>${ic('box')}Sotto scorta minima</b>${l.map(x=>`<button class="lowi" data-prod="${esc(x.pid)}" data-pc="${x.c}">${ctag(x.c)} ${esc(prodName(x.pid))} <span>${x.have} su ${x.min}</span></button>`).join('')}</div>`}
 function stockBar(c){const tot=c.magazzino+c.tecnico+c.installato||1;return `<div class="stock"><i style="width:${c.magazzino/tot*100}%;background:var(--neu)"></i><i style="width:${c.tecnico/tot*100}%;background:var(--wait)"></i><i style="width:${c.installato/tot*100}%;background:var(--ok)"></i></div>`}
 function prodCard(id,p,us,cm){const u=us.filter(x=>cm==='—'?!x.committente:x.committente===cm),c=counts(u),min=+((p.soglie||{})[cm])||0,low=min&&c.magazzino<min;
-  return `<button class="prod${low?' low':''}" data-prod="${esc(id)}" data-pc="${esc(cm==='—'?'':cm)}"><h4>${esc(p.nome)}</h4>${min?`<div class="pill ${low?'ko':'neu'}" style="display:inline-block;margin:2px 0 4px">${low?'Sotto scorta':'Scorta minima'}: ${c.magazzino} su ${min}</div>`:''}<div class="cod">${ic('bc')}${esc(p.codice||'Senza codice a barre')}</div>${stockBar(c)}
+  return `<button class="prod${low?' low':''}" data-prod="${esc(id)}" data-pc="${esc(cm==='—'?'':cm)}"><h4>${esc(p.nome)}${p.cat?` <span class="pill neu" style="font-size:12px">${APK[p.cat]}</span>`:''}</h4>${min?`<div class="pill ${low?'ko':'neu'}" style="display:inline-block;margin:2px 0 4px">${low?'Sotto scorta':'Scorta minima'}: ${c.magazzino} su ${min}</div>`:''}<div class="cod">${ic('bc')}${esc(p.codice||'Senza codice a barre')}</div>${stockBar(c)}
     <div class="leg"><span><span class="dot" style="background:var(--neu)"></span><b>${c.magazzino}</b> in magazzino</span><span><span class="dot" style="background:var(--wait)"></span><b>${c.tecnico}</b> ai tecnici</span><span><span class="dot" style="background:var(--ok)"></span><b>${c.installato}</b> installati</span>${c.scaricato?`<span><b>${c.scaricato}</b> scaricati</span>`:''}</div></button>`}
 function prodListHTML(){
   if(!S.pd.size)return `<div class="empty">Nessun prodotto in magazzino.<div style="margin-top:12px"><button class="btn yel" data-mt2="carica">${ic('plus')}Carica i primi prodotti</button></div></div>`;
@@ -682,6 +730,7 @@ function caricaHTML(){
    <div class="lbl">Committente <span class="req">*</span></div>${commSeg('ccomm',S.mag.comm||S.mag.lastComm||'')}
    <label class="f">Prodotto<select class="in" id="cprod"><option value="__new">+ Nuovo prodotto</option>${[...S.pd].sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||'')).map(([id,p])=>`<option value="${esc(id)}" ${pre===id?'selected':''}>${esc(p.nome)}${p.codice?' · '+esc(p.codice):''}</option>`).join('')}</select></label>
    <div id="cnew" ${pre?'hidden':''}><div class="grid2"><label class="f">Nome prodotto <span class="req">*</span><input class="in" id="cnome" placeholder="Es. ONT ZTE F6005" autocomplete="off"></label>
+    <label class="f">Tipo<select class="in" id="ccat"><option value="">Altro materiale</option><option value="ont">Modello ONT</option><option value="modem">Modello modem</option></select></label>
     <div><label class="f" style="margin-bottom:6px">Codice a barre prodotto<input class="in mono" id="ccod" placeholder="Scansiona o scrivi" autocomplete="off"></label>${scanBtn('ccod')}</div></div><div class="note" id="cmatch" style="margin-bottom:10px"></div></div>
    ${serBox('car','Seriali della serie')}
    <label class="f">Assegna subito a un tecnico (facoltativo)<select class="in" id="ctec">${tecOpts('','Lascia in magazzino')}</select></label>
@@ -702,7 +751,7 @@ function bindCarica(){
     if(pid!=='__new'&&!list.length){er.textContent=all.length?'Tutti i seriali sono già presenti in magazzino.':'Scansiona almeno un seriale.';return}
     const tid=$('#ctec').value;btn.disabled=true;S.busy=true;const now=new Date().toISOString();S.mag.lastComm=comm;
     try{
-      if(pid==='__new'){btn.textContent='Creo prodotto…';const r=await S.db.collection('prodotti').add({nome,codice,createdAt:now});pid=r.id}
+      if(pid==='__new'){btn.textContent='Creo prodotto…';const r=await S.db.collection('prodotti').add({nome,codice,cat:$('#ccat')?.value||'',createdAt:now});pid=r.id}
       const errs=await pool(list,s=>S.db.doc('unita/'+sk(s)).set({seriale:s,prodottoId:pid,committente:comm,stato:tid?'tecnico':'magazzino',tecnicoId:tid||'',praticaId:'',ordine:'',idRisorsa:'',createdAt:now,assignedAt:tid?now:'',installedAt:'',scaricatoAt:'',motivoScarico:'',notaScarico:''}),6,d=>btn.textContent=`Salvo ${d} di ${list.length}…`);
       S.busy=false;const ok=list.length-errs.length;
       toast(list.length?`${ok} pezzi ${comm} caricati in ${prodName(pid)}${tid?' e assegnati a '+tecName(tid):''}`:'Prodotto creato');
@@ -881,6 +930,7 @@ function renderModal(){
       <h3>${p.indirizzo?`<a class="alink" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener">${esc(p.indirizzo)}${ic('pin')}</a>`:'Indirizzo non indicato'}</h3><div class="note" style="text-transform:capitalize">${esc(dayName(p.data))} · ${fa.a}–${fa.b}${p.ora?' · ore '+esc(p.ora):''}</div>
       ${Array.isArray(p.rimod)&&p.rimod.length?`<div class="dupw" style="margin:10px 0 0"><b>Rimodulata ${p.rimod.length===1?'1 volta':p.rimod.length+' volte'}</b>${p.rimod.map(r=>`<div style="margin-top:4px">${esc(dmy(r.daData))} ${esc(fascia(r.daFascia).a)} → <b>${esc(dmy(r.aData))} ${esc(fascia(r.aFascia).a)}–${esc(fascia(r.aFascia).b)}${r.ora?' ore '+esc(r.ora):''}</b> · ${esc(r.by?tecName(r.by):'gestore')} il ${esc(dt(r.at))}${r.nota?' · '+esc(r.nota):''}</div>`).join('')}</div>`:''}
       <dl class="kv"><dt>Intervento</dt><dd>${esc(p.tipo||'—')}</dd><dt>Rete</dt><dd>${esc(p.rete||'—')}</dd><dt>Ordine</dt><dd>${esc(p.ordine||'—')}</dd><dt>ID risorsa</dt><dd>${esc(p.idRisorsa||'—')}</dd><dt>PFS</dt><dd>${(()=>{const l=pfsLoc(p);return esc(p.pfs||'—')+(l?`${l.a?' · anello '+esc(l.a):''} <a class="btn sm pri" href="${navLL(l.lat,l.lng)}" target="_blank" rel="noopener">${ic('pin')}Vai al PFS</a>`:'')})()}</dd><dt>Numero permuta</dt><dd>${esc(pv(M.id,p,'permuta')||'—')}</dd><dt>Splitter</dt><dd>${esc(pv(M.id,p,'splitter')||'—')}</dd>
+        <dt>ONT</dt><dd>${apOf(p,'ont')?`<b>${esc(apNome(apOf(p,'ont'))||'del cliente')}</b> · ${APM[p.ont.m]}`:'Non serve'}</dd><dt>Modem</dt><dd>${apOf(p,'modem')?`<b>${esc(apNome(apOf(p,'modem'))||'del cliente')}</b> · ${APM[p.modem.m]}`:'Non serve'}</dd>
         <dt>Indirizzo</dt><dd>${p.indirizzo?`<a class="alink" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener">${esc(p.indirizzo)}</a> <a class="btn sm pri" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener">${ic('pin')}Naviga</a>`:'—'}</dd>
         <dt>Telefono</dt><dd>${p.telefono?`<a href="tel:${esc(p.telefono.replace(/[^\d+]/g,''))}">${esc(p.telefono)}</a> <button class="btn sm" data-copy="${esc(p.telefono)}">Copia</button>`:'—'}</dd>
         <dt>${tecsOf(p).length>1?'Tecnici':'Tecnico'}</dt><dd>${tecsOf(p).length?tecsOf(p).map(id=>esc(tecName(id))+(S.tec.get(id)?.telefono?' · '+esc(S.tec.get(id).telefono):'')).join('<br>'):(p.tecniciNomi?.length?esc(p.tecniciNomi.join(' + ')):'Non assegnata')}</dd></dl>${!arch&&st!=='fatta'?contactHTML(M.id,p):''}
@@ -895,7 +945,7 @@ function renderModal(){
   }else if(M.type==='complete'&&isAss(S.pr.get(M.id))){
     const p=S.pr.get(M.id)||{};S.up={fotoIdRisorsa:[],foto:[],caratterizzazione:[]};
     box.innerHTML=shell(`<h3>Chiudi intervento Assurance</h3><div class="note">${esc(p.committente||'')} · Ordine ${esc(p.ordine||'—')} · ID risorsa ${esc(p.idRisorsa||'—')}</div>
-      <form id="cf" data-ass="1" style="margin-top:16px">
+      <form id="cf" data-ass="1" style="margin-top:16px">${apNoteHTML(p)}
         <label class="f">Nota <span class="req">*</span><textarea class="in" name="nota" rows="3" placeholder="Cosa è stato fatto o perché" required></textarea></label>
         <div class="lbl">Esito <span class="req">*</span></div>
         <div class="seg esa">${[['positiva','Positiva'],['negativa','Negativa'],['rimodulato','Rimodulato']].map(([k,l])=>`<label><input type="radio" name="esitoAss" value="${k}"><span class="k-${k}">${l}</span></label>`).join('')}</div>
@@ -910,7 +960,7 @@ function renderModal(){
       <form id="cf" style="margin-top:16px">
         <label class="f">Nota<textarea class="in" name="nota" rows="3" placeholder="Esito lavoro, eventuali problemi"></textarea></label>
         <div class="grid2"><label class="f">Numero permuta <span class="req">*</span><input class="in" name="permuta" value="${esc(p.permuta||'')}" autocomplete="off" required></label><label class="f">Splitter <span class="req">*</span><input class="in" name="splitter" value="${esc(p.splitter||'')}" autocomplete="off" required></label></div>
-        ${serBox('ins','Materiale installato · codici a barre dei seriali','Scansiona il codice a barre del seriale installato (uno per riga)')}
+        ${apNoteHTML(p)}${serBox('ins','Materiale installato · codici a barre dei seriali','Scansiona il codice a barre del seriale installato (uno per riga)')}
         ${S.assets?`${blk('fotoIdRisorsa','Foto ID risorsa (facoltativa)',false,'image/*',false)}${blk('foto','Foto (facoltative)',false,'image/*',true)}${blk('caratterizzazione','Caratterizzazione · foto o PDF (facoltativa)',false,'image/*,application/pdf',true)}`:'<p class="note">Il caricamento di foto non è disponibile per il tuo account: puoi completare la pratica senza foto, oppure chiedi al gestore di condividerti l\'app come Collaboratore o Editor.</p>'}
         <div class="err" id="cerr"></div><div class="acts"><button class="btn yel" type="submit">Conferma completamento</button><button class="btn" type="button" data-back>Indietro</button></div></form>`);
   }else if(M.type==='soglie'){
@@ -919,6 +969,7 @@ function renderModal(){
   }else if(M.type==='prod'){
     const p=S.pd.get(M.id)||{};
     box.innerHTML=shell(`<h3>Modifica prodotto</h3><form id="pform" style="margin-top:14px"><label class="f">Nome prodotto<input class="in" name="nome" value="${esc(p.nome||'')}"></label>
+      <label class="f">Tipo<select class="in" name="cat"><option value="">Altro materiale</option><option value="ont" ${p.cat==='ont'?'selected':''}>Modello ONT (si sceglie nelle pratiche)</option><option value="modem" ${p.cat==='modem'?'selected':''}>Modello modem (si sceglie nelle pratiche)</option></select></label>
       <label class="f" style="margin-bottom:6px">Codice a barre prodotto<input class="in mono" id="pcod" name="codice" value="${esc(p.codice||'')}"></label>${scanBtn('pcod')}
       <div class="err" id="perr"></div><div class="acts"><button class="btn pri" type="submit">Salva</button><button class="btn" type="button" data-close>Annulla</button></div></form>`);
   }else if(M.type==='confirm'){
@@ -978,7 +1029,7 @@ $('#modal').addEventListener('submit',async e=>{
   if(e.target.id==='sogf'){e.preventDefault();const fd=new FormData(e.target),so={};for(const c of COMM)so[c]=Math.max(0,parseInt(fd.get(c),10)||0);
     try{await S.db.doc('prodotti/'+S.modal.id).update({soglie:so});closeModal();toast('Scorta minima salvata')}catch(x){$('#sogerr').textContent=errText(x)}return}
   if(e.target.id==='pform'){e.preventDefault();const fd=new FormData(e.target);const nome=String(fd.get('nome')||'').trim(),codice=String(fd.get('codice')||'').trim();if(!nome){$('#perr').textContent='Inserisci il nome.';return}
-    try{await S.db.doc('prodotti/'+S.modal.id).update({nome,codice});closeModal();toast('Prodotto aggiornato')}catch(x){$('#perr').textContent=errText(x)}return}
+    const cat=String(fd.get('cat')||'');try{await S.db.doc('prodotti/'+S.modal.id).update({nome,codice,cat});closeModal();toast('Prodotto aggiornato')}catch(x){$('#perr').textContent=errText(x)}return}
   if(e.target.id!=='cf')return;e.preventDefault();
   const er=$('#cerr'),btn=e.target.querySelector('button[type=submit]');
   if(e.target.dataset.ass){
@@ -1004,6 +1055,7 @@ $('#modal').addEventListener('submit',async e=>{
   if(bad.length){er.textContent='Controlla i seriali: '+bad.map(r=>r[0]+' ('+r[2]+')').join(', ');return}
   const cfd=new FormData(e.target);const nota=String(cfd.get('nota')||'').trim(),permuta=String(cfd.get('permuta')||'').trim(),splitter=String(cfd.get('splitter')||'').trim();
   if(!permuta||!splitter){er.textContent='Inserisci '+[!permuta&&'il numero permuta',!splitter&&'lo splitter'].filter(Boolean).join(' e ')+'.';return}
+  {const miss=apMissing(S.pr.get(S.modal.id)||{},sr.map(r=>r[0])),mk=miss.join('|')+'#'+sr.length;if(miss.length&&S.apOk!==mk){S.apOk=mk;play('err');er.textContent='Non hai scansionato il seriale di: '+miss.join(', ')+'. Scansionalo qui sopra, oppure premi di nuovo Conferma per chiudere comunque.';return}}
   const all=['fotoIdRisorsa','foto','caratterizzazione'].flatMap(k=>S.up[k].map(u=>[k,u.file]));
   const out={fotoIdRisorsa:[],foto:[],caratterizzazione:[]};
   S.busy=true;btn.disabled=true;er.textContent='';
@@ -1274,7 +1326,10 @@ function renderImport(){
 }
 
 /* ---------- archivio ---------- */
-function snapOf(id){const p=S.pr.get(id)||{};const t=tecsOf(p);return {rete:p.rete||'',ora:p.ora||'',rimod:Array.isArray(p.rimod)?p.rimod:[],pfsLat:p.pfsLat??null,pfsLng:p.pfsLng??null,pfsAnello:p.pfsAnello||'',tipo:p.tipo||'',committente:p.committente||'',ordine:p.ordine||'',idRisorsa:p.idRisorsa||'',indirizzo:p.indirizzo||'',telefono:p.telefono||'',pfs:p.pfs||'',permuta:p.permuta||'',splitter:p.splitter||'',data:p.data||'',fascia:p.fascia||'',tecnici:t,tecnicoId:t[0]||'',tecniciNomi:t.map(x=>tecName(x))}}
+function apNoteHTML(p){const l=['ont','modem'].filter(k=>apOf(p,k));if(!l.length)return '';
+  return `<div class="apnote"><b>Apparati di questa pratica</b>${l.map(k=>{const a=p[k];return `<div>${ic(k==='ont'?'ont':'wifi')} <b>${esc(apLab(k,a))}</b> · ${APM[a.m]}${apCons(a)?' · <span class="note">scansiona il seriale che consegni</span>':''}</div>`}).join('')}</div>`}
+function apMissing(p,mats){const out=[];for(const k of ['ont','modem']){const a=apOf(p,k);if(!apCons(a)||!a.id||!unitsOf(a.id).length)continue;if(!mats.some(s=>S.un.get(sk(s))?.prodottoId===a.id))out.push(apLab(k,a))}return out}
+function snapOf(id){const p=S.pr.get(id)||{};const t=tecsOf(p);return {rete:p.rete||'',ora:p.ora||'',rimod:Array.isArray(p.rimod)?p.rimod:[],pfsLat:p.pfsLat??null,pfsLng:p.pfsLng??null,pfsAnello:p.pfsAnello||'',tipo:p.tipo||'',committente:p.committente||'',ordine:p.ordine||'',idRisorsa:p.idRisorsa||'',indirizzo:p.indirizzo||'',telefono:p.telefono||'',pfs:p.pfs||'',permuta:p.permuta||'',splitter:p.splitter||'',ont:apOf(p,'ont')?{...p.ont,nome:apNome(p.ont)}:null,modem:apOf(p,'modem')?{...p.modem,nome:apNome(p.modem)}:null,data:p.data||'',fascia:p.fascia||'',tecnici:t,tecnicoId:t[0]||'',tecniciNomi:t.map(x=>tecName(x))}}
 function archItems(){
   const a=S.ar,q=a.q.trim().toLowerCase(),out=[];
   for(const [id,e] of S.es){
@@ -1284,7 +1339,7 @@ function archItems(){
     if(a.tipo&&p.tipo!==a.tipo)continue;if(a.comm&&p.committente!==a.comm)continue;
     if(S.admin&&a.tec&&!team.includes(a.tec))continue;
     const names=team.length?team.map(tecName).join(' + '):(p.tecniciNomi||[]).join(' + ');
-    if(q&&![p.ordine,p.idRisorsa,p.indirizzo,p.pfs,e.permuta||p.permuta,e.splitter||p.splitter,p.telefono,names,(e.materiali||[]).join(' ')].join(' ').toLowerCase().includes(q))continue;
+    if(q&&![p.ordine,p.idRisorsa,p.indirizzo,p.pfs,e.permuta||p.permuta,e.splitter||p.splitter,p.telefono,names,(e.materiali||[]).join(' '),apTxt(p,'ont'),apTxt(p,'modem')].join(' ').toLowerCase().includes(q))continue;
     out.push({id,p,e,names});
   }
   return out.sort((x,y)=>(y.e.completedAt||'').localeCompare(x.e.completedAt||''));
@@ -1306,9 +1361,9 @@ function bindArch(){
     const nw=$('#stonow');if(nw)nw.onclick=async()=>{nw.disabled=true;try{const r=await S.call('archiveNow',{});toast(r.archiviate?`${r.archiviate} pratiche spostate nello storico`:'Nessuna pratica da spostare');if(r.archiviate)setTimeout(()=>location.reload(),1200)}catch(x){toast('Non riuscito: '+x.message)}nw.disabled=false}}
   const on=(id,k,ev)=>{const el=$('#'+id);if(el)el.addEventListener(ev||'change',e=>{S.ar[k]=e.target.value;renderArch()})};
   on('aq','q','input');on('am','mese');on('ati','tipo');on('acm','comm');on('atc','tec');
-  $('#arcopy').onclick=async()=>{const rows=archItems();const h=['Completata','Data','Fascia','Tipo','Esito','Rimodulazioni','Committente','Rete','Ordine','ID risorsa','PFS','Numero permuta','Splitter','Indirizzo','Tecnici','Seriali installati','Nota'];
+  $('#arcopy').onclick=async()=>{const rows=archItems();const h=['Completata','Data','Fascia','Tipo','Esito','Rimodulazioni','Committente','Rete','Ordine','ID risorsa','PFS','Numero permuta','Splitter','ONT','Modem','Indirizzo','Tecnici','Seriali installati','Nota'];
     const cl=v=>String(v??'').replace(/[\t\n\r]+/g,' ');
-    const tsv=[h.join('\t'),...rows.map(({p,e,names})=>[dt(e.completedAt),p.data,fascia(p.fascia).a+'-'+fascia(p.fascia).b,p.tipo,ESA[e.esitoAss]?.[1]||'Completata',(p.rimod||[]).length,p.committente,p.rete,p.ordine,p.idRisorsa,p.pfs,e.permuta||p.permuta,e.splitter||p.splitter,p.indirizzo,names,(e.materiali||[]).join(' '),e.nota].map(cl).join('\t'))].join('\n');
+    const tsv=[h.join('\t'),...rows.map(({p,e,names})=>[dt(e.completedAt),p.data,fascia(p.fascia).a+'-'+fascia(p.fascia).b,p.tipo,ESA[e.esitoAss]?.[1]||'Completata',(p.rimod||[]).length,p.committente,p.rete,p.ordine,p.idRisorsa,p.pfs,e.permuta||p.permuta,e.splitter||p.splitter,apTxt(p,'ont'),apTxt(p,'modem'),p.indirizzo,names,(e.materiali||[]).join(' '),e.nota].map(cl).join('\t'))].join('\n');
     try{await navigator.clipboard.writeText(tsv);toast(rows.length+' righe copiate: incollale in Excel')}catch(x){toast('Copia non riuscita')}};
 }
 function renderArch(){
@@ -1455,7 +1510,9 @@ function msgCliente(p,kind){
   if(kind==='arrivo')return `Buongiorno, sono ${S.tec.get(S.me)?.nome||'il tecnico'}${S.cfg.azienda?' di '+S.cfg.azienda:''}. Sto arrivando per ${cosa}${ord}${p.indirizzo?' in '+p.indirizzo:''}: sarò da lei a breve.`;
   if(kind==='sposta')return `Buongiorno${chi}. Il suo appuntamento per ${cosa}${ord} è stato spostato a ${giorno} ${ora}. Ci scusiamo per il disagio: per qualsiasi necessità risponda a questo messaggio.`;
   if(kind==='assente')return `Buongiorno${chi}. Il tecnico è passato oggi per ${cosa}${ord} ma non l'ha trovata. La preghiamo di richiamarci o rispondere a questo messaggio per fissare un nuovo appuntamento.`;
-  return `Buongiorno${chi}. Le confermiamo l'appuntamento per ${cosa}${ord} ${giorno} ${ora}${p.indirizzo?' in '+p.indirizzo:''}.${tec?' Il tecnico '+tec+' la contatterà prima di arrivare.':''} Per spostarlo risponda a questo messaggio.`;
+  const por=['ont','modem'].map(k=>apOf(p,k)).filter(apCons).map(a=>apNome(a)).filter(Boolean),inst=['modem'].map(k=>apOf(p,k)).filter(a=>a&&a.m==='inst');
+  const app=por.length?` Il tecnico porterà ${por.length>1?'gli apparati':"l'apparato"} ${por.join(' e ')}.`:'';const tieni=inst.length?' Tenga pronto il modem che le è stato consegnato.':'';
+  return `Buongiorno${chi}. Le confermiamo l'appuntamento per ${cosa}${ord} ${giorno} ${ora}${p.indirizzo?' in '+p.indirizzo:''}.${app}${tieni}${tec?' Il tecnico '+tec+' la contatterà prima di arrivare.':''} Per spostarlo risponda a questo messaggio.`;
 }
 const waLink=(n,m)=>`https://wa.me/${n}?text=${encodeURIComponent(m)}`;
 const smsLink=(n,m)=>`sms:+${n}${isIOS()?'&':'?'}body=${encodeURIComponent(m)}`;
@@ -1528,12 +1585,12 @@ function dl(blob,name){const a=document.createElement('a');a.href=URL.createObje
 async function backupXlsx(){const X=await loadXLSX();const wb=X.utils.book_new();const stamp=today();
   const pr=[];const ids=new Set([...S.pr.keys(),...S.es.keys()]);
   for(const id of ids){const p=S.pr.get(id)||S.es.get(id)?.snap||{},e=S.es.get(id);const st=e?(ESA[e.esitoAss]?.[1]||'Completata'):(tecsOf(p).length?'Assegnata':'Da assegnare');
-    pr.push({Data:p.data||'',Fascia:p.fascia?fascia(p.fascia).a+'-'+fascia(p.fascia).b:'',Ora:p.ora||'',Tipo:normT(p.tipo)||'',Committente:p.committente||'',Rete:p.rete||'',Ordine:p.ordine||'','ID risorsa':p.idRisorsa||'',Indirizzo:p.indirizzo||'',Telefono:p.telefono||'',PFS:p.pfs||'',Permuta:e?.permuta||p.permuta||'',Splitter:e?.splitter||p.splitter||'',Tecnici:tecsOf(p).map(tecName).join(' + '),Stato:st,'Chiusa il':e?.completedAt?dt(e.completedAt):'',Nota:e?.nota||'','Seriali installati':(e?.materiali||[]).join(' '),Rimodulazioni:(p.rimod||[]).length,'In archivio':S.pr.has(id)?'':'sì'})}
+    pr.push({Data:p.data||'',Fascia:p.fascia?fascia(p.fascia).a+'-'+fascia(p.fascia).b:'',Ora:p.ora||'',Tipo:normT(p.tipo)||'',Committente:p.committente||'',Rete:p.rete||'',Ordine:p.ordine||'','ID risorsa':p.idRisorsa||'',Indirizzo:p.indirizzo||'',Telefono:p.telefono||'',PFS:p.pfs||'',Permuta:e?.permuta||p.permuta||'',Splitter:e?.splitter||p.splitter||'',ONT:apTxt(p,'ont'),Modem:apTxt(p,'modem'),Tecnici:tecsOf(p).map(tecName).join(' + '),Stato:st,'Chiusa il':e?.completedAt?dt(e.completedAt):'',Nota:e?.nota||'','Seriali installati':(e?.materiali||[]).join(' '),Rimodulazioni:(p.rimod||[]).length,'In archivio':S.pr.has(id)?'':'sì'})}
   pr.sort((a,b)=>String(a.Data).localeCompare(String(b.Data)));
   X.utils.book_append_sheet(wb,X.utils.json_to_sheet(pr.length?pr:[{Nota:'Nessuna pratica'}]),'Pratiche');
   const un=[...S.un.values()].map(u=>({Seriale:u.seriale,Prodotto:prodName(u.prodottoId),Committente:u.committente||'',Stato:SL[u.stato]||u.stato,Tecnico:u.tecnicoId?tecName(u.tecnicoId):'',Ordine:u.ordine||'','ID risorsa':u.idRisorsa||'',Caricato:dt(u.createdAt),Installato:dt(u.installedAt),'Scarico':u.motivoScarico||''}));
   X.utils.book_append_sheet(wb,X.utils.json_to_sheet(un.length?un:[{Nota:'Magazzino vuoto'}]),'Magazzino');
-  const pd=[...S.pd.values()].map(p=>({Prodotto:p.nome,'Codice a barre':p.codice||'',...Object.fromEntries(COMM.map(c=>['Scorta minima '+c,+(p.soglie||{})[c]||0]))}));
+  const pd=[...S.pd.values()].map(p=>({Prodotto:p.nome,Tipo:APK[p.cat]||'','Codice a barre':p.codice||'',...Object.fromEntries(COMM.map(c=>['Scorta minima '+c,+(p.soglie||{})[c]||0]))}));
   X.utils.book_append_sheet(wb,X.utils.json_to_sheet(pd.length?pd:[{Nota:'Nessun prodotto'}]),'Prodotti');
   const us=[...S.tec].map(([id,t])=>{const r=roleInfo(id)||{};return{Nome:t.nome||'',Telefono:t.telefono||'',Email:t.email||'',Ruolo:RUOLI[r.ruolo]||'',Stato:r.stato||''}});
   X.utils.book_append_sheet(wb,X.utils.json_to_sheet(us.length?us:[{Nota:'Nessun utente'}]),'Utenti');
