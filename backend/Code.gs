@@ -10,7 +10,8 @@
  *     Esegui come: Me · Chi ha accesso: Chiunque → Esegui il deployment.
  *  5. Copia l'URL che finisce con /exec e incollalo in GoFiber.
  */
-const VERSION = 2;
+const VERSION = 3;
+const BACKUP_KEEP = 12;     // backup mensili conservati su Drive
 const ARCHIVE_DAYS = 365;   // pratiche chiuse da più di un anno vanno nello Storico
 const TOMBSTONE_DAYS = 45; // righe eliminate tenute per avvisare i dispositivi, poi tolte
 const SHEET_ID = ''; // vuoto = il foglio collegato o, se lo script è separato, "GoFiber – Database" cercato su Drive
@@ -50,13 +51,17 @@ const props_ = () => PropertiesService.getScriptProperties();
 
 function setup() {
   dati_(); utenti_(); sessioni_(); storico_();
-  folder_(); photos_();
+  folder_(); photos_(); backups_();
   return 'GoFiber pronto';
 }
 
 function folder_() {
   const f = DriveApp.getFileById(ss_().getId()).getParents();
   return f.hasNext() ? f.next() : DriveApp.getRootFolder();
+}
+function backups_() {
+  const p = folder_(), it = p.getFoldersByName('GoFiber Backup');
+  return it.hasNext() ? it.next() : p.createFolder('GoFiber Backup');
 }
 function photos_() {
   const p = folder_(), it = p.getFoldersByName('GoFiber Foto');
@@ -218,7 +223,7 @@ const API = {
 
   sync(b) {
     const id = auth_(b), role = role_(id), since = Number(b.since || 0);
-    if (role.attivo && role.ruolo === 'admin') maybeArchive_();
+    if (role.attivo && role.ruolo === 'admin') { maybeArchive_(); maybeBackup_(); }
     const lw = lastWrite_();
     // nessuna modifica dall'ultimo controllo: risposta immediata, senza leggere il foglio
     if (since && lw && since >= lw) return { now: since, docs: [], owner: id === owner_(), ruolo: role.ruolo, attivo: role.attivo };
@@ -296,6 +301,35 @@ const API = {
     return archive_(Number(b.days) || ARCHIVE_DAYS);
   },
 
+  backups(b) {
+    const id = auth_(b), r = role_(id);
+    if (!(r.attivo && r.ruolo === 'admin')) throw new Error('Non autorizzato');
+    const out = [], it = backups_().getFiles();
+    while (it.hasNext()) { const f = it.next(); out.push({ nome: f.getName(), data: f.getDateCreated().toISOString(), url: f.getUrl() }); }
+    out.sort((a, b2) => b2.data.localeCompare(a.data));
+    return { items: out, cartella: backups_().getUrl() };
+  },
+
+  backupNow(b) {
+    const id = auth_(b), r = role_(id);
+    if (!(r.attivo && r.ruolo === 'admin')) throw new Error('Non autorizzato');
+    return backup_('manuale');
+  },
+
+  revokeSessions(b) {
+    const id = auth_(b), r = role_(id), target = b.userId || id;
+    if (target !== id && !(r.attivo && r.ruolo === 'admin')) throw new Error('Non autorizzato');
+    const keepTok = target === id && b.keepCurrent ? String(b.token) : '';
+    const s = sessioni_(), n = s.getLastRow(); let tolte = 0;
+    if (n > 1) {
+      const v = s.getRange(2, 1, n - 1, 3).getValues(), keep = [];
+      v.forEach(x => { if (x[1] === target && x[0] !== keepTok) { cache_().remove('s:' + x[0]); tolte++; } else keep.push(x); });
+      s.getRange(2, 1, n - 1, 3).clearContent();
+      if (keep.length) s.getRange(2, 1, keep.length, 3).setNumberFormat('@').setValues(keep);
+    }
+    return { tolte: tolte };
+  },
+
   pfs(b) {
     const id = auth_(b), r = role_(id);
     if (!r.attivo) throw new Error('Non autorizzato');
@@ -340,4 +374,22 @@ function archive_(days) {
     props_().setProperty('LAST_WRITE', String(now)); cache_().put('lw', String(now), 21600);
     return { archiviate: moved / 2, tolte: purged };
   } finally { lock.releaseLock(); }
+}
+
+/* ---------- backup mensile su Drive ---------- */
+function maybeBackup_() {
+  const m = new Date().toISOString().slice(0, 7);
+  if (props_().getProperty('LAST_BACKUP_MONTH') === m) return;
+  props_().setProperty('LAST_BACKUP_MONTH', m);
+  try { backup_('mensile'); } catch (x) {}
+}
+function backup_(tipo) {
+  const f = DriveApp.getFileById(ss_().getId()), d = new Date();
+  const nome = 'GoFiber backup ' + tipo + ' ' + Utilities.formatDate(d, 'Europe/Rome', 'yyyy-MM-dd HH.mm');
+  const c = f.makeCopy(nome, backups_());
+  const all = []; const it = backups_().getFiles();
+  while (it.hasNext()) { const x = it.next(); if (x.getName().indexOf('GoFiber backup mensile') === 0) all.push(x); }
+  all.sort((a, b) => b.getDateCreated() - a.getDateCreated());
+  all.slice(BACKUP_KEEP).forEach(x => x.setTrashed(true));
+  return { nome: nome, url: c.getUrl(), data: d.toISOString() };
 }

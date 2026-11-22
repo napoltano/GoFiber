@@ -145,6 +145,14 @@ body.auth #netbar{display:none}
 .lowbox>b{display:flex;align-items:center;gap:8px;color:var(--ko);margin-inline-end:6px}
 .lowi{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:6px 10px;cursor:pointer;font-weight:600}
 .lowi span{color:var(--ko)}.prod.low{border-color:color-mix(in srgb,var(--ko) 55%,transparent)}
+#lock{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:20px;background:radial-gradient(1100px 620px at 8% -12%,rgba(14,165,233,.38),transparent 62%),radial-gradient(900px 620px at 112% 112%,rgba(99,102,241,.34),transparent 62%),var(--bg)}
+.in.pin{font-size:26px;letter-spacing:.4em;text-align:center}
+.ctc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.ctc .seg span{min-height:38px;padding:6px 12px;font-size:14px}
+.ctcb{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:10px}
+.ctcb .btn{min-height:50px}.btn.wa{background:#25d366;border-color:#25d366;color:#fff}
+.rowqa{display:flex;gap:6px;margin-top:6px}.rowqa a{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;text-decoration:none;padding:5px 10px;border-radius:99px;border:1px solid var(--line);background:var(--soft)}
+.rowqa a.wa{background:#25d366;border-color:#25d366;color:#fff}.rowqa svg{width:15px;height:15px}
 .dupw{background:color-mix(in srgb,var(--wait) 14%,transparent);border:1px solid color-mix(in srgb,var(--wait) 45%,transparent);border-radius:10px;padding:10px 12px;font-size:14px;margin:-4px 0 14px}.dupw b{font-weight:600}.dupw button{margin-inline-start:4px}
 .r-OF{background:#13a538}.r-FC{background:#e2001a}
 .seg.rete input:checked+span.k-OF{background:#13a538;border-color:#13a538;color:#fff}.seg.rete input:checked+span.k-FC{background:#e2001a;border-color:#e2001a;color:#fff}
@@ -276,6 +284,7 @@ body.auth main{min-height:100vh;min-height:100dvh;display:grid;place-items:cente
 <div id="toast"></div>
 <div id="ntoasts"></div>
 <div id="scanner" hidden></div>
+<div id="lock" hidden></div>
 
 <script>
 {
@@ -301,6 +310,10 @@ const IC={
  bc:'<path d="M4 5v14M7 5v14M11 5v14M14 5v14M18 5v14M20 5v14"/>',
  arch:'<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9M10 13h4"/>',
  chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+ phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
+ wa:'<path d="M4 20l1.3-4A8 8 0 1 1 8.4 19z"/><path d="M9 9c0 3 3 6 6 6l1-1.5-2-1-1 1c-1-.5-2-1.5-2.5-2.5l1-1-1-2z"/>',
+ sms:'<path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8M8 13h5"/>',
+ gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
  pin:'<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
  cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'};
 const ic=k=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
@@ -330,7 +343,7 @@ $('#thm').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'
 
 const S={db:null,user:null,assets:null,admin:false,me:null,state:'load',
   pr:new Map(),es:new Map(),tec:new Map(),pd:new Map(),un:new Map(),
-  loaded:{pr:false,es:false,tec:false,pd:false,un:false,pfsx:false,ro:false},pfs:new Map(),pfsDocs:new Map(),roles:new Map(),role:null,gate:undefined,boss:false,isOwner:false,canApprove:false,forceReg:false,pfsBase:new Map(),pfsImp:new Map(),pfsBaseAt:'',pfsBaseState:'load',slow:false,err:null,
+  loaded:{pr:false,es:false,tec:false,pd:false,un:false,pfsx:false,ro:false,cfg:false},pfs:new Map(),pfsDocs:new Map(),roles:new Map(),cfgMap:new Map(),cfg:{},role:null,gate:undefined,boss:false,isOwner:false,canApprove:false,forceReg:false,pfsBase:new Map(),pfsImp:new Map(),pfsBaseAt:'',pfsBaseState:'load',slow:false,err:null,
   view:'agenda',editId:null,f:{range:'oggi',day:'',stato:'',comm:'',tipo:'',tec:'',q:''},
   mag:{tab:'prodotti',prod:null,pst:'',pq:'',q:'',mode:'ser',comm:'',lastComm:''},ar:{q:'',mese:'',tipo:'',comm:'',tec:''},rep:{per:'mese',ref:new Date().toISOString().slice(0,10),comm:'',tipo:'',tec:''},repMine:false,imp:{txt:'',rows:null,skip:true,def:{tipo:'',comm:'',rete:'',data:'',fascia:'',tec:''}},nuovaMode:'one',modal:null,up:null,dupOk:null,needReg:null,busy:false};
 
@@ -402,9 +415,9 @@ function sbUpdate(id){
 document.addEventListener('input',e=>{const t=e.target;if(t.id?.startsWith('sb-')){sbUpdate(t.id.slice(3));if(e.inputType==='insertLineBreak'||/\n$/.test(t.value))play('scan')}});
 
 /* ---------- navigazione ---------- */
-const views=()=>S.boss?['agenda','nuova','archivio','report','magazzino','tecnici']:S.admin?['agenda','nuova','archivio','report','magazzino']:['agenda','materiale','resa','profilo'];
+const views=()=>S.boss?['agenda','nuova','archivio','report','magazzino','tecnici','impostazioni']:S.admin?['agenda','nuova','archivio','report','magazzino']:['agenda','materiale','resa','profilo'];
 function tabs(){
-  const lab=S.admin?{agenda:['cal','Agenda'],nuova:['plus',S.editId?'Modifica':'Nuova pratica'],archivio:['arch','Archivio'],report:['chart','Riepilogo'],magazzino:['box','Magazzino'],tecnici:['users','Utenti']}:{agenda:['cal','Le mie pratiche'],archivio:['arch','Archivio'],materiale:['box','Il mio materiale'],resa:['chart','La mia resa'],profilo:['user','Profilo']};
+  const lab=S.admin?{agenda:['cal','Agenda'],nuova:['plus',S.editId?'Modifica':'Nuova pratica'],archivio:['arch','Archivio'],report:['chart','Riepilogo'],magazzino:['box','Magazzino'],tecnici:['users','Utenti'],impostazioni:['gear','Impostazioni']}:{agenda:['cal','Le mie pratiche'],archivio:['arch','Archivio'],materiale:['box','Il mio materiale'],resa:['chart','La mia resa'],profilo:['user','Profilo']};
   $('#tabs').innerHTML=(S.state==='ok'&&!S.gate)?views().map(v=>`<a href="#${v}" class="${S.view===v?'on':''}">${ic(lab[v][0])}<span>${lab[v][1]}</span></a>`).join(''):'';
   $('#who').textContent=S.state!=='ok'?'Non connesso':S.gate?'Accesso':(S.isOwner?'Proprietario':(S.tec.get(S.me)?.nome||'')+' · '+(RUOLI[S.role]||''));
 }
@@ -421,6 +434,7 @@ function render(){
   const v=S.view;
   if(v==='nuova'){if(!S.imp.def.data)S.imp.def.data=today();if(S.nuovaMode==='imp'&&!S.editId){m.innerHTML=nuovaTabs()+importHTML();bindNuovaTabs();bindImport()}else{m.innerHTML=(S.editId?'':nuovaTabs())+formHTML();if(!S.editId)bindNuovaTabs();bindForm()}}
   else if(v==='report'){m.innerHTML=reportHTML(false);bindReport();renderReport()}
+  else if(v==='impostazioni'){m.innerHTML=impHTML();bindImp()}
   else if(v==='resa'){m.innerHTML=reportHTML(true);bindReport();renderReport()}
   else if(v==='tecnici')m.innerHTML=utentiHTML();
   else if(v==='profilo'){m.innerHTML=profileHTML(false);bindProfile()}
@@ -497,7 +511,7 @@ function rowHTML(id,p,st){const fa=fascia(p.fascia),team=tecsOf(p);
   return `<article class="row st-${st}" tabindex="0" data-open="${esc(id)}">${isAnti(id,p)?`<div class="antib"><b>ANTICIPO</b><span>prevista ${esc(dayName(p.data))} · puoi farla prima</span></div>`:''}<div class="when"><b>${fa.a}</b><span>${fa.b}</span></div>
       <div><div class="top2">${tipoTag(p)}<span class="tag c-${esc(p.committente)}">${esc(p.committente)}</span>${reteTag(p)}${(([c,l])=>`<span class="pill ${c}">${l}</span>`)(stLab(id,st))}${lastRim(p)&&st!=='fatta'?`<span class="pill wait">Rimodulata${p.rimod.length>1?' ×'+p.rimod.length:''} · era ${esc(dmy(lastRim(p).daData))} ${esc(fascia(lastRim(p).daFascia).a)}</span>`:''}${p.ora&&st!=='fatta'?`<span class="pill neu">Ore ${esc(p.ora)}</span>`:''}</div>
       <div class="addr">${p.indirizzo?`<a class="alink" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener" title="Naviga all'indirizzo">${esc(p.indirizzo)}${ic('pin')}</a>`:'Indirizzo non indicato'}</div>
-      <div class="meta"><span>Ordine <b>${esc(p.ordine||'—')}</b></span><span>ID risorsa <b>${esc(p.idRisorsa||'—')}</b></span><span>PFS <b>${pfsHTML(p)}</b></span>${pv(id,p,'permuta')?`<span>Permuta <b>${esc(pv(id,p,'permuta'))}</b></span>`:''}${pv(id,p,'splitter')?`<span>Splitter <b>${esc(pv(id,p,'splitter'))}</b></span>`:''}${p.telefono?`<span>Tel <b>${esc(p.telefono)}</b></span>`:''}${who}</div></div><div class="chev">›</div></article>`}
+      <div class="meta"><span>Ordine <b>${esc(p.ordine||'—')}</b></span><span>ID risorsa <b>${esc(p.idRisorsa||'—')}</b></span><span>PFS <b>${pfsHTML(p)}</b></span>${pv(id,p,'permuta')?`<span>Permuta <b>${esc(pv(id,p,'permuta'))}</b></span>`:''}${pv(id,p,'splitter')?`<span>Splitter <b>${esc(pv(id,p,'splitter'))}</b></span>`:''}${p.telefono?`<span>Tel <b>${esc(p.telefono)}</b></span>`:''}${who}</div>${p.telefono&&st!=='fatta'&&telIntl(p.telefono)?`<div class="rowqa"><a href="tel:+${telIntl(p.telefono)}">${ic('phone')}Chiama</a><a class="wa" href="${esc(waLink(telIntl(p.telefono),msgCliente(p,!S.admin&&p.data===today()?'arrivo':'conferma')))}" target="_blank" rel="noopener">${ic('wa')}WhatsApp</a></div>`:''}</div><div class="chev">›</div></article>`}
 function antiBox(){
   if(S.admin)return '';
   const t=today(),l=[...S.pr].filter(([id,p])=>isAnti(id,p)&&tecsOf(p).includes(S.me)&&p.data>t).sort((a,b)=>(a[1].data||'').localeCompare(b[1].data||'')||(FI[a[1].fascia]??9)-(FI[b[1].fascia]??9));
@@ -825,6 +839,12 @@ document.addEventListener('click',e=>{
   const t=e.target;
   if(t.closest('a[href]'))return;
   const r=t.closest('[data-open]');if(r){S.modal={type:'detail',id:r.dataset.open};renderModal();return}
+  if(t.closest('[data-mypin]')){pinSetup(false);return}
+  if(t.closest('[data-logoutall]')){S.modal={type:'confirm',title:'Uscire dagli altri dispositivi?',text:'Tutti gli altri telefoni e computer collegati con il tuo account dovranno accedere di nuovo. Questo resta collegato.',ok:'Esci dagli altri',done:'Altri dispositivi disconnessi',fn:()=>S.call('revokeSessions',{keepCurrent:true})};renderModal();return}
+  const urv=t.closest('[data-urev]');if(urv){const id=urv.dataset.urev;S.modal={type:'confirm',danger:true,title:'Disconnettere '+tecName(id)+'?',text:'Esce subito da tutti i telefoni e computer: per rientrare dovrà inserire email e password. Usalo se ha perso il telefono.',ok:'Disconnetti',done:'Dispositivi disconnessi',fn:()=>S.call('revokeSessions',{userId:id})};renderModal();return}
+  if(t.closest('[data-bkxlsx]')){backupXlsx().catch(x=>toast('Backup non riuscito: '+(x.message||x)));return}
+  if(t.closest('[data-bkjson]')){dl(new Blob([JSON.stringify(backupData(),null,1)],{type:'application/json'}),`GoFiber-backup-completo-${today()}.json`);toast('Backup completo scaricato');return}
+  const bn=t.closest('[data-bknow]');if(bn){bn.disabled=true;$('#bkmsg').textContent='Backup in corso…';S.call('backupNow',{}).then(r=>{$('#bkmsg').textContent='';toast('Backup salvato su Drive');bindImp()}).catch(x=>{$('#bkmsg').textContent=x.message}).finally(()=>bn.disabled=false);return}
   if(t.closest('[data-magscan]')){S.mag.tab='cerca';S.mag.prod=null;render();setTimeout(()=>liveStart('sb-chk'),50);return}
   if(t.closest('[data-chkclear]')){S.mag.chk='';const ta=$('#sb-chk');if(ta){ta.value='';sbUpdate('chk')}return}
   const pr=t.closest('[data-prod]');if(pr){S.mag.prod=pr.dataset.prod;if(pr.dataset.pc!==undefined&&pr.dataset.pc)S.mag.comm=pr.dataset.pc;S.mag.pst='';S.mag.pq='';render();window.scrollTo(0,0);return}
@@ -841,7 +861,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{
   if((e.key==='Enter'||e.key===' ')&&e.target.matches?.('.row[data-open]')){e.preventDefault();e.target.click()}
-  if(e.key==='Escape'&&S.modal&&!S.busy)closeModal();
+  if(e.key==='Escape'&&S.modal&&!S.busy&&!S.modal.forced)closeModal();
 });
 document.addEventListener('error',e=>{if(e.target.tagName==='IMG'){e.target.classList.add('broken');const p=e.target.parentElement;if(p&&!p.dataset.ph){p.dataset.ph=1;p.insertAdjacentHTML('beforeend','<span class="note">Foto non disponibile</span>')}}},true);
 
@@ -863,7 +883,7 @@ function renderModal(){
       <dl class="kv"><dt>Intervento</dt><dd>${esc(p.tipo||'—')}</dd><dt>Rete</dt><dd>${esc(p.rete||'—')}</dd><dt>Ordine</dt><dd>${esc(p.ordine||'—')}</dd><dt>ID risorsa</dt><dd>${esc(p.idRisorsa||'—')}</dd><dt>PFS</dt><dd>${(()=>{const l=pfsLoc(p);return esc(p.pfs||'—')+(l?`${l.a?' · anello '+esc(l.a):''} <a class="btn sm pri" href="${navLL(l.lat,l.lng)}" target="_blank" rel="noopener">${ic('pin')}Vai al PFS</a>`:'')})()}</dd><dt>Numero permuta</dt><dd>${esc(pv(M.id,p,'permuta')||'—')}</dd><dt>Splitter</dt><dd>${esc(pv(M.id,p,'splitter')||'—')}</dd>
         <dt>Indirizzo</dt><dd>${p.indirizzo?`<a class="alink" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener">${esc(p.indirizzo)}</a> <a class="btn sm pri" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener">${ic('pin')}Naviga</a>`:'—'}</dd>
         <dt>Telefono</dt><dd>${p.telefono?`<a href="tel:${esc(p.telefono.replace(/[^\d+]/g,''))}">${esc(p.telefono)}</a> <button class="btn sm" data-copy="${esc(p.telefono)}">Copia</button>`:'—'}</dd>
-        <dt>${tecsOf(p).length>1?'Tecnici':'Tecnico'}</dt><dd>${tecsOf(p).length?tecsOf(p).map(id=>esc(tecName(id))+(S.tec.get(id)?.telefono?' · '+esc(S.tec.get(id).telefono):'')).join('<br>'):(p.tecniciNomi?.length?esc(p.tecniciNomi.join(' + ')):'Non assegnata')}</dd></dl>
+        <dt>${tecsOf(p).length>1?'Tecnici':'Tecnico'}</dt><dd>${tecsOf(p).length?tecsOf(p).map(id=>esc(tecName(id))+(S.tec.get(id)?.telefono?' · '+esc(S.tec.get(id).telefono):'')).join('<br>'):(p.tecniciNomi?.length?esc(p.tecniciNomi.join(' + ')):'Non assegnata')}</dd></dl>${!arch&&st!=='fatta'?contactHTML(M.id,p):''}
       ${e&&e.esitoAss?`<div class="esito"><h4 style="color:var(--${e.esitoAss==='positiva'?'ok':'ko'})">Esito ${e.esitoAss==='positiva'?'positivo':'negativo'} · ${esc(dt(e.completedAt))}${e.byAdmin?' dal gestore':e.by?' da '+esc(tecName(e.by)):''}</h4><div class="lbl">Nota</div><p style="margin:0;white-space:pre-wrap">${esc(e.nota||'—')}</p></div>`:''}
       ${e&&!e.esitoAss?`<div class="esito"><h4>Completata ${e.completedAt?'il '+esc(dt(e.completedAt)):''}${e.byAdmin?' dal gestore':e.by?' da '+esc(tecName(e.by)):''}</h4>
         <div class="lbl">Nota</div><p style="margin:0 0 12px;white-space:pre-wrap">${esc(e.nota||'—')}</p>
@@ -905,6 +925,10 @@ function renderModal(){
     box.innerHTML=shell(`<h3>${esc(M.title)}</h3><p>${esc(M.text)}</p><div class="err" id="xerr"></div><div class="acts"><button class="btn ${M.danger?'dng':'pri'}" data-ok>${esc(M.ok)}</button><button class="btn" data-close>Annulla</button></div>`);
   }else if(M.type==='pw'){
     box.innerHTML=shell(`<h3>Nuova password</h3><p class="note">Per ${esc(tecName(M.id))}. Comunicagliela: potrà cambiarla dal suo profilo.</p><form id="pwf"><label class="f">Password (almeno 6 caratteri)<input class="in" name="pw" type="text" autocomplete="off" value="${Math.random().toString(36).slice(2,10)}"></label><div class="err" id="pwerr"></div><div class="acts"><button class="btn yel" type="submit">Imposta</button><button class="btn" type="button" data-close>Annulla</button></div></form>`);
+  }else if(M.type==='pin'){
+    box.innerHTML=shell(`<h3>${hasPin()?'Cambia il PIN':'Scegli un PIN'}</h3><p class="note">${M.forced?'Il responsabile ha reso obbligatorio il PIN. ':''}Serve per sbloccare GoFiber su questo telefono dopo un periodo di inattività. Da 4 a 8 cifre.</p>
+      <form id="pinf" novalidate><label class="f">Nuovo PIN<input class="in pin" name="p1" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></label><label class="f">Ripeti il PIN<input class="in pin" name="p2" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></label><div class="err" id="pinerr"></div><div class="acts"><button class="btn yel" type="submit">Salva PIN</button>${M.forced?'':'<button class="btn" type="button" data-close>Annulla</button>'}${hasPin()&&!S.cfg.pinObbl?'<button class="btn dng" type="button" data-pinoff>Togli il PIN</button>':''}</div></form>`);
+    if(M.forced)box.querySelector('.x')?.remove();
   }else if(M.type==='notif'){box.innerHTML=shell(notifHTML());
   }else if(M.type==='install'){box.innerHTML=shell(installHTML());
   }else if(M.type==='conn'){
@@ -918,11 +942,12 @@ async function revertUnits(pid){const e=S.es.get(pid);const keys=(e?.materiali||
   await pool(keys,k=>{const u=S.un.get(k);return S.db.doc('unita/'+k).update({stato:u.tecnicoId?'tecnico':'magazzino',praticaId:'',ordine:'',idRisorsa:'',installedAt:''})},6)}
 $('#modal').addEventListener('click',async e=>{
   const t=e.target;
-  if(t.id==='ov'||t.closest('[data-close]')){if(!S.busy){const back=S.modal?.back;closeModal();if(back){S.modal=back;renderModal()}}return}
+  if(t.id==='ov'||t.closest('[data-close]')){if(S.modal?.forced)return;if(!S.busy){const back=S.modal?.back;closeModal();if(back){S.modal=back;renderModal()}}return}
   const big=t.closest('[data-big]');if(big){S.modal={type:'photo',src:big.dataset.big,back:S.modal};renderModal();return}
   const cp=t.closest('[data-copy]');if(cp){try{await navigator.clipboard.writeText(cp.dataset.copy);toast('Numero copiato')}catch(x){toast('Copia non riuscita')}return}
   const rm=t.closest('[data-rm]');if(rm){const [k,i]=rm.dataset.rm.split(':');const u=S.up[k].splice(+i,1)[0];if(u)URL.revokeObjectURL(u.url);$('#g-'+k).innerHTML=prev(k);return}
   if(t.closest('[data-back]')){const id=S.modal.id;closeModal();S.modal={type:'detail',id};renderModal();return}
+  if(t.closest('[data-pinoff]')){LS.set(pinKey(),null);closeModal();toast('PIN tolto');return}
   if(t.closest('[data-nperm]')){try{const p=await Notification.requestPermission();toast(p==='granted'?'Notifiche di sistema attive':'Notifiche non consentite dal browser')}catch(x){}renderModal();return}
   if(t.closest('[data-snd]')){SND.on=!SND.on;try{localStorage.setItem('gofiber-snd',SND.on?'1':'0')}catch(x){}if(SND.on)play('ok');renderModal();return}
   if(t.closest('[data-nclear]')){NT.list=[];notifSave();bellRender();renderModal();return}
@@ -943,6 +968,9 @@ $('#modal').addEventListener('change',e=>{
   for(const f of files)S.up[k].push({file:f,url:URL.createObjectURL(f)});inp.value='';$('#g-'+k).innerHTML=prev(k);
 });
 $('#modal').addEventListener('submit',async e=>{
+  if(e.target.id==='pinf'){e.preventDefault();const fd=new FormData(e.target),a=String(fd.get('p1')||''),b=String(fd.get('p2')||'');
+    if(!/^\d{4,8}$/.test(a)){$('#pinerr').textContent='Il PIN deve avere da 4 a 8 cifre.';return}if(a!==b){$('#pinerr').textContent='I due PIN non coincidono.';return}
+    LS.set(pinKey(),await pinHash(a));touch();closeModal();toast('PIN salvato su questo telefono');if(S.view==='impostazioni')render();return}
   if(e.target.id==='pwf'){e.preventDefault();const p=String(new FormData(e.target).get('pw')||'');try{await S.call('setPassword',{userId:S.modal.id===S.me?undefined:S.modal.id,password:p});closeModal();toast('Password impostata')}catch(x){$('#pwerr').textContent=x.message}return}
   if(e.target.id==='connf'){e.preventDefault();const u=String(new FormData(e.target).get('api')||'').trim();if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)){$('#cnerr').textContent='L\'indirizzo deve iniziare con https://script.google.com/';return}
     try{const r=await fetch(u);const j=await r.json();if(j.app!=='GoFiber')throw 0}catch(x){$('#cnerr').textContent='Non risponde come server GoFiber: controlla il deployment (accesso: Chiunque).';return}
@@ -1417,6 +1445,100 @@ function liveStop(){LIVE.on=false;clearTimeout(LIVE.timer);
 document.addEventListener('click',e=>{const b=e.target.closest('[data-live]');if(b){e.preventDefault();liveStart(b.dataset.live)}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&LIVE.on){e.stopPropagation();liveStop()}},true);
 
+/* ---------- contatto rapido del cliente ---------- */
+function telIntl(t){let d=String(t||'').trim().replace(/[^\d+]/g,'');if(!d)return '';if(d.startsWith('+'))d=d.slice(1);else if(d.startsWith('00'))d=d.slice(2);else if(/^3\d{8,9}$/.test(d)||/^0\d{5,10}$/.test(d))d='39'+d;return d}
+function msgCliente(p,kind){
+  const fa=fascia(p.fascia),giorno=p.data?parse(p.data).toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'}):'';
+  const chi=S.cfg.azienda?`, siamo ${S.cfg.azienda}`:'',ora=p.ora?`alle ore ${p.ora}`:`tra le ${fa.a} e le ${fa.b}`;
+  const cosa=isAss(p)?"l'intervento di assistenza sulla sua linea in fibra":"l'installazione della fibra ottica",ord=p.ordine?` (ordine ${p.ordine})`:'';
+  const tec=tecsOf(p).map(tecName).filter(x=>x&&x!=='Tecnico rimosso').join(' e ');
+  if(kind==='arrivo')return `Buongiorno, sono ${S.tec.get(S.me)?.nome||'il tecnico'}${S.cfg.azienda?' di '+S.cfg.azienda:''}. Sto arrivando per ${cosa}${ord}${p.indirizzo?' in '+p.indirizzo:''}: sarò da lei a breve.`;
+  if(kind==='sposta')return `Buongiorno${chi}. Il suo appuntamento per ${cosa}${ord} è stato spostato a ${giorno} ${ora}. Ci scusiamo per il disagio: per qualsiasi necessità risponda a questo messaggio.`;
+  if(kind==='assente')return `Buongiorno${chi}. Il tecnico è passato oggi per ${cosa}${ord} ma non l'ha trovata. La preghiamo di richiamarci o rispondere a questo messaggio per fissare un nuovo appuntamento.`;
+  return `Buongiorno${chi}. Le confermiamo l'appuntamento per ${cosa}${ord} ${giorno} ${ora}${p.indirizzo?' in '+p.indirizzo:''}.${tec?' Il tecnico '+tec+' la contatterà prima di arrivare.':''} Per spostarlo risponda a questo messaggio.`;
+}
+const waLink=(n,m)=>`https://wa.me/${n}?text=${encodeURIComponent(m)}`;
+const smsLink=(n,m)=>`sms:+${n}${isIOS()?'&':'?'}body=${encodeURIComponent(m)}`;
+function contactHTML(id,p){const n=telIntl(p.telefono);if(!n)return '';
+  const def=lastRim(p)&&Date.now()-Date.parse(lastRim(p).at||0)<3*864e5?'sposta':(!S.admin&&p.data===today()?'arrivo':'conferma');
+  const K=[['conferma','Conferma appuntamento'],['arrivo','Sto arrivando'],['sposta','Appuntamento spostato'],['assente','Cliente assente']];
+  return `<div class="ctc" data-ctcid="${esc(id)}"><div class="lbl" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span>Contatta il cliente</span><span class="note" style="font-weight:400">${esc(p.telefono)}</span></div>
+   <div class="seg ctck" style="margin-bottom:8px">${K.map(([k,l])=>`<label><input type="radio" name="ctck" value="${k}" ${k===def?'checked':''}><span>${l}</span></label>`).join('')}</div>
+   <textarea class="in" id="ctcmsg" rows="4">${esc(msgCliente(p,def))}</textarea>
+   <div class="ctcb"><a class="btn" href="tel:+${n}">${ic('phone')}Chiama</a><a class="btn wa" id="ctcwa" href="${esc(waLink(n,msgCliente(p,def)))}" target="_blank" rel="noopener">${ic('wa')}WhatsApp</a><a class="btn" id="ctcsms" href="${esc(smsLink(n,msgCliente(p,def)))}">${ic('sms')}SMS</a><button type="button" class="btn" data-copy-msg>Copia testo</button></div></div>`}
+function ctcRefresh(){const box=document.querySelector('.ctc');if(!box)return;const p=S.pr.get(box.dataset.ctcid)||{},n=telIntl(p.telefono),m=$('#ctcmsg').value;$('#ctcwa').href=waLink(n,m);$('#ctcsms').href=smsLink(n,m)}
+document.addEventListener('change',e=>{if(e.target.name==='ctck'){const box=e.target.closest('.ctc'),p=S.pr.get(box.dataset.ctcid)||{};$('#ctcmsg').value=msgCliente(p,e.target.value);ctcRefresh()}});
+document.addEventListener('input',e=>{if(e.target.id==='ctcmsg')ctcRefresh()});
+document.addEventListener('click',async e=>{if(e.target.closest('[data-copy-msg]')){try{await navigator.clipboard.writeText($('#ctcmsg').value);toast('Messaggio copiato')}catch(x){toast('Copia non riuscita')}}});
+
+/* ---------- sicurezza: PIN, blocco e uscita automatica ---------- */
+const SEC={wrong:0,locked:false};
+const pinKey=()=>'gofiber-pin:'+S.me;
+async function pinHash(pin){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('gofiber|'+S.me+'|'+pin));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const hasPin=()=>!!LS.get(pinKey());
+const touch=()=>{try{localStorage.setItem('gofiber-last',String(Date.now()))}catch(e){}};
+let touchT=0;['pointerdown','keydown'].forEach(ev=>addEventListener(ev,()=>{if(SEC.locked)return;const n=Date.now();if(n-touchT>20000){touchT=n;touch()}},{passive:true}));
+function secStart(){
+  if(!S.remote)return;
+  const last=+LS.get('gofiber-last')||Date.now(),days=+S.cfg.logoutDays;
+  if(days>0&&Date.now()-last>days*864e5){toast('Disconnesso per inattività',true);setTimeout(logout,600);return}
+  touch();
+  setInterval(secCheck,30000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')secCheck();else touch()});
+  if(S.cfg.pinObbl&&!hasPin())setTimeout(()=>pinSetup(true),800);
+}
+function secCheck(){if(!S.remote||SEC.locked||S.gate)return;const min=+S.cfg.lockMin;if(!min||!hasPin())return;
+  const last=+LS.get('gofiber-last')||Date.now();if(Date.now()-last>min*60000)lockShow()}
+function lockShow(){SEC.locked=true;const L=$('#lock');L.hidden=false;
+  L.innerHTML=`<form class="authcard" id="lockf" novalidate>${authHead('App bloccata')}<label class="f">Inserisci il tuo PIN<input class="in pin" name="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="8"></label><div class="err" id="lockerr"></div><button class="btn yel" type="submit">Sblocca</button><p class="authfoot">PIN dimenticato? <button type="button" class="lnk" onclick="logout()">Esci e accedi con la password</button></p></form>`;
+  setTimeout(()=>L.querySelector('input').focus(),50);
+  $('#lockf').onsubmit=async e=>{e.preventDefault();const pin=String(new FormData(e.target).get('pin')||'');
+    if(await pinHash(pin)===LS.get(pinKey())){SEC.locked=false;SEC.wrong=0;L.hidden=true;L.innerHTML='';touch();play('ok')}
+    else{SEC.wrong++;if(SEC.wrong>=5){toast('Troppi tentativi: accedi di nuovo',true);setTimeout(logout,500)}else{$('#lockerr').textContent=`PIN errato (${5-SEC.wrong} tentativi rimasti)`;e.target.reset()}}};
+}
+function pinSetup(forced){S.modal={type:'pin',forced};renderModal()}
+
+/* ---------- impostazioni (solo amministratore) ---------- */
+function impHTML(){const c=S.cfg;
+  return `<div class="ph"><h1>Impostazioni</h1></div>
+  <div class="grid2" style="align-items:start">
+  <form class="card" id="cfgmsg"><h3>Messaggi ai clienti</h3><p class="note" style="margin-top:-4px">Il nome compare nei messaggi WhatsApp e SMS che tecnici e ufficio mandano dalla pratica.</p>
+   <label class="f">Nome dell'azienda<input class="in" name="azienda" value="${esc(c.azienda||'')}" placeholder="Es. Rossi Impianti srl"></label>
+   <div class="acts"><button class="btn yel" type="submit">Salva</button></div></form>
+  ${S.remote?`<form class="card" id="cfgsec"><h3>Sicurezza dei telefoni</h3>
+   <label class="f">Blocca l'app con il PIN dopo<select class="in" name="lockMin">${[[0,'Mai'],[5,'5 minuti'],[15,'15 minuti'],[30,'30 minuti'],[60,'1 ora'],[240,'4 ore']].map(([v,l])=>`<option value="${v}" ${+c.lockMin===v?'selected':''}>${l} di inattività</option>`).join('')}</select></label>
+   <label class="f">Esci automaticamente dopo<select class="in" name="logoutDays">${[[0,'Mai'],[1,'1 giorno'],[3,'3 giorni'],[7,'7 giorni'],[14,'14 giorni'],[30,'30 giorni']].map(([v,l])=>`<option value="${v}" ${(c.logoutDays??30)==v?'selected':''}>${l} senza aprire l'app</option>`).join('')}</select></label>
+   <label class="ckline" style="background:var(--soft);border-color:var(--line)"><input type="checkbox" name="pinObbl" ${c.pinObbl?'checked':''}><span><b>PIN obbligatorio</b> per tutti: al primo accesso ognuno sceglie un PIN di 4-8 cifre per sbloccare l'app.</span></label>
+   <div class="acts"><button class="btn yel" type="submit">Salva</button><button class="btn" type="button" data-mypin>${hasPin()?'Cambia il mio PIN':'Imposta il mio PIN'}</button><button class="btn" type="button" data-logoutall>Esci dagli altri dispositivi</button></div>
+   <p class="note">Se un tecnico perde il telefono: <b>Utenti → Disconnetti</b> lo fa uscire da tutti i dispositivi.</p></form>`:''}
+  </div>
+  <div class="card" style="margin-top:14px"><h3>Backup</h3>
+   <p class="note" style="margin-top:-4px">Scarica una copia di tutti i dati: pratiche, archivio, magazzino, prodotti e utenti.</p>
+   <div class="acts"><button class="btn yel" data-bkxlsx>${ic('arch')}Scarica backup Excel</button><button class="btn" data-bkjson>Scarica backup completo (JSON)</button></div>
+   ${S.remote?`<h3 style="margin-top:18px;font-size:20px">Backup mensile automatico su Google Drive</h3><p class="note">Ogni mese viene salvata una copia completa del foglio nella cartella <b>GoFiber Backup</b> sul tuo Drive. Vengono tenuti gli ultimi 12 mesi.</p>
+   <div class="acts"><button class="btn sm" data-bknow>Fai un backup ora</button><span class="note" id="bkmsg"></span></div><div id="bklist" style="margin-top:10px"><p class="note">Caricamento elenco…</p></div>`:''}
+   ${S.inClaude?'<p class="note">Nella versione su Claude i file scaricati possono essere bloccati: usa la versione su GitHub per i backup.</p>':''}</div>`}
+async function bindImp(){
+  const fm=$('#cfgmsg');fm.onsubmit=async e=>{e.preventDefault();await cfgSave({azienda:String(new FormData(fm).get('azienda')||'').trim()})};
+  const fs=$('#cfgsec');if(fs)fs.onsubmit=async e=>{e.preventDefault();const fd=new FormData(fs);await cfgSave({lockMin:+fd.get('lockMin')||0,logoutDays:+fd.get('logoutDays')||0,pinObbl:fd.get('pinObbl')==='on'})};
+  if(S.remote){try{const r=await S.call('backups',{});$('#bklist').innerHTML=r.items.length?`<div class="tlist">${r.items.slice(0,15).map(b=>`<a class="trow" href="${esc(b.url)}" target="_blank" rel="noopener" style="text-decoration:none"><div class="nm" style="font-size:15px">${esc(b.nome)}</div><span class="note">Apri su Drive</span></a>`).join('')}</div><p class="note" style="margin-top:8px"><a href="${esc(r.cartella)}" target="_blank" rel="noopener">Apri la cartella GoFiber Backup</a></p>`:'<div class="empty">Nessun backup ancora: il primo viene creato automaticamente questo mese.</div>'}catch(x){const b=$('#bklist');if(b)b.innerHTML=`<p class="note">${esc(isNetErr(x)?'Serve la rete per vedere i backup su Drive.':x.message)}</p>`}}
+}
+async function cfgSave(o){try{await S.db.doc('config/app').set({...S.cfg,...o});toast('Impostazioni salvate')}catch(x){toast(errText(x))}}
+function backupData(){const o={};for(const [n,m] of [['pratiche',S.pr],['esiti',S.es],['prodotti',S.pd],['unita',S.un],['tecnici',S.tec],['ruoli',S.roles]])o[n]=Object.fromEntries(m);o.config=S.cfg;o.esportatoIl=new Date().toISOString();o.app='GoFiber';return o}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
+async function backupXlsx(){const X=await loadXLSX();const wb=X.utils.book_new();const stamp=today();
+  const pr=[];const ids=new Set([...S.pr.keys(),...S.es.keys()]);
+  for(const id of ids){const p=S.pr.get(id)||S.es.get(id)?.snap||{},e=S.es.get(id);const st=e?(ESA[e.esitoAss]?.[1]||'Completata'):(tecsOf(p).length?'Assegnata':'Da assegnare');
+    pr.push({Data:p.data||'',Fascia:p.fascia?fascia(p.fascia).a+'-'+fascia(p.fascia).b:'',Ora:p.ora||'',Tipo:normT(p.tipo)||'',Committente:p.committente||'',Rete:p.rete||'',Ordine:p.ordine||'','ID risorsa':p.idRisorsa||'',Indirizzo:p.indirizzo||'',Telefono:p.telefono||'',PFS:p.pfs||'',Permuta:e?.permuta||p.permuta||'',Splitter:e?.splitter||p.splitter||'',Tecnici:tecsOf(p).map(tecName).join(' + '),Stato:st,'Chiusa il':e?.completedAt?dt(e.completedAt):'',Nota:e?.nota||'','Seriali installati':(e?.materiali||[]).join(' '),Rimodulazioni:(p.rimod||[]).length,'In archivio':S.pr.has(id)?'':'sì'})}
+  pr.sort((a,b)=>String(a.Data).localeCompare(String(b.Data)));
+  X.utils.book_append_sheet(wb,X.utils.json_to_sheet(pr.length?pr:[{Nota:'Nessuna pratica'}]),'Pratiche');
+  const un=[...S.un.values()].map(u=>({Seriale:u.seriale,Prodotto:prodName(u.prodottoId),Committente:u.committente||'',Stato:SL[u.stato]||u.stato,Tecnico:u.tecnicoId?tecName(u.tecnicoId):'',Ordine:u.ordine||'','ID risorsa':u.idRisorsa||'',Caricato:dt(u.createdAt),Installato:dt(u.installedAt),'Scarico':u.motivoScarico||''}));
+  X.utils.book_append_sheet(wb,X.utils.json_to_sheet(un.length?un:[{Nota:'Magazzino vuoto'}]),'Magazzino');
+  const pd=[...S.pd.values()].map(p=>({Prodotto:p.nome,'Codice a barre':p.codice||'',...Object.fromEntries(COMM.map(c=>['Scorta minima '+c,+(p.soglie||{})[c]||0]))}));
+  X.utils.book_append_sheet(wb,X.utils.json_to_sheet(pd.length?pd:[{Nota:'Nessun prodotto'}]),'Prodotti');
+  const us=[...S.tec].map(([id,t])=>{const r=roleInfo(id)||{};return{Nome:t.nome||'',Telefono:t.telefono||'',Email:t.email||'',Ruolo:RUOLI[r.ruolo]||'',Stato:r.stato||''}});
+  X.utils.book_append_sheet(wb,X.utils.json_to_sheet(us.length?us:[{Nota:'Nessun utente'}]),'Utenti');
+  const out=X.write(wb,{bookType:'xlsx',type:'array'});dl(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),`GoFiber-backup-${stamp}.xlsx`);toast('Backup Excel scaricato')}
+
 /* ---------- utenti e accesso ---------- */
 const RUOLI={tecnico:'Tecnico',ufficio:'Ufficio',admin:'Amministratore'};
 function roleInfo(id){const r=S.roles.get(id),t=S.tec.get(id);
@@ -1466,7 +1588,7 @@ function utentiHTML(){
   <h2 class="cond" style="font-size:24px;margin:8px 0 10px">Da confermare</h2>
   <div class="tlist" style="margin-bottom:22px">${pend.length?pend.map(u=>`<div class="trow" style="border-color:var(--wait)"><div class="nm">${esc(u.x.nome||'—')}<div class="note" style="font-weight:400">${esc(u.x.telefono||'')} · chiede: ${esc(RUOLI[u.x.ruoloRichiesto]||'Tecnico')} · ${esc(dt(u.x.createdAt))}</div></div>${sel(u)}<button class="btn sm yel" data-uok="${esc(u.id)}" ${can?'':'disabled'}>Conferma</button><button class="btn sm dng" data-uno="${esc(u.id)}" ${can?'':'disabled'}>Rifiuta</button></div>`).join(''):'<div class="empty">Nessuna registrazione in attesa.</div>'}</div>
   <h2 class="cond" style="font-size:24px;margin:8px 0 10px">Attivi</h2>
-  <div class="tlist" style="margin-bottom:22px">${S.isOwner?`<div class="trow"><div class="nm">Tu<div class="note" style="font-weight:400">Proprietario dell'app</div></div><span class="pill ok">Amministratore</span></div>`:''}${act.map(u=>`<div class="trow"><div class="nm">${esc(u.x.nome||'—')}<div class="note" style="font-weight:400">${esc(u.x.telefono||'')}${u.x.email?' · '+esc(u.x.email):''}</div></div>${u.r.ruolo==='tecnico'?stats(u.id):''}${sel(u)}${u.r.ruolo==='tecnico'?`<button class="btn sm" data-tf="${esc(u.id)}">Pratiche</button>`:''}${S.remote&&can?`<button class="btn sm" data-upw="${esc(u.id)}">Nuova password</button>`:''}<button class="btn sm dng" data-ublk="${esc(u.id)}" ${can&&u.id!==S.me?'':'disabled'}>Sospendi</button></div>`).join('')}</div>
+  <div class="tlist" style="margin-bottom:22px">${S.isOwner?`<div class="trow"><div class="nm">Tu<div class="note" style="font-weight:400">Proprietario dell'app</div></div><span class="pill ok">Amministratore</span></div>`:''}${act.map(u=>`<div class="trow"><div class="nm">${esc(u.x.nome||'—')}<div class="note" style="font-weight:400">${esc(u.x.telefono||'')}${u.x.email?' · '+esc(u.x.email):''}</div></div>${u.r.ruolo==='tecnico'?stats(u.id):''}${sel(u)}${u.r.ruolo==='tecnico'?`<button class="btn sm" data-tf="${esc(u.id)}">Pratiche</button>`:''}${S.remote&&can?`<button class="btn sm" data-upw="${esc(u.id)}">Nuova password</button><button class="btn sm" data-urev="${esc(u.id)}">Disconnetti</button>`:''}<button class="btn sm dng" data-ublk="${esc(u.id)}" ${can&&u.id!==S.me?'':'disabled'}>Sospendi</button></div>`).join('')}</div>
   ${off.length?`<h2 class="cond" style="font-size:24px;margin:8px 0 10px">Sospesi o rifiutati</h2><div class="tlist" style="margin-bottom:22px">${off.map(u=>`<div class="trow"><div class="nm">${esc(u.x.nome||'—')}<div class="note" style="font-weight:400">${esc(u.x.telefono||'')} · ${u.r.stato==='rifiutato'?'rifiutato':'sospeso'}</div></div>${sel(u)}<button class="btn sm" data-uok="${esc(u.id)}" ${can?'':'disabled'}>Riattiva</button>${S.isOwner?`<button class="btn sm dng" data-trm="${esc(u.id)}">Elimina</button>`:''}</div>`).join('')}</div>`:''}
   <div class="card"><h3>Come far registrare una persona</h3><ol class="steps"><li>Dal menu <b>Condividi</b> di questa app su Claude aggiungila come <b>Collaboratore</b> (Contributor) o <b>Editor</b>.</li><li>Apre il link, accede a Claude e si registra con nome, telefono e ruolo.</li><li>La trovi qui in “Da confermare”: scegli il ruolo e premi <b>Conferma</b>.</li></ol>
    <p class="note"><b>Tecnico</b>: vede solo le sue pratiche, le esegue e le chiude, e usa FiberTools. <b>Ufficio</b>: agenda, pratiche, importazione, archivio, riepilogo e magazzino. <b>Amministratore</b>: tutto, compresa la gestione degli utenti.</p></div>`;
@@ -1506,7 +1628,7 @@ function profileHTML(first){
    ${first?'<p class="note" style="margin-top:-6px">Inserisci i tuoi dati: il gestore potrà assegnarti pratiche e materiale.</p>':''}
    <label class="f">Nome e cognome <span class="req">*</span><input class="in" name="nome" value="${esc(me.nome||'')}" autocomplete="name"></label>
    <label class="f">Telefono<input class="in" name="telefono" type="tel" value="${esc(me.telefono||'')}" autocomplete="tel"></label>
-   <div class="err" id="rerr"></div><div class="acts"><button class="btn yel" type="submit">${first?'Iscriviti':'Salva'}</button>${!S.inClaude&&!isStandalone()?'<button type="button" class="btn" onclick="window.__inst()">Installa app</button>':''}${S.remote?`<button type="button" class="btn" data-upw="${esc(S.me)}">Cambia password</button><button type="button" class="btn" onclick="logout()">Esci</button>`:''}</div></form>`;
+   <div class="err" id="rerr"></div><div class="acts"><button class="btn yel" type="submit">${first?'Iscriviti':'Salva'}</button>${!S.inClaude&&!isStandalone()?'<button type="button" class="btn" onclick="window.__inst()">Installa app</button>':''}${S.remote?`<button type="button" class="btn" data-mypin>${hasPin()?'Cambia PIN':'Imposta PIN'}</button><button type="button" class="btn" data-logoutall>Esci dagli altri dispositivi</button><button type="button" class="btn" data-upw="${esc(S.me)}">Cambia password</button><button type="button" class="btn" onclick="logout()">Esci</button>`:''}</div></form>`;
 }
 function bindProfile(){
   const f=$('#regf');if(!f)return;
@@ -1639,7 +1761,7 @@ async function remoteClaude(api){
 const bUrl=id=>String(id).startsWith('pending:')?(PENDING_URL[id]||'icons/icon-192.png'):String(id).startsWith('gd:')?'https://drive.google.com/thumbnail?id='+encodeURIComponent(id.slice(3))+'&sz=w1600':'/_blob/'+id;
 const bLink=id=>String(id).startsWith('gd:')?'https://drive.google.com/file/d/'+encodeURIComponent(id.slice(3))+'/view':'/_blob/'+id;
 window.logout=()=>logout();window.__inst=()=>maybeInstall(true);
-function logout(){const t=LS.get('gofiber-token');LS.set('gofiber-token',null);if(S.api&&t)apiCall(S.api,'logout',{token:t}).catch(()=>{}).finally(()=>location.reload());else location.reload()}
+function logout(){try{localStorage.removeItem('gofiber-last')}catch(e){}const t=LS.get('gofiber-token');LS.set('gofiber-token',null);if(S.api&&t)apiCall(S.api,'logout',{token:t}).catch(()=>{}).finally(()=>location.reload());else location.reload()}
 
 /* ---------- modalità locale (fuori da Claude, es. GitHub Pages) ---------- */
 function localClaude(){
@@ -1665,7 +1787,7 @@ function sub(path,key,map){
   const t=setTimeout(()=>{if(!S.loaded[key]){S.slow=true;S.loaded[key]=true;live()}},10000);
   S.db.collection(path).onSnapshot(snap=>{
     map.clear();for(const d of snap.docs){let v=d.data();if(path==='pratiche')v=fixT(v);else if(path==='esiti'&&v?.snap?.tipo==='Guasto')v={...v,snap:fixT(v.snap)};map.set(d.id,v)}
-    if(path==='pfsdb')rebuildPfs();
+    if(path==='pfsdb')rebuildPfs();if(path==='config')S.cfg=S.cfgMap.get('app')||{};
     if(!snap.metadata.fromCache){clearTimeout(t);S.loaded[key]=true;if(Object.values(S.loaded).every(Boolean))S.slow=false}
     live();
   },e=>{clearTimeout(t);S.loaded[key]=true;S.err=e?.code||'err';live()});
@@ -1684,10 +1806,10 @@ function sub(path,key,map){
   S.db=db;S.user=user;S.assets=assets;
   S.isOwner=user?!!(await user.isOwner()):false;S.me=user?await user.id():null;S.canApprove=S.isOwner||(user?!!(await user.canEdit()):false);applyRole();
   const h=location.hash.slice(1);S.view=views().includes(h)?h:'agenda';
-  setTimeout(()=>maybeInstall(),4000);
+  setTimeout(()=>maybeInstall(),4000);setTimeout(secStart,1500);
   S.state='ok';if(S.remote){const b=document.createElement('button');b.className='thm';b.title='Esci';b.setAttribute('aria-label','Esci');b.innerHTML='<svg class="i" viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h11"/></svg>';b.onclick=logout;$('.hr').appendChild(b)}
   if(S.local)$('#localbar').innerHTML='<div class="wrap"><div class="dupw" style="margin:12px 0 0"><b>Modalità locale.</b> I dati restano solo in questo browser e su questo dispositivo, senza foto e senza utenti condivisi. <button class=\"lnk\" id=\"connGs\">Collega il foglio Google</button> per lavorare in squadra.</div></div>';if($('#connGs'))$('#connGs').onclick=()=>{S.modal={type:'conn'};renderModal()};render();
-  sub('tecnici','tec',S.tec);sub('ruoli','ro',S.roles);sub('pratiche','pr',S.pr);sub('esiti','es',S.es);sub('prodotti','pd',S.pd);sub('unita','un',S.un);sub('pfsdb','pfsx',S.pfsDocs);loadPfsBase();
+  sub('tecnici','tec',S.tec);sub('ruoli','ro',S.roles);sub('config','cfg',S.cfgMap);sub('pratiche','pr',S.pr);sub('esiti','es',S.es);sub('prodotti','pd',S.pd);sub('unita','un',S.un);sub('pfsdb','pfsx',S.pfsDocs);loadPfsBase();
 })();
 }
 </script>
