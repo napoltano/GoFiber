@@ -138,6 +138,13 @@ tfoot td{border-top:2px solid var(--line)}
 .lvhint{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:15px;padding:0 16px}
 .lvlist{display:flex;flex-wrap:wrap;gap:6px;max-height:22vh;overflow:auto}
 .lvitem code{background:rgba(255,255,255,.14);color:#fff;padding:4px 10px;border-radius:8px;font-size:14px}
+.netb{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 0;padding:10px 14px;border-radius:14px;background:var(--pris);border:1px solid color-mix(in srgb,var(--pri) 35%,transparent);font-size:14px}
+.netb.off{background:color-mix(in srgb,var(--wait) 16%,var(--card));border-color:color-mix(in srgb,var(--wait) 50%,transparent)}
+body.auth #netbar{display:none}
+.lowbox{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 14px;border-radius:14px;margin-bottom:14px;background:color-mix(in srgb,var(--ko) 10%,var(--card));border:1px solid color-mix(in srgb,var(--ko) 40%,transparent)}
+.lowbox>b{display:flex;align-items:center;gap:8px;color:var(--ko);margin-inline-end:6px}
+.lowi{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:6px 10px;cursor:pointer;font-weight:600}
+.lowi span{color:var(--ko)}.prod.low{border-color:color-mix(in srgb,var(--ko) 55%,transparent)}
 .dupw{background:color-mix(in srgb,var(--wait) 14%,transparent);border:1px solid color-mix(in srgb,var(--wait) 45%,transparent);border-radius:10px;padding:10px 12px;font-size:14px;margin:-4px 0 14px}.dupw b{font-weight:600}.dupw button{margin-inline-start:4px}
 .r-OF{background:#13a538}.r-FC{background:#e2001a}
 .seg.rete input:checked+span.k-OF{background:#13a538;border-color:#13a538;color:#fff}.seg.rete input:checked+span.k-FC{background:#e2001a;border-color:#e2001a;color:#fff}
@@ -263,7 +270,7 @@ body.auth main{min-height:100vh;min-height:100dvh;display:grid;place-items:cente
   <nav id="tabs"></nav>
   <div class="hr"><span class="who" id="who">Caricamento…</span><button class="thm bell" id="bell" hidden aria-label="Notifiche"><svg class="i" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/></svg><i hidden></i></button><a class="thm ft" href="https://napoltano.github.io/fiber-tools/" target="_blank" rel="noopener" title="FiberTools" aria-label="Apri FiberTools"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3.6 17.1a1.8 1.8 0 0 0 2.6 2.6l5.7-5.7a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.3-.6-.6-2.3z"/></svg><span>FiberTools</span></a><button class="thm" id="thm" aria-label="Cambia tema"></button></div>
 </div></header>
-<div id="localbar"></div>
+<div id="localbar"></div><div id="netbar"></div>
 <main class="wrap" id="main"><p class="note">Caricamento…</p></main>
 <div id="modal"></div>
 <div id="toast"></div>
@@ -595,7 +602,7 @@ function magHTML(){
   const M=S.mag;const tb=[['prodotti','Prodotti'],['carica','Carica'],['assegna','Assegna ai tecnici'],['scarico','Scarico'],['cerca','Controlla seriale']];
   return `<div class="ph"><div><h1>Magazzino</h1><div class="sub" style="text-transform:none" id="msub">${magSub()}</div></div>${canLive()?`<div class="sp"><button class="btn yel" data-magscan>${ic('bc')}Scansiona</button></div>`:''}</div>
   <div class="bar" id="mcomm"><span class="note">Committente:</span>${[['','Tutti'],...COMM.map(c=>[c,c])].map(([k,l])=>`<button class="chip ${M.comm===k?'on':''}" data-mc="${k}">${l}</button>`).join('')}</div>
-  <div class="kpis" id="mkpi">${magKpi()}</div>
+  <div id="mlow">${lowHTML()}</div><div class="kpis" id="mkpi">${magKpi()}</div>
   <div class="subt" id="mtabs">${tb.map(([k,l])=>`<button class="chip ${M.tab===k?'on':''}" data-mt="${k}">${l}</button>`).join('')}</div>
   <div id="magbody">${magBody()}</div>`;
 }
@@ -609,14 +616,18 @@ function magBind(){
   if(t==='prodotti'&&S.mag.prod&&$('#pq')){$('#pq').oninput=e=>{S.mag.pq=e.target.value;$('#ptab').innerHTML=prodTable()}}
 }
 function magRefresh(){
-  const t=S.mag.tab;if($('#mkpi'))$('#mkpi').innerHTML=magKpi();if($('#msub'))$('#msub').textContent=magSub();
+  const t=S.mag.tab;if($('#mkpi'))$('#mkpi').innerHTML=magKpi();if($('#mlow'))$('#mlow').innerHTML=lowHTML();if($('#msub'))$('#msub').textContent=magSub();
   if(t==='prodotti'){if(S.mag.prod&&$('#ptab')){$('#ptab').innerHTML=prodTable();$('#phead').innerHTML=prodHead()}else if(!S.mag.prod)$('#magbody').innerHTML=prodListHTML()}
   else if(t==='cerca'&&$('#cres')){$('#cres').innerHTML=cercaRes();sbUpdate('chk')}
   else{['car','ass','rie','sca'].forEach(sbUpdate);if($('#qav'))qAvail();if($('#prelist'))$('#prelist').innerHTML=prelHTML()}
 }
+function lowStock(){const out=[];let any=false;for(const [,p] of S.pd)if(p.soglie){any=true;break}if(!any)return out;const cnt={};for(const u of S.un.values())if(u.stato==='magazzino'){const k=u.prodottoId+'|'+u.committente;cnt[k]=(cnt[k]||0)+1}
+  for(const [pid,p] of S.pd){const so=p.soglie||{};for(const c of COMM){const min=+so[c]||0;if(!min)continue;const have=cnt[pid+'|'+c]||0;if(have<min)out.push({pid,c,have,min})}}return out}
+function lowHTML(){const l=lowStock().filter(x=>!S.mag.comm||x.c===S.mag.comm);if(!l.length)return '';
+  return `<div class="lowbox" role="status"><b>${ic('box')}Sotto scorta minima</b>${l.map(x=>`<button class="lowi" data-prod="${esc(x.pid)}" data-pc="${x.c}">${ctag(x.c)} ${esc(prodName(x.pid))} <span>${x.have} su ${x.min}</span></button>`).join('')}</div>`}
 function stockBar(c){const tot=c.magazzino+c.tecnico+c.installato||1;return `<div class="stock"><i style="width:${c.magazzino/tot*100}%;background:var(--neu)"></i><i style="width:${c.tecnico/tot*100}%;background:var(--wait)"></i><i style="width:${c.installato/tot*100}%;background:var(--ok)"></i></div>`}
-function prodCard(id,p,us,cm){const u=us.filter(x=>cm==='—'?!x.committente:x.committente===cm),c=counts(u);
-  return `<button class="prod" data-prod="${esc(id)}" data-pc="${esc(cm==='—'?'':cm)}"><h4>${esc(p.nome)}</h4><div class="cod">${ic('bc')}${esc(p.codice||'Senza codice a barre')}</div>${stockBar(c)}
+function prodCard(id,p,us,cm){const u=us.filter(x=>cm==='—'?!x.committente:x.committente===cm),c=counts(u),min=+((p.soglie||{})[cm])||0,low=min&&c.magazzino<min;
+  return `<button class="prod${low?' low':''}" data-prod="${esc(id)}" data-pc="${esc(cm==='—'?'':cm)}"><h4>${esc(p.nome)}</h4>${min?`<div class="pill ${low?'ko':'neu'}" style="display:inline-block;margin:2px 0 4px">${low?'Sotto scorta':'Scorta minima'}: ${c.magazzino} su ${min}</div>`:''}<div class="cod">${ic('bc')}${esc(p.codice||'Senza codice a barre')}</div>${stockBar(c)}
     <div class="leg"><span><span class="dot" style="background:var(--neu)"></span><b>${c.magazzino}</b> in magazzino</span><span><span class="dot" style="background:var(--wait)"></span><b>${c.tecnico}</b> ai tecnici</span><span><span class="dot" style="background:var(--ok)"></span><b>${c.installato}</b> installati</span>${c.scaricato?`<span><b>${c.scaricato}</b> scaricati</span>`:''}</div></button>`}
 function prodListHTML(){
   if(!S.pd.size)return `<div class="empty">Nessun prodotto in magazzino.<div style="margin-top:12px"><button class="btn yel" data-mt2="carica">${ic('plus')}Carica i primi prodotti</button></div></div>`;
@@ -630,7 +641,7 @@ function prodListHTML(){
 }
 function prodHead(){const p=S.pd.get(S.mag.prod)||{},all=unitsOf(S.mag.prod),c=counts(all.filter(inC));
   return `<div class="ph" style="margin-bottom:8px"><div><button class="lnk" data-back-prod>← Tutti i prodotti</button><h1 style="margin-top:6px">${esc(p.nome)}</h1><div class="sub" style="text-transform:none">Codice a barre: <code>${esc(p.codice||'—')}</code>${S.mag.comm?' · solo '+esc(S.mag.comm):''}</div></div>
-   <div class="sp"><button class="btn sm" data-pedit>Modifica</button><button class="btn sm" data-mt2="carica" data-pp="${esc(S.mag.prod)}">${ic('plus')}Aggiungi seriali</button>${all.length===0?'<button class="btn sm dng" data-pdel>Elimina prodotto</button>':''}</div></div>
+   <div class="sp"><button class="btn sm" data-pedit>Modifica</button><button class="btn sm" data-psoglie>Scorta minima</button><button class="btn sm" data-mt2="carica" data-pp="${esc(S.mag.prod)}">${ic('plus')}Aggiungi seriali</button>${all.length===0?'<button class="btn sm dng" data-pdel>Elimina prodotto</button>':''}</div></div>
    ${stockBar(c)}<div class="leg" style="margin-bottom:14px"><span><b>${c.magazzino+c.tecnico+c.installato}</b> attivi</span><span><b>${c.magazzino}</b> in magazzino</span><span><b>${c.tecnico}</b> ai tecnici</span><span><b>${c.installato}</b> installati</span><span><b>${c.scaricato}</b> scaricati</span></div>`}
 function prodDetHTML(){const st=S.mag.pst;
   return `<div id="phead">${prodHead()}</div><div class="bar">${[['','Tutti'],['magazzino','In magazzino'],['tecnico','Ai tecnici'],['installato','Installati'],['scaricato','Scaricati']].map(([k,l])=>`<button class="chip ${st===k?'on':''}" data-pst="${k}">${l}</button>`).join('')}<input class="in" id="pq" style="max-width:280px" placeholder="Cerca seriale" value="${esc(S.mag.pq)}">${canLive()?`<button type="button" class="btn sm yel" data-live="pq">${ic('bc')}Scansiona</button>`:''}</div><div id="ptab">${prodTable()}</div>`}
@@ -791,6 +802,7 @@ document.addEventListener('click',e=>{
   if(t.closest('[data-back-prod]')){S.mag.prod=null;render();return}
   const m2=t.closest('[data-mt2]');if(m2){if(m2.dataset.cc)S.mag.lastComm=m2.dataset.cc;S.mag.tab=m2.dataset.mt2;S.mag.preProd=m2.dataset.pp||'';S.mag.prod=null;render();return}
   const ps=t.closest('[data-pst]');if(ps){S.mag.pst=ps.dataset.pst;render();return}
+  if(t.closest('[data-psoglie]')){S.modal={type:'soglie',id:S.mag.prod};renderModal();return}
   if(t.closest('[data-pedit]')){S.modal={type:'prod',id:S.mag.prod};renderModal();return}
   if(t.closest('[data-pdel]')){const id=S.mag.prod;S.modal={type:'confirm',danger:true,title:'Eliminare il prodotto?',text:`${prodName(id)} non ha pezzi e verrà eliminato.`,ok:'Elimina',done:'Prodotto eliminato',fn:async()=>{await S.db.doc('prodotti/'+id).delete();S.mag.prod=null;render()}};renderModal();return}
   const ur=t.closest('[data-urest]');if(ur){const k=ur.dataset.urest,u=S.un.get(k);S.modal={type:'confirm',title:'Ripristinare il seriale?',text:`${u?.seriale||''} torna disponibile in magazzino.`,ok:'Ripristina',done:'Seriale ripristinato',fn:()=>S.db.doc('unita/'+k).update({stato:'magazzino',tecnicoId:'',motivoScarico:'',notaScarico:'',scaricatoAt:''})};renderModal();return}
@@ -852,6 +864,9 @@ function renderModal(){
         ${serBox('ins','Materiale installato · codici a barre dei seriali','Scansiona il codice a barre del seriale installato (uno per riga)')}
         ${S.assets?`${blk('fotoIdRisorsa','Foto ID risorsa (facoltativa)',false,'image/*',false)}${blk('foto','Foto (facoltative)',false,'image/*',true)}${blk('caratterizzazione','Caratterizzazione · foto o PDF (facoltativa)',false,'image/*,application/pdf',true)}`:'<p class="note">Il caricamento di foto non è disponibile per il tuo account: puoi completare la pratica senza foto, oppure chiedi al gestore di condividerti l\'app come Collaboratore o Editor.</p>'}
         <div class="err" id="cerr"></div><div class="acts"><button class="btn yel" type="submit">Conferma completamento</button><button class="btn" type="button" data-back>Indietro</button></div></form>`);
+  }else if(M.type==='soglie'){
+    const p=S.pd.get(M.id)||{},so=p.soglie||{};
+    box.innerHTML=shell(`<h3>Scorta minima</h3><p class="note">${esc(p.nome||'')}: quando i pezzi <b>in magazzino</b> di un committente scendono sotto questo numero, il Magazzino lo segnala e ricevi una notifica. 0 = nessun controllo.</p><form id="sogf" style="margin-top:12px">${COMM.map(c=>{const have=[...S.un.values()].filter(u=>u.prodottoId===M.id&&u.committente===c&&u.stato==='magazzino').length;return `<label class="f">${c} <span class="note" style="font-weight:400">· ora in magazzino: ${have}</span><input class="in" type="number" min="0" inputmode="numeric" name="${c}" value="${+so[c]||0}"></label>`}).join('')}<div class="err" id="sogerr"></div><div class="acts"><button class="btn yel" type="submit">Salva</button><button class="btn" type="button" data-close>Annulla</button></div></form>`);
   }else if(M.type==='prod'){
     const p=S.pd.get(M.id)||{};
     box.innerHTML=shell(`<h3>Modifica prodotto</h3><form id="pform" style="margin-top:14px"><label class="f">Nome prodotto<input class="in" name="nome" value="${esc(p.nome||'')}"></label>
@@ -903,6 +918,8 @@ $('#modal').addEventListener('submit',async e=>{
   if(e.target.id==='connf'){e.preventDefault();const u=String(new FormData(e.target).get('api')||'').trim();if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)){$('#cnerr').textContent='L\'indirizzo deve iniziare con https://script.google.com/';return}
     try{const r=await fetch(u);const j=await r.json();if(j.app!=='GoFiber')throw 0}catch(x){$('#cnerr').textContent='Non risponde come server GoFiber: controlla il deployment (accesso: Chiunque).';return}
     LS.set('gofiber-api',u);location.reload();return}
+  if(e.target.id==='sogf'){e.preventDefault();const fd=new FormData(e.target),so={};for(const c of COMM)so[c]=Math.max(0,parseInt(fd.get(c),10)||0);
+    try{await S.db.doc('prodotti/'+S.modal.id).update({soglie:so});closeModal();toast('Scorta minima salvata')}catch(x){$('#sogerr').textContent=errText(x)}return}
   if(e.target.id==='pform'){e.preventDefault();const fd=new FormData(e.target);const nome=String(fd.get('nome')||'').trim(),codice=String(fd.get('codice')||'').trim();if(!nome){$('#perr').textContent='Inserisci il nome.';return}
     try{await S.db.doc('prodotti/'+S.modal.id).update({nome,codice});closeModal();toast('Prodotto aggiornato')}catch(x){$('#perr').textContent=errText(x)}return}
   if(e.target.id!=='cf')return;e.preventDefault();
@@ -1222,8 +1239,14 @@ function archHTML(){const a=S.ar;
    <select class="in" id="ati" aria-label="Tipo"><option value="">Assurance e delivery</option>${TIPI.map(t=>`<option ${a.tipo===t?'selected':''}>${t}</option>`).join('')}</select>
    <select class="in" id="acm" aria-label="Committente"><option value="">Tutti i committenti</option>${COMM.map(c=>`<option ${a.comm===c?'selected':''}>${c}</option>`).join('')}</select>
    ${S.admin?`<select class="in" id="atc" aria-label="Tecnico">${tecOpts(a.tec,'Tutti i tecnici')}</select>`:'<span></span>'}</div>
-  <div id="alist"></div>`}
+  <div id="alist"></div>
+  ${S.remote&&S.admin?`<div class="card" style="margin-top:18px"><h3>Storico · pratiche chiuse da oltre 12 mesi</h3><p class="note" style="margin-top:-4px">Per tenere l'app veloce, le pratiche chiuse da più di un anno passano ogni giorno nel foglio <b>Storico</b>. Qui le ritrovi.</p>
+   <form class="acts" id="stof"><input class="in" name="q" style="flex:1 1 240px" placeholder="Ordine, ID risorsa, indirizzo, nota…" autocomplete="off"><button class="btn yel" type="submit">Cerca nello storico</button>${S.boss?'<button class="btn sm" type="button" id="stonow">Sposta ora le pratiche vecchie</button>':''}</form><div id="stores" style="margin-top:12px"></div></div>`:''}`}
 function bindArch(){
+  const sf=$('#stof');if(sf){sf.onsubmit=async e=>{e.preventDefault();const q=String(new FormData(sf).get('q')||'').trim();const out=$('#stores');out.innerHTML='<p class="note">Ricerca…</p>';
+    try{const r=await S.call('storico',{q});out.innerHTML=r.items.length?`<p class="note">${r.total} pratiche trovate${r.total>200?' · mostrate 200':''}</p><div class="tw"><table class="t stack"><thead><tr><th>Chiusa</th><th>Intervento</th><th>Ordine</th><th>ID risorsa</th><th>Indirizzo</th><th>Esito</th><th>Nota</th></tr></thead><tbody>${r.items.map(({pratica:p,esito:e})=>{p=fixT(p||e?.snap||{});e=e||{};return `<tr><td>${esc(dt(e.completedAt))}</td><td><div class="top2" style="margin:0">${tipoTag(p)}${ctag(p.committente)}${reteTag(p)}</div></td><td><b>${esc(p.ordine||'—')}</b></td><td>${esc(p.idRisorsa||'')}</td><td>${esc(p.indirizzo||'')}</td><td>${ESA[e.esitoAss]?`<span class="pill ${ESA[e.esitoAss][0]}">${ESA[e.esitoAss][1]}</span>`:'Completata'}</td><td>${esc(e.nota||'')}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty">Nessuna pratica nello storico con questi termini.</div>'}
+    catch(x){out.innerHTML=`<p class="err">${esc(isNetErr(x)?'Serve la rete per cercare nello storico.':x.message)}</p>`}};
+    const nw=$('#stonow');if(nw)nw.onclick=async()=>{nw.disabled=true;try{const r=await S.call('archiveNow',{});toast(r.archiviate?`${r.archiviate} pratiche spostate nello storico`:'Nessuna pratica da spostare');if(r.archiviate)setTimeout(()=>location.reload(),1200)}catch(x){toast('Non riuscito: '+x.message)}nw.disabled=false}}
   const on=(id,k,ev)=>{const el=$('#'+id);if(el)el.addEventListener(ev||'change',e=>{S.ar[k]=e.target.value;renderArch()})};
   on('aq','q','input');on('am','mese');on('ati','tipo');on('acm','comm');on('atc','tec');
   $('#arcopy').onclick=async()=>{const rows=archItems();const h=['Completata','Data','Fascia','Tipo','Esito','Rimodulazioni','Committente','Rete','Ordine','ID risorsa','PFS','Numero permuta','Splitter','Indirizzo','Tecnici','Seriali installati','Nota'];
@@ -1267,9 +1290,13 @@ function notifCheck(){
     const n={id,at:new Date().toISOString(),t:`${p.tipo||'Pratica'} ${p.ordine||''}`.trim(),b:`${what}${who?' · '+who:''}${p.indirizzo?' · '+p.indirizzo:''}`,k:e.rimod?'wait':e.esitoAss==='negativa'?'ko':'ok',r:false};
     NT.list.unshift(n);showNotif(n)}
   if(fresh.length){notifSave();bellRender()}
+  if(!NT.low)NT.low=new Set(lowStock().map(x=>x.pid+'|'+x.c));
+  clearTimeout(NT.lowT);NT.lowT=setTimeout(()=>{const lows=lowStock();let any=false;
+    for(const x of lows){const k=x.pid+'|'+x.c;if(NT.low.has(k))continue;NT.low.add(k);any=true;const n={id:'',at:new Date().toISOString(),t:'Scorta bassa · '+x.c,b:`${prodName(x.pid)}: ${x.have} in magazzino, minimo ${x.min}`,k:'ko',r:false};NT.list.unshift(n);showNotif(n)}
+    for(const k of [...NT.low])if(!lows.some(x=>x.pid+'|'+x.c===k))NT.low.delete(k);if(any){notifSave();bellRender()}},1500);
 }
 function showNotif(n){play('notify');
-  const el=document.createElement('div');el.className='ntoast '+n.k;el.innerHTML=`<b>${esc(n.t)}</b><span>${esc(n.b)}</span>`;el.onclick=()=>{el.remove();S.modal={type:'detail',id:n.id};renderModal()};
+  const el=document.createElement('div');el.className='ntoast '+n.k;el.innerHTML=`<b>${esc(n.t)}</b><span>${esc(n.b)}</span>`;el.onclick=()=>{el.remove();if(n.id){S.modal={type:'detail',id:n.id};renderModal()}else show('magazzino')};
   $('#ntoasts').appendChild(el);setTimeout(()=>el.remove(),9000);
   try{if('Notification' in window&&Notification.permission==='granted'&&document.visibilityState!=='visible'){const o={body:n.b,icon:'icons/icon-192.png',badge:'icons/favicon-32.png',tag:n.id};
     navigator.serviceWorker?.getRegistration?.().then(r=>r?r.showNotification('GoFiber · '+n.t,o):new Notification('GoFiber · '+n.t,o)).catch(()=>{try{new Notification('GoFiber · '+n.t,o)}catch(e){}})}}catch(e){}
@@ -1495,45 +1522,92 @@ function waitLogin(api,msg){return new Promise(res=>{
     try{const r=await apiCall(api,mode==='reg'?'register':'login',{email:em,password:pw});LS.set('gofiber-token',r.token);res(r.token)}
     catch(x){er.textContent=x.message==='Failed to fetch'?'Impossibile raggiungere il server: controlla la connessione o l\'indirizzo.':x.message;b.disabled=false;b.textContent=mode==='reg'?'Crea account':'Accedi'}};
 })}
+/* archivio locale sul dispositivo (IndexedDB) per lavorare senza rete */
+const IDB={db:null,open(){return this.db||(this.db=new Promise((ok,ko)=>{try{const r=indexedDB.open('gofiber',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error)}catch(e){ko(e)}}))},
+  async get(k){try{const d=await this.open();return await new Promise((ok,ko)=>{const q=d.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error)})}catch(e){return undefined}},
+  async set(k,v){try{const d=await this.open();await new Promise((ok,ko)=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=ok;t.onerror=()=>ko(t.error)})}catch(e){}},
+  async del(k){try{const d=await this.open();await new Promise(ok=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').delete(k);t.oncomplete=ok;t.onerror=ok})}catch(e){}}};
+const isNetErr=x=>!navigator.onLine||x instanceof TypeError||/fetch|network|rete|server non risponde/i.test(String(x&&x.message||''));
+const PENDING_URL={};
 async function remoteClaude(api){
-  S.remote=true;S.api=api;let token=LS.get('gofiber-token'),me=null,msg='';
+  S.remote=true;S.api=api;let token=LS.get('gofiber-token'),me=null,msg='',offlineStart=false;
   for(;;){
     if(!token)token=await waitLogin(api,msg);
-    try{me=await apiCall(api,'me',{token});break}catch(x){msg=x.message==='auth'?'Sessione scaduta: accedi di nuovo.':x.message;if(x.message==='auth'){token=null;LS.set('gofiber-token',null)}else{setAuth(true);$('#main').innerHTML=`<div class="authcard">${authHead()}<h3>Server non raggiungibile</h3><p>${esc(msg)}</p><div class="acts"><button class="btn yel" onclick="location.reload()">Riprova</button></div></div>`;await new Promise(()=>{})}}
+    try{me=await apiCall(api,'me',{token});IDB.set('me',{token,me});break}
+    catch(x){
+      if(x.message==='auth'){msg='Sessione scaduta: accedi di nuovo.';token=null;LS.set('gofiber-token',null);continue}
+      const c=await IDB.get('me');
+      if(isNetErr(x)&&c&&c.token===token){me=c.me;offlineStart=true;break}
+      msg=x.message;setAuth(true);$('#main').innerHTML=`<div class="authcard">${authHead()}<h3>Server non raggiungibile</h3><p>${esc(isNetErr(x)?'Nessuna connessione e nessun dato salvato su questo dispositivo: collegati a internet almeno una volta.':msg)}</p><div class="acts"><button class="btn yel" onclick="location.reload()">Riprova</button></div></div>`;await new Promise(()=>{})}
   }
   S.email=me.email;S.token=token;
   const call=(a,b)=>apiCall(api,a,{token,...b}).catch(x=>{if(x.message==='auth'){LS.set('gofiber-token',null);location.reload()}throw x});
   S.call=call;
   const docs=new Map(),subs=[];let since=0,synced=false,syncing=null;
+  const CK='cache:'+me.id;
   const colOf=p=>p.split('/').slice(0,-1).join('/');
   const snap=c=>{const n=c.split('/').length+1;const out=[];for(const [k,v] of docs)if(k.startsWith(c+'/')&&k.split('/').length===n)out.push({id:k.split('/').pop(),exists:true,data:()=>v,metadata:{fromCache:false,hasPendingWrites:false}});return{docs:out.sort((a,b)=>a.id<b.id?-1:1),metadata:{fromCache:false,hasPendingWrites:false}}};
   const notify=cols=>subs.forEach(([c,f])=>{if(!cols||cols.has(c))try{f(snap(c))}catch(e){}});
+  let saveT=null;const saveCache=()=>{clearTimeout(saveT);saveT=setTimeout(()=>IDB.set(CK,{since,docs:[...docs]}),400)};
+  // coda delle operazioni fatte senza rete
+  let outbox=(await IDB.get('outbox:'+me.id))||{ops:[],blobs:[],map:{}};
+  const saveOut=()=>{IDB.set('outbox:'+me.id,outbox);netUI()};
+  const netUI=()=>{const n=outbox.ops.length+outbox.blobs.length,b=$('#netbar');if(!b)return;
+    if(!navigator.onLine||S.netErr){b.innerHTML=`<div class="wrap"><div class="netb off">${ic('box')}<b>Senza rete</b><span>Puoi continuare a lavorare: ${n?n+' operazioni in attesa, partono':'le modifiche partono'} da sole quando torna il segnale.</span></div></div>`}
+    else if(n){b.innerHTML=`<div class="wrap"><div class="netb">${ic('box')}<b>Invio in corso</b><span>${n} operazioni in attesa…</span></div></div>`}else b.innerHTML=''};
+  S.netUI=netUI;
   async function sync(){if(syncing)return syncing;syncing=(async()=>{try{const r=await call('sync',{since});const cols=new Set();
       for(const [p,j] of r.docs){cols.add(colOf(p));if(j==null)docs.delete(p);else try{docs.set(p,JSON.parse(j))}catch(e){}}
-      since=r.now;const first=!synced;synced=true;notify(first?null:cols);S.netErr=false}catch(x){S.netErr=true}finally{syncing=null}})();return syncing}
-  // scritture raggruppate
-  let queue=[],timer=null;
-  function flush(){const q=queue;queue=[];timer=null;if(!q.length)return;
-    call('write',{ops:q.map(x=>x.op)}).then(r=>{const bad=new Set(r.errors||[]);q.forEach(x=>bad.has(x.op.path)?x.rej({code:'invalid_argument'}):x.res());if(bad.size)sync()},e=>{q.forEach(x=>x.rej({code:'unavailable',message:e.message}));since=0;docs.clear();sync()})}
-  function write(op){const cols=new Set([colOf(op.path)]);
-    if(op.op==='delete')docs.delete(op.path);else if(op.op==='update'){const c=docs.get(op.path);if(!c)return Promise.reject({code:'invalid_argument'});docs.set(op.path,deep(c,op.data))}else docs.set(op.path,JSON.parse(JSON.stringify(op.data)));
-    notify(cols);return new Promise((res,rej)=>{queue.push({op,res,rej});if(queue.length>=150)flush();else if(!timer)timer=setTimeout(flush,80)})}
+      // le modifiche ancora in coda restano visibili finché non partono
+      for(const o of outbox.ops)applyLocal(o,cols);
+      since=r.now;const first=!synced;synced=true;notify(first?null:cols);S.netErr=false;saveCache()}catch(x){S.netErr=isNetErr(x);if(!synced&&S.netErr){synced=true;notify(null)}}finally{syncing=null;netUI()}})();return syncing}
   const deep=(a,b)=>{const o={...a};for(const k in b){const v=b[k];o[k]=v&&typeof v==='object'&&!Array.isArray(v)&&o[k]&&typeof o[k]==='object'&&!Array.isArray(o[k])?deep(o[k],v):JSON.parse(JSON.stringify(v))}return o};
+  function applyLocal(op,cols){cols&&cols.add(colOf(op.path));if(op.op==='delete')docs.delete(op.path);else if(op.op==='update'){const c=docs.get(op.path);if(c)docs.set(op.path,deep(c,op.data))}else docs.set(op.path,JSON.parse(JSON.stringify(op.data)))}
+  const swapIds=o=>{let j=JSON.stringify(o);for(const [p,r] of Object.entries(outbox.map))j=j.split(p).join(r);return JSON.parse(j)};
+  let queue=[],timer=null,draining=false;
+  function flush(){const q=queue;queue=[];timer=null;if(!q.length)return;
+    const send=q.map(x=>swapIds(x.op));
+    if(outbox.ops.length||outbox.blobs.length){outbox.ops.push(...send);saveOut();q.forEach(x=>x.res());drain();return}
+    call('write',{ops:send}).then(r=>{const bad=new Set(r.errors||[]);q.forEach(x=>bad.has(x.op.path)?x.rej({code:'invalid_argument'}):x.res());if(bad.size)sync();else setTimeout(sync,400)},
+      e=>{if(isNetErr(e)){outbox.ops.push(...send);saveOut();S.netErr=true;netUI();q.forEach(x=>x.res())}else{q.forEach(x=>x.rej({code:'unavailable',message:e.message}));since=0;docs.clear();sync()}})}
+  function write(op){if(op.op==='update'&&!docs.get(op.path))return Promise.reject({code:'invalid_argument'});
+    const cols=new Set();applyLocal(op,cols);notify(cols);saveCache();
+    return new Promise((res,rej)=>{queue.push({op,res,rej});if(queue.length>=150)flush();else if(!timer)timer=setTimeout(flush,80)})}
+  async function drain(){if(draining||!navigator.onLine)return;if(!outbox.ops.length&&!outbox.blobs.length)return;draining=true;netUI();
+    try{
+      while(outbox.blobs.length){const b=outbox.blobs[0];const blob=await IDB.get('blob:'+b.pid);
+        if(blob){const r=await uploadNow(blob,b.type,b.name);outbox.map['pending:'+b.pid]=r.id;
+          const fix=[];for(const [p,v] of docs){const s=JSON.stringify(v);if(s.includes('pending:'+b.pid))fix.push({op:'set',path:p,data:JSON.parse(s.split('pending:'+b.pid).join(r.id))})}
+          if(fix.length){fix.forEach(f=>applyLocal(f));outbox.ops.push(...fix)}}
+        await IDB.del('blob:'+b.pid);outbox.blobs.shift();saveOut()}
+      while(outbox.ops.length){const batch=outbox.ops.slice(0,100).map(swapIds);await call('write',{ops:batch});outbox.ops.splice(0,batch.length);saveOut()}
+      S.netErr=false;toast('Operazioni senza rete inviate');sync();
+    }catch(x){S.netErr=isNetErr(x)}finally{draining=false;netUI()}}
   const rid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
   const doc=p=>({id:p.split('/').pop(),path:p,get:async()=>{if(!synced)await sync();return{id:p.split('/').pop(),exists:docs.has(p),data:()=>docs.get(p)}},
     set:d=>write({op:'set',path:p,data:d}),update:d=>write({op:'update',path:p,data:d}),delete:()=>write({op:'delete',path:p})});
   const col=p=>({path:p,doc:id=>doc(p+'/'+(id||rid())),add:async d=>{const r=doc(p+'/'+rid());await r.set(d);return r},
     onSnapshot:f=>{const e=[p,f];subs.push(e);if(synced)setTimeout(()=>f(snap(p)),0);return()=>{const i=subs.indexOf(e);if(i>=0)subs.splice(i,1)}}});
-  await sync();
-  setInterval(()=>{if(document.visibilityState!=='hidden')sync()},12000);
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')sync()});
+  // avvio: prima i dati salvati sul dispositivo, poi il server
+  const cached=await IDB.get(CK);
+  if(cached&&cached.docs){for(const [k,v] of cached.docs)docs.set(k,v);since=cached.since||0;synced=true}
+  for(const o of outbox.ops)applyLocal(o);if(outbox.ops.length&&offlineStart)synced=true;
+  if(offlineStart){S.netErr=true}else{const pr=sync();if(!synced)await pr}
+  setInterval(()=>{if(document.visibilityState!=='hidden'){sync();drain()}},12000);
+  addEventListener('online',()=>{S.netErr=false;netUI();drain();sync()});addEventListener('offline',()=>{S.netErr=true;netUI()});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){sync();drain()}});
+  setTimeout(()=>{netUI();drain()},500);
   const db={doc,collection:col};
   const user={isOwner:async()=>!!me.owner,canEdit:async()=>!!me.owner||(me.attivo&&me.ruolo==='admin'),id:async()=>me.id,can:async()=>true};
-  const assets={upload:async(blob,o)=>{const b64=await new Promise((ok,ko)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(',')[1]);fr.onerror=ko;fr.readAsDataURL(blob)});
-    try{const r=await call('upload',{b64,type:o?.type||blob.type,name:(blob.name||'foto')+'-'+Date.now()});return{id:r.id,url:bUrl(r.id),contentType:r.contentType,sizeBytes:blob.size}}catch(x){throw{code:'upstream_error',message:x.message}}}};
+  const toB64=blob=>new Promise((ok,ko)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(',')[1]);fr.onerror=ko;fr.readAsDataURL(blob)});
+  async function uploadNow(blob,type,name){const r=await call('upload',{b64:await toB64(blob),type,name});return r}
+  const assets={upload:async(blob,o)=>{const type=o?.type||blob.type,name=(blob.name||'foto')+'-'+Date.now();
+    if(navigator.onLine&&!S.netErr){try{const r=await uploadNow(blob,type,name);return{id:r.id,url:bUrl(r.id),contentType:r.contentType,sizeBytes:blob.size}}catch(x){if(!isNetErr(x))throw{code:'upstream_error',message:x.message}}}
+    const pid=rid();await IDB.set('blob:'+pid,blob);outbox.blobs.push({pid,type,name});saveOut();PENDING_URL['pending:'+pid]=URL.createObjectURL(blob);
+    return{id:'pending:'+pid,url:PENDING_URL['pending:'+pid],contentType:type,sizeBytes:blob.size}}};
   return{use:async k=>k==='db'?db:k==='user'?user:k==='assets'?assets:null};
 }
-const bUrl=id=>String(id).startsWith('gd:')?'https://drive.google.com/thumbnail?id='+encodeURIComponent(id.slice(3))+'&sz=w1600':'/_blob/'+id;
+const bUrl=id=>String(id).startsWith('pending:')?(PENDING_URL[id]||'icons/icon-192.png'):String(id).startsWith('gd:')?'https://drive.google.com/thumbnail?id='+encodeURIComponent(id.slice(3))+'&sz=w1600':'/_blob/'+id;
 const bLink=id=>String(id).startsWith('gd:')?'https://drive.google.com/file/d/'+encodeURIComponent(id.slice(3))+'/view':'/_blob/'+id;
 window.logout=()=>logout();window.__inst=()=>maybeInstall(true);
 function logout(){const t=LS.get('gofiber-token');LS.set('gofiber-token',null);if(S.api&&t)apiCall(S.api,'logout',{token:t}).catch(()=>{}).finally(()=>location.reload());else location.reload()}

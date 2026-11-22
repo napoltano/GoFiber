@@ -10,7 +10,9 @@
  *     Esegui come: Me · Chi ha accesso: Chiunque → Esegui il deployment.
  *  5. Copia l'URL che finisce con /exec e incollalo in GoFiber.
  */
-const VERSION = 1;
+const VERSION = 2;
+const ARCHIVE_DAYS = 365;   // pratiche chiuse da più di un anno vanno nello Storico
+const TOMBSTONE_DAYS = 45; // righe eliminate tenute per avvisare i dispositivi, poi tolte
 const SHEET_ID = ''; // vuoto = il foglio collegato o, se lo script è separato, "GoFiber – Database" cercato su Drive
 const SESSION_DAYS = 90;
 
@@ -42,10 +44,12 @@ function sh_(name, header) {
 const dati_ = () => sh_('Dati', ['PERCORSO', 'JSON', 'AGGIORNATO', 'ELIMINATO']);
 const utenti_ = () => sh_('Utenti', ['ID', 'EMAIL', 'SALT', 'HASH', 'CREATO', 'ULTIMO_ACCESSO']);
 const sessioni_ = () => sh_('Sessioni', ['TOKEN', 'ID', 'SCADE']);
+const storico_ = () => sh_('Storico', ['PERCORSO', 'JSON', 'ARCHIVIATO']);
+const cache_ = () => CacheService.getScriptCache();
 const props_ = () => PropertiesService.getScriptProperties();
 
 function setup() {
-  dati_(); utenti_(); sessioni_();
+  dati_(); utenti_(); sessioni_(); storico_();
   folder_(); photos_();
   return 'GoFiber pronto';
 }
@@ -112,15 +116,26 @@ function readAll_() {
   return s.getRange(2, 1, n - 1, 4).getValues();
 }
 function getDoc_(path) {
-  for (const r of readAll_()) if (r[0] === path && !r[3]) { try { return JSON.parse(r[1]); } catch (x) { return null; } }
+  const s = dati_(), n = s.getLastRow();
+  if (n < 2) return null;
+  const col = s.getRange(2, 1, n - 1, 1).getValues();
+  for (let i = col.length - 1; i >= 0; i--) if (col[i][0] === path) {
+    const r = s.getRange(i + 2, 1, 1, 4).getValues()[0];
+    if (r[3]) return null;
+    try { return JSON.parse(r[1]); } catch (x) { return null; }
+  }
   return null;
 }
 function role_(id) {
   if (id && id === owner_()) return { ruolo: 'admin', attivo: true, owner: true };
+  const c = cache_(), hit = c.get('r:' + id);
+  if (hit) return JSON.parse(hit);
   const r = getDoc_('ruoli/' + id);
-  if (r && r.stato === 'attivo') return { ruolo: r.ruolo || 'tecnico', attivo: true, owner: false };
-  return { ruolo: r && r.ruolo || '', attivo: false, owner: false };
+  const out = r && r.stato === 'attivo' ? { ruolo: r.ruolo || 'tecnico', attivo: true, owner: false } : { ruolo: r && r.ruolo || '', attivo: false, owner: false };
+  c.put('r:' + id, JSON.stringify(out), 60);
+  return out;
 }
+function lastWrite_() { return Number(cache_().get('lw') || props_().getProperty('LAST_WRITE') || 0); }
 function canWrite_(path, id, role) {
   const p = String(path).split('/');
   if (p.length < 2 || p.length % 2) return false;
@@ -202,14 +217,22 @@ const API = {
   },
 
   sync(b) {
-    const id = auth_(b), role = role_(id), since = Number(b.since || 0), now = Date.now();
-    const docs = [];
-    for (const r of readAll_()) {
-      if (Number(r[2]) <= since) continue;
-      if (!canRead_(r[0], id, role)) continue;
-      docs.push([r[0], r[3] ? null : r[1]]);
+    const id = auth_(b), role = role_(id), since = Number(b.since || 0);
+    if (role.attivo && role.ruolo === 'admin') maybeArchive_();
+    const lw = lastWrite_();
+    // nessuna modifica dall'ultimo controllo: risposta immediata, senza leggere il foglio
+    if (since && lw && since >= lw) return { now: since, docs: [], owner: id === owner_(), ruolo: role.ruolo, attivo: role.attivo };
+    const s = dati_(), n = s.getLastRow(), now = Date.now(), docs = [];
+    if (n > 1) {
+      const times = s.getRange(2, 3, n - 1, 1).getValues();
+      const idx = []; times.forEach((t, i) => { if (Number(t[0]) > since) idx.push(i); });
+      let rows;
+      if (idx.length > 150 || !since) { const all = s.getRange(2, 1, n - 1, 4).getValues(); rows = idx.map(i => all[i]); }
+      else rows = idx.map(i => s.getRange(i + 2, 1, 1, 4).getValues()[0]);
+      for (const r of rows) { if (!canRead_(r[0], id, role)) continue; if (!since && r[3]) continue; docs.push([r[0], r[3] ? null : r[1]]); }
     }
-    return { now: now, docs: docs, owner: id === owner_(), ruolo: role.ruolo, attivo: role.attivo };
+    // margine di 8 secondi: una scrittura in corso durante la lettura viene ripresa al giro dopo
+    return { now: now - 8000, docs: docs, owner: id === owner_(), ruolo: role.ruolo, attivo: role.attivo };
   },
 
   write(b) {
@@ -235,6 +258,11 @@ const API = {
       }
       Object.keys(changed).forEach(k => { s.getRange(Number(k) + 2, 1, 1, 4).setValues([rows[k]]); });
       if (add.length) s.getRange(n + 1 < 2 ? 2 : n + 1, 1, add.length, 4).setNumberFormat('@').setValues(add.map(k => rows[k]));
+      if (Object.keys(changed).length || add.length) {
+        SpreadsheetApp.flush();
+        props_().setProperty('LAST_WRITE', String(now)); cache_().put('lw', String(now), 21600);
+        ops.forEach(op => { const p = String(op.path || '').split('/'); if (p[0] === 'ruoli') cache_().remove('r:' + p[1]); });
+      }
       return { ok: true, now: now, errors: errors };
     } finally { lock.releaseLock(); }
   },
@@ -248,6 +276,26 @@ const API = {
     return { id: 'gd:' + f.getId(), contentType: b.type };
   },
 
+  storico(b) {
+    const id = auth_(b), r = role_(id);
+    if (!r.attivo || r.ruolo === 'tecnico') throw new Error('Non autorizzato');
+    const q = String(b.q || '').trim().toLowerCase();
+    const s = storico_(), n = s.getLastRow();
+    if (n < 2) return { items: [], total: 0 };
+    const v = s.getRange(2, 1, n - 1, 2).getValues(), by = {};
+    v.forEach(x => { const p = String(x[0]).split('/'); if (p.length !== 2) return; (by[p[1]] = by[p[1]] || {})[p[0]] = x[1]; });
+    const out = [];
+    Object.keys(by).forEach(k => { const o = by[k]; const txt = ((o.pratiche || '') + ' ' + (o.esiti || '')).toLowerCase(); if (!q || txt.indexOf(q) >= 0) out.push({ id: k, pratica: o.pratiche ? JSON.parse(o.pratiche) : null, esito: o.esiti ? JSON.parse(o.esiti) : null }); });
+    out.sort((a, b2) => String(b2.esito && b2.esito.completedAt || '').localeCompare(String(a.esito && a.esito.completedAt || '')));
+    return { items: out.slice(0, 200), total: out.length };
+  },
+
+  archiveNow(b) {
+    const id = auth_(b), r = role_(id);
+    if (!(r.attivo && r.ruolo === 'admin')) throw new Error('Non autorizzato');
+    return archive_(Number(b.days) || ARCHIVE_DAYS);
+  },
+
   pfs(b) {
     const id = auth_(b), r = role_(id);
     if (!r.attivo) throw new Error('Non autorizzato');
@@ -256,3 +304,40 @@ const API = {
     return { text: it.next().getBlob().getDataAsString('UTF-8') };
   }
 };
+
+/* ---------- storico: alleggerisce il foglio Dati ---------- */
+function maybeArchive_() {
+  const last = Number(props_().getProperty('LAST_ARCHIVE') || 0);
+  if (Date.now() - last < 864e5) return;
+  props_().setProperty('LAST_ARCHIVE', String(Date.now()));
+  try { archive_(ARCHIVE_DAYS); } catch (x) {}
+}
+function archive_(days) {
+  const lock = LockService.getScriptLock(); lock.waitLock(25000);
+  try {
+    const s = dati_(), n = s.getLastRow();
+    if (n < 2) return { archiviate: 0, tolte: 0 };
+    const rows = s.getRange(2, 1, n - 1, 4).getValues(), now = Date.now();
+    const cut = new Date(now - days * 864e5).toISOString(), tomb = now - TOMBSTONE_DAYS * 864e5;
+    const old = {};
+    rows.forEach(r => { if (String(r[0]).indexOf('esiti/') === 0 && !r[3]) { try { const e = JSON.parse(r[1]); if (e.completedAt && e.completedAt < cut) old[String(r[0]).slice(6)] = true; } catch (x) {} } });
+    const toStore = [], keep = [];
+    let moved = 0, purged = 0;
+    rows.forEach(r => {
+      const p = String(r[0]).split('/');
+      if (r[3] && Number(r[2]) < tomb) { purged++; return; }
+      if ((p[0] === 'esiti' || p[0] === 'pratiche') && old[p[1]] && !r[3]) {
+        toStore.push([r[0], r[1], new Date(now).toISOString()]); moved++;
+        keep.push([r[0], '', String(now), '1']); return;
+      }
+      keep.push(r);
+    });
+    if (!moved && !purged) return { archiviate: 0, tolte: 0 };
+    if (toStore.length) { const st = storico_(), m = st.getLastRow(); st.getRange(m + 1, 1, toStore.length, 3).setNumberFormat('@').setValues(toStore); }
+    s.getRange(2, 1, n - 1, 4).clearContent();
+    if (keep.length) s.getRange(2, 1, keep.length, 4).setNumberFormat('@').setValues(keep);
+    SpreadsheetApp.flush();
+    props_().setProperty('LAST_WRITE', String(now)); cache_().put('lw', String(now), 21600);
+    return { archiviate: moved / 2, tolte: purged };
+  } finally { lock.releaseLock(); }
+}
