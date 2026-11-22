@@ -384,7 +384,11 @@ const VAL={
   pre:l=>l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non presente in magazzino: avvisa l\'ufficio'];const d=prodName(u.prodottoId)+(u.committente?' · '+u.committente:'');if(u.stato==='installato')return[s,'ko','Già installato · ordine '+(u.ordine||'—')];if(u.stato==='scaricato')return[s,'ko','Scaricato dal magazzino'];if(u.stato==='tecnico'&&u.tecnicoId===S.me)return[s,'neu',d+' · già in carico a te'];if(u.stato==='tecnico')return[s,'ko',d+' · in carico a '+tecName(u.tecnicoId)];return[s,'ok',d]}),
   sca:l=>l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non trovato'];if(u.stato==='installato')return[s,'ko','Installato · ordine '+(u.ordine||'—')+': non scaricabile'];if(u.stato==='scaricato')return[s,'neu','Già scaricato'];const d=prodName(u.prodottoId)+(u.committente?' · '+u.committente:'');if(u.stato==='tecnico')return[s,'wait',d+' · in carico a '+tecName(u.tecnicoId)];return[s,'ok',d]}),
   ass:l=>{const tid=$('#atec')?.value;return l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non trovato'];if(u.stato==='scaricato')return[s,'ko','Scaricato dal magazzino'];if(u.stato==='installato')return[s,'ko','Già installato · ordine '+(u.ordine||'—')];if(u.stato==='tecnico'&&u.tecnicoId===tid)return[s,'neu','Già assegnato a questo tecnico'];if(u.stato==='tecnico')return[s,'wait',prodName(u.prodottoId)+' · riassegna da '+tecName(u.tecnicoId)];return[s,'ok',prodName(u.prodottoId)]})},
-  rie:l=>l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non trovato'];if(u.stato==='scaricato')return[s,'ko','Scaricato: ripristinalo dalla scheda prodotto'];if(u.stato==='installato')return[s,'ko','Installato: riapri prima la pratica'];if(u.stato==='magazzino')return[s,'neu','Già in magazzino'];return[s,'ok',prodName(u.prodottoId)+' · da '+tecName(u.tecnicoId)]}),
+  rie:l=>l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non presente in magazzino'];const d=prodName(u.prodottoId)+(u.committente?' · '+u.committente:'');
+    if(u.stato==='tecnico')return[s,'ok',d+' · torna da '+tecName(u.tecnicoId)];
+    if(u.stato==='installato')return[s,'wait',d+' · era installato (ordine '+(u.ordine||'—')+'): verrà tolto dalla pratica'];
+    if(u.stato==='scaricato')return[s,'wait',d+' · era scaricato'+(u.motivoScarico?' ('+u.motivoScarico+')':'')+': torna disponibile'];
+    return[s,'neu',d+' · già in magazzino']}),
   ins:l=>{const pid=S.modal?.id,p=S.pr.get(pid)||{},team=tecsOf(p).length?tecsOf(p):[S.me];return l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Seriale non presente in magazzino'];if(u.stato==='scaricato')return[s,'ko','Seriale scaricato dal magazzino'];if(u.committente&&p.committente&&u.committente!==p.committente&&u.stato!=='installato')return[s,'wait',prodName(u.prodottoId)+' · materiale '+u.committente+', pratica '+p.committente];if(u.stato==='installato'&&u.praticaId!==pid)return[s,'ko','Già installato · ordine '+(u.ordine||'—')];if(u.stato==='tecnico'&&!team.includes(u.tecnicoId))return[s,'wait',prodName(u.prodottoId)+' · in carico a '+tecName(u.tecnicoId)];if(u.stato==='magazzino')return[s,'wait',prodName(u.prodottoId)+' · in magazzino, non assegnato'];return[s,'ok',prodName(u.prodottoId)]})}};
 function serBox(id,label,hint){return `<div class="sbox"><div class="lbl">${label}</div><textarea class="in mono" id="sb-${id}" rows="4" placeholder="${esc(hint||'Scansiona con il lettore o scrivi un seriale per riga')}" autocomplete="off" autocapitalize="characters" spellcheck="false"></textarea>
   <div class="acts">${scanBtn('sb-'+id)}<span class="note" id="sbc-${id}"></span></div><div class="sval" id="sbv-${id}"></div></div>`}
@@ -599,19 +603,19 @@ function counts(list){const c={magazzino:0,tecnico:0,installato:0,scaricato:0};f
 function magKpi(){const l=[...S.un.values()].filter(inC),c=counts(l);return `<div class="kpi"><b>${c.magazzino}</b><span>In magazzino</span></div><div class="kpi k-wait"><b>${c.tecnico}</b><span>Ai tecnici</span></div><div class="kpi k-ok"><b>${c.installato}</b><span>Installati</span></div><div class="kpi k-ko"><b>${c.scaricato}</b><span>Scaricati</span></div>`}
 const magSub=()=>`${S.pd.size} prodotti · ${[...S.un.values()].filter(u=>u.stato!=='scaricato').length} pezzi a seriale attivi`;
 function magHTML(){
-  const M=S.mag;const tb=[['prodotti','Prodotti'],['carica','Carica'],['assegna','Assegna ai tecnici'],['scarico','Scarico'],['cerca','Controlla seriale']];
+  const M=S.mag;const tb=[['prodotti','Prodotti'],['carica','Carica'],['assegna','Assegna ai tecnici'],['rientro','Rientro'],['scarico','Scarico'],['cerca','Controlla seriale']];
   return `<div class="ph"><div><h1>Magazzino</h1><div class="sub" style="text-transform:none" id="msub">${magSub()}</div></div>${canLive()?`<div class="sp"><button class="btn yel" data-magscan>${ic('bc')}Scansiona</button></div>`:''}</div>
   <div class="bar" id="mcomm"><span class="note">Committente:</span>${[['','Tutti'],...COMM.map(c=>[c,c])].map(([k,l])=>`<button class="chip ${M.comm===k?'on':''}" data-mc="${k}">${l}</button>`).join('')}</div>
   <div id="mlow">${lowHTML()}</div><div class="kpis" id="mkpi">${magKpi()}</div>
   <div class="subt" id="mtabs">${tb.map(([k,l])=>`<button class="chip ${M.tab===k?'on':''}" data-mt="${k}">${l}</button>`).join('')}</div>
   <div id="magbody">${magBody()}</div>`;
 }
-function magBody(){const t=S.mag.tab;if(t==='carica')return caricaHTML();if(t==='assegna')return assegnaHTML();if(t==='scarico')return scaricoHTML();if(t==='cerca')return cercaHTML();return S.mag.prod&&S.pd.has(S.mag.prod)?prodDetHTML():prodListHTML()}
+function magBody(){const t=S.mag.tab;if(t==='carica')return caricaHTML();if(t==='assegna')return assegnaHTML();if(t==='scarico')return scaricoHTML();if(t==='rientro')return rientroHTML();if(t==='cerca')return cercaHTML();return S.mag.prod&&S.pd.has(S.mag.prod)?prodDetHTML():prodListHTML()}
 function magBind(){
   $('#mtabs').onclick=e=>{const b=e.target.closest('[data-mt]');if(!b)return;S.mag.tab=b.dataset.mt;S.mag.prod=null;render()};
   $('#mcomm').onclick=e=>{const b=e.target.closest('[data-mc]');if(!b)return;S.mag.comm=b.dataset.mc;$('#mcomm').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b));magRefresh()};
   const t=S.mag.tab;
-  if(t==='carica')bindCarica();if(t==='assegna')bindAssegna();if(t==='scarico')bindScarico();
+  if(t==='carica')bindCarica();if(t==='assegna')bindAssegna();if(t==='scarico')bindScarico();if(t==='rientro')bindRientro();
   if(t==='cerca'){$('#mq').oninput=e=>{S.mag.q=e.target.value;$('#cres').innerHTML=cercaRes()};const ta=$('#sb-chk');ta.value=S.mag.chk||'';ta.addEventListener('input',()=>{S.mag.chk=ta.value});sbUpdate('chk')}
   if(t==='prodotti'&&S.mag.prod&&$('#pq')){$('#pq').oninput=e=>{S.mag.pq=e.target.value;$('#ptab').innerHTML=prodTable()}}
 }
@@ -619,7 +623,7 @@ function magRefresh(){
   const t=S.mag.tab;if($('#mkpi'))$('#mkpi').innerHTML=magKpi();if($('#mlow'))$('#mlow').innerHTML=lowHTML();if($('#msub'))$('#msub').textContent=magSub();
   if(t==='prodotti'){if(S.mag.prod&&$('#ptab')){$('#ptab').innerHTML=prodTable();$('#phead').innerHTML=prodHead()}else if(!S.mag.prod)$('#magbody').innerHTML=prodListHTML()}
   else if(t==='cerca'&&$('#cres')){$('#cres').innerHTML=cercaRes();sbUpdate('chk')}
-  else{['car','ass','rie','sca'].forEach(sbUpdate);if($('#qav'))qAvail();if($('#prelist'))$('#prelist').innerHTML=prelHTML()}
+  else{['car','ass','rie','sca'].forEach(sbUpdate);if($('#rlist')){const lim=addDays(today(),-30);$('#rlist').innerHTML=rientriHTML([...S.un.values()].filter(u=>u.rientroAt&&u.rientroAt.slice(0,10)>=lim).sort((a,b)=>b.rientroAt.localeCompare(a.rientroAt)))}if($('#qav'))qAvail();if($('#prelist'))$('#prelist').innerHTML=prelHTML()}
 }
 function lowStock(){const out=[];let any=false;for(const [,p] of S.pd)if(p.soglie){any=true;break}if(!any)return out;const cnt={};for(const u of S.un.values())if(u.stato==='magazzino'){const k=u.prodottoId+'|'+u.committente;cnt[k]=(cnt[k]||0)+1}
   for(const [pid,p] of S.pd){const so=p.soglie||{};for(const c of COMM){const min=+so[c]||0;if(!min)continue;const have=cnt[pid+'|'+c]||0;if(have<min)out.push({pid,c,have,min})}}return out}
@@ -694,13 +698,12 @@ function bindCarica(){
     btn.disabled=false;btn.textContent='Carica in magazzino';
   };
 }
-function assegnaHTML(){const m=S.mag.mode;
+function assegnaHTML(){if(S.mag.mode==='rie')S.mag.mode='ser';const m=S.mag.mode;
   return `<form class="card pf" id="aform" novalidate><h3>Movimenta materiale</h3>
-   <div class="seg">${[['ser','Assegna per seriale'],['qty','Assegna per quantità'],['rie','Rientro in magazzino']].map(([k,l])=>`<label><input type="radio" name="amode" value="${k}" ${m===k?'checked':''}><span>${l}</span></label>`).join('')}</div>
+   <div class="seg">${[['ser','Assegna per seriale'],['qty','Assegna per quantità']].map(([k,l])=>`<label><input type="radio" name="amode" value="${k}" ${m===k?'checked':''}><span>${l}</span></label>`).join('')}</div>
    ${m!=='rie'?`<label class="f">Tecnico <span class="req">*</span><select class="in" id="atec">${tecOpts('','Scegli tecnico')}</select></label>`:''}
    ${m==='ser'?serBox('ass','Seriali da consegnare'):''}
    ${m==='qty'?`<div class="grid2"><label class="f">Committente <span class="req">*</span><select class="in" id="qcom">${COMM.map(c=>`<option ${(S.mag.comm||S.mag.lastComm||COMM[0])===c?'selected':''}>${c}</option>`).join('')}</select></label><label class="f">Prodotto<select class="in" id="qprod">${[...S.pd].sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||'')).map(([id,p])=>`<option value="${esc(id)}">${esc(p.nome)}</option>`).join('')}</select></label></div><label class="f" style="max-width:220px">Quantità<input class="in" id="qn" type="number" min="1" value="1" inputmode="numeric"></label><p class="note" id="qav"></p>`:''}
-   ${m==='rie'?serBox('rie','Seriali che rientrano in magazzino'):''}
    <div class="err" id="aerr"></div><div class="acts"><button class="btn yel" type="submit">${m==='rie'?'Registra rientro':'Assegna'}</button></div></form>
   <h2 class="cond" style="font-size:24px;margin:22px 0 10px">Prelievi fatti dai tecnici · ultimi 30 giorni</h2><div id="prelist">${prelHTML()}</div>`}
 function prelHTML(){const lim=addDays(today(),-30);const l=[...S.un.values()].filter(u=>u.prelevatoAt&&u.prelevatoAt.slice(0,10)>=lim).sort((a,b)=>b.prelevatoAt.localeCompare(a.prelevatoAt));
@@ -727,6 +730,32 @@ function bindAssegna(){
     toast(m==='rie'?`${keys.length-errs.length} pezzi rientrati in magazzino`:`${keys.length-errs.length} pezzi assegnati a ${tecName(tid)}`);
     if(errs.length)er.textContent=`${errs.length} non salvati.`;else render();
   };
+}
+function rientroHTML(){
+  const lim=addDays(today(),-30),recent=[...S.un.values()].filter(u=>u.rientroAt&&u.rientroAt.slice(0,10)>=lim).sort((a,b)=>b.rientroAt.localeCompare(a.rientroAt));
+  return `<form class="card pf" id="rform" novalidate><h3>Rientro dal tecnico</h3>
+   <p class="note" style="margin-top:-4px">Quando un tecnico ti riporta del materiale, scansiona di nuovo i codici a barre: i pezzi tornano in magazzino e sono di nuovo disponibili da assegnare. Funziona anche per pezzi tolti da un impianto o scaricati per errore.</p>
+   ${serBox('rie','Seriali che rientrano')}
+   <div class="lbl">Rientrano come</div>
+   <div class="seg"><label><input type="radio" name="rcome" value="ok" checked><span>Disponibili in magazzino</span></label><label><input type="radio" name="rcome" value="ko"><span>Difettosi (scarica)</span></label></div>
+   <label class="f">Nota (facoltativa)<input class="in" id="rnota" placeholder="Es. avanzato dal cantiere di via Roma" autocomplete="off"></label>
+   <div class="err" id="rerr3"></div><div class="acts"><button class="btn yel" type="submit">Registra rientro</button></div></form>
+  <h2 class="cond" style="font-size:24px;margin:22px 0 10px">Rientri degli ultimi 30 giorni</h2>
+  <div id="rlist">${rientriHTML(recent)}</div>`}
+function rientriHTML(l){if(!l.length)return '<div class="empty">Nessun rientro registrato.</div>';
+  return `<div class="tw"><table class="t stack"><thead><tr><th>Quando</th><th>Da</th><th>Seriale</th><th>Prodotto</th><th>Committente</th><th>Esito</th><th>Nota</th></tr></thead><tbody>${l.slice(0,300).map(u=>`<tr><td>${esc(dt(u.rientroAt))}</td><td>${esc(u.rientroDa?tecName(u.rientroDa):'—')}</td><td><code>${esc(u.seriale)}</code></td><td>${esc(prodName(u.prodottoId))}</td><td>${ctag(u.committente)}</td><td><span class="pill ${u.stato==='scaricato'?'ko':'ok'}">${u.stato==='scaricato'?'Difettoso, scaricato':'Di nuovo disponibile'}</span></td><td>${esc(u.rientroNota||'')}</td></tr>`).join('')}</tbody></table></div>`}
+function bindRientro(){const f=$('#rform');if(!f)return;
+  f.onsubmit=e=>{e.preventDefault();const er=$('#rerr3');er.textContent='';
+    const r=VAL.rie(serials('rie')).filter(x=>x[1]==='ok'||x[1]==='wait');if(!r.length){er.textContent='Nessun seriale da far rientrare: scansiona i codici.';return}
+    const come=f.querySelector('[name=rcome]:checked').value,nota=$('#rnota').value.trim(),inst=r.filter(x=>x[1]==='wait'&&S.un.get(sk(x[0]))?.stato==='installato').length;
+    const run=async()=>{const now=new Date().toISOString();const btn=f.querySelector('button[type=submit]');btn.disabled=true;S.busy=true;
+      const errs=await pool(r.map(x=>sk(x[0])),k=>{const u=S.un.get(k)||{};const base={rientroAt:now,rientroDa:u.tecnicoId||'',rientroNota:nota,tecnicoId:'',assignedAt:now};
+        if(u.stato==='installato')Object.assign(base,{exPraticaId:u.praticaId||'',exOrdine:u.ordine||'',praticaId:'',ordine:'',idRisorsa:'',installedAt:''});
+        return S.db.doc('unita/'+k).update(come==='ko'?{...base,stato:'scaricato',motivoScarico:'Difettoso (rientro)',notaScarico:nota,scaricatoAt:now}:{...base,stato:'magazzino',motivoScarico:'',notaScarico:'',scaricatoAt:''})},6,d=>btn.textContent=`Salvo ${d} di ${r.length}…`);
+      S.busy=false;btn.disabled=false;btn.textContent='Registra rientro';
+      if(errs.length){er.textContent=`${errs.length} non salvati: ${errText(errs[0][1])}`;return}
+      toast(come==='ko'?`${r.length} pezzi difettosi scaricati`:`${r.length} pezzi di nuovo disponibili in magazzino`);const ta=$('#sb-rie');ta.value='';sbUpdate('rie');$('#rnota').value=''};
+    if(inst){S.modal={type:'confirm',title:'Confermi il rientro?',text:`${inst} ${inst===1?'pezzo risulta installato':'pezzi risultano installati'} in una pratica: verranno tolti dalla pratica e ${come==='ko'?'scaricati come difettosi':'rimessi in magazzino'}.`,ok:'Conferma rientro',done:'Rientro registrato',fn:run};renderModal()}else run()};
 }
 function scaricoHTML(){
   return `<form class="card pf" id="sform" novalidate><h3>Scarico dal magazzino</h3>
