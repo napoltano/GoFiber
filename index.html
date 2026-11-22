@@ -373,6 +373,7 @@ const scanBtn=(tid,l)=>`${canLive()?`<button type="button" class="btn sm yel" da
 const serials=id=>[...new Set((document.getElementById('sb-'+id)?.value||'').split(/[\s,;]+/).map(normS).filter(Boolean))];
 const VAL={
   car:l=>l.map(s=>{const u=S.un.get(sk(s));return !u?[s,'ok','Nuovo']:u.stato==='scaricato'?[s,'wait','Era scaricato: verrà ricaricato']:[s,'ko','Già presente · '+prodName(u.prodottoId)+(u.committente?' · '+u.committente:'')]}),
+  chk:l=>l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non presente in magazzino'];const [k,lab]=uLab(u);return[s,k==='neu'?'ok':k,prodName(u.prodottoId)+(u.committente?' · '+u.committente:'')+' · '+lab]}),
   pre:l=>l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non presente in magazzino: avvisa l\'ufficio'];const d=prodName(u.prodottoId)+(u.committente?' · '+u.committente:'');if(u.stato==='installato')return[s,'ko','Già installato · ordine '+(u.ordine||'—')];if(u.stato==='scaricato')return[s,'ko','Scaricato dal magazzino'];if(u.stato==='tecnico'&&u.tecnicoId===S.me)return[s,'neu',d+' · già in carico a te'];if(u.stato==='tecnico')return[s,'ko',d+' · in carico a '+tecName(u.tecnicoId)];return[s,'ok',d]}),
   sca:l=>l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non trovato'];if(u.stato==='installato')return[s,'ko','Installato · ordine '+(u.ordine||'—')+': non scaricabile'];if(u.stato==='scaricato')return[s,'neu','Già scaricato'];const d=prodName(u.prodottoId)+(u.committente?' · '+u.committente:'');if(u.stato==='tecnico')return[s,'wait',d+' · in carico a '+tecName(u.tecnicoId)];return[s,'ok',d]}),
   ass:l=>{const tid=$('#atec')?.value;return l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non trovato'];if(u.stato==='scaricato')return[s,'ko','Scaricato dal magazzino'];if(u.stato==='installato')return[s,'ko','Già installato · ordine '+(u.ordine||'—')];if(u.stato==='tecnico'&&u.tecnicoId===tid)return[s,'neu','Già assegnato a questo tecnico'];if(u.stato==='tecnico')return[s,'wait',prodName(u.prodottoId)+' · riassegna da '+tecName(u.tecnicoId)];return[s,'ok',prodName(u.prodottoId)]})},
@@ -384,6 +385,7 @@ function sbUpdate(id){
   const c=document.getElementById('sbc-'+id);if(!c)return;const l=serials(id);const r=VAL[id](l);
   const n=k=>r.filter(x=>x[1]===k).length;
   c.textContent=l.length?`${l.length} seriali · ${n('ok')+n('wait')} validi${n('ko')?' · '+n('ko')+' con errore':''}`:'';
+  if(id==='chk'){const box=document.getElementById('chkres');if(box){const found=l.map(x=>S.un.get(sk(x))).filter(Boolean);const miss=l.length-found.length;const c=counts(found);box.innerHTML=l.length?`<div class="kpis" style="margin:12px 0"><div class="kpi"><b>${l.length}</b><span>Codici controllati</span></div><div class="kpi"><b>${c.magazzino}</b><span>In magazzino</span></div><div class="kpi k-wait"><b>${c.tecnico}</b><span>Ai tecnici</span></div><div class="kpi k-ok"><b>${c.installato}</b><span>Installati</span></div>${c.scaricato?`<div class="kpi"><b>${c.scaricato}</b><span>Scaricati</span></div>`:''}${miss?`<div class="kpi k-ko"><b>${miss}</b><span>Non trovati</span></div>`:''}</div>${found.length?unitRows(found,true):''}`:''}}
   document.getElementById('sbv-'+id).innerHTML=r.slice(0,300).map(([s,k,t])=>`<div class="sv ${k}"><code>${esc(s)}</code><span>${esc(t)}</span></div>`).join('')+(r.length>300?`<div class="note">…e altri ${r.length-300}</div>`:'');
 }
 document.addEventListener('input',e=>{const t=e.target;if(t.id?.startsWith('sb-')){sbUpdate(t.id.slice(3));if(e.inputType==='insertLineBreak'||/\n$/.test(t.value))play('scan')}});
@@ -591,7 +593,7 @@ function magKpi(){const l=[...S.un.values()].filter(inC),c=counts(l);return `<di
 const magSub=()=>`${S.pd.size} prodotti · ${[...S.un.values()].filter(u=>u.stato!=='scaricato').length} pezzi a seriale attivi`;
 function magHTML(){
   const M=S.mag;const tb=[['prodotti','Prodotti'],['carica','Carica'],['assegna','Assegna ai tecnici'],['scarico','Scarico'],['cerca','Controlla seriale']];
-  return `<div class="ph"><div><h1>Magazzino</h1><div class="sub" style="text-transform:none" id="msub">${magSub()}</div></div></div>
+  return `<div class="ph"><div><h1>Magazzino</h1><div class="sub" style="text-transform:none" id="msub">${magSub()}</div></div>${canLive()?`<div class="sp"><button class="btn yel" data-magscan>${ic('bc')}Scansiona</button></div>`:''}</div>
   <div class="bar" id="mcomm"><span class="note">Committente:</span>${[['','Tutti'],...COMM.map(c=>[c,c])].map(([k,l])=>`<button class="chip ${M.comm===k?'on':''}" data-mc="${k}">${l}</button>`).join('')}</div>
   <div class="kpis" id="mkpi">${magKpi()}</div>
   <div class="subt" id="mtabs">${tb.map(([k,l])=>`<button class="chip ${M.tab===k?'on':''}" data-mt="${k}">${l}</button>`).join('')}</div>
@@ -603,13 +605,13 @@ function magBind(){
   $('#mcomm').onclick=e=>{const b=e.target.closest('[data-mc]');if(!b)return;S.mag.comm=b.dataset.mc;$('#mcomm').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b));magRefresh()};
   const t=S.mag.tab;
   if(t==='carica')bindCarica();if(t==='assegna')bindAssegna();if(t==='scarico')bindScarico();
-  if(t==='cerca'){$('#mq').oninput=e=>{S.mag.q=e.target.value;$('#cres').innerHTML=cercaRes()};}
+  if(t==='cerca'){$('#mq').oninput=e=>{S.mag.q=e.target.value;$('#cres').innerHTML=cercaRes()};const ta=$('#sb-chk');ta.value=S.mag.chk||'';ta.addEventListener('input',()=>{S.mag.chk=ta.value});sbUpdate('chk')}
   if(t==='prodotti'&&S.mag.prod&&$('#pq')){$('#pq').oninput=e=>{S.mag.pq=e.target.value;$('#ptab').innerHTML=prodTable()}}
 }
 function magRefresh(){
   const t=S.mag.tab;if($('#mkpi'))$('#mkpi').innerHTML=magKpi();if($('#msub'))$('#msub').textContent=magSub();
   if(t==='prodotti'){if(S.mag.prod&&$('#ptab')){$('#ptab').innerHTML=prodTable();$('#phead').innerHTML=prodHead()}else if(!S.mag.prod)$('#magbody').innerHTML=prodListHTML()}
-  else if(t==='cerca'&&$('#cres'))$('#cres').innerHTML=cercaRes();
+  else if(t==='cerca'&&$('#cres')){$('#cres').innerHTML=cercaRes();sbUpdate('chk')}
   else{['car','ass','rie','sca'].forEach(sbUpdate);if($('#qav'))qAvail();if($('#prelist'))$('#prelist').innerHTML=prelHTML()}
 }
 function stockBar(c){const tot=c.magazzino+c.tecnico+c.installato||1;return `<div class="stock"><i style="width:${c.magazzino/tot*100}%;background:var(--neu)"></i><i style="width:${c.tecnico/tot*100}%;background:var(--wait)"></i><i style="width:${c.installato/tot*100}%;background:var(--ok)"></i></div>`}
@@ -631,7 +633,7 @@ function prodHead(){const p=S.pd.get(S.mag.prod)||{},all=unitsOf(S.mag.prod),c=c
    <div class="sp"><button class="btn sm" data-pedit>Modifica</button><button class="btn sm" data-mt2="carica" data-pp="${esc(S.mag.prod)}">${ic('plus')}Aggiungi seriali</button>${all.length===0?'<button class="btn sm dng" data-pdel>Elimina prodotto</button>':''}</div></div>
    ${stockBar(c)}<div class="leg" style="margin-bottom:14px"><span><b>${c.magazzino+c.tecnico+c.installato}</b> attivi</span><span><b>${c.magazzino}</b> in magazzino</span><span><b>${c.tecnico}</b> ai tecnici</span><span><b>${c.installato}</b> installati</span><span><b>${c.scaricato}</b> scaricati</span></div>`}
 function prodDetHTML(){const st=S.mag.pst;
-  return `<div id="phead">${prodHead()}</div><div class="bar">${[['','Tutti'],['magazzino','In magazzino'],['tecnico','Ai tecnici'],['installato','Installati'],['scaricato','Scaricati']].map(([k,l])=>`<button class="chip ${st===k?'on':''}" data-pst="${k}">${l}</button>`).join('')}<input class="in" id="pq" style="max-width:280px" placeholder="Cerca seriale" value="${esc(S.mag.pq)}"></div><div id="ptab">${prodTable()}</div>`}
+  return `<div id="phead">${prodHead()}</div><div class="bar">${[['','Tutti'],['magazzino','In magazzino'],['tecnico','Ai tecnici'],['installato','Installati'],['scaricato','Scaricati']].map(([k,l])=>`<button class="chip ${st===k?'on':''}" data-pst="${k}">${l}</button>`).join('')}<input class="in" id="pq" style="max-width:280px" placeholder="Cerca seriale" value="${esc(S.mag.pq)}">${canLive()?`<button type="button" class="btn sm yel" data-live="pq">${ic('bc')}Scansiona</button>`:''}</div><div id="ptab">${prodTable()}</div>`}
 const uDate=u=>u.scaricatoAt||u.installedAt||u.assignedAt||u.createdAt||'';
 function unitRows(list,showProd){
   return `<div class="tw"><table class="t stack"><thead><tr><th>Seriale</th>${showProd?'<th>Prodotto</th>':''}<th>Committente</th><th>Stato</th><th>Tecnico</th><th>Pratica</th><th>ID risorsa</th><th>Data</th>${S.admin?'<th></th>':''}</tr></thead><tbody>${list.map(u=>{const [k,l]=uLab(u);const key=sk(u.seriale||'');
@@ -733,7 +735,9 @@ function bindScarico(){
       fn:async()=>{const now=new Date().toISOString();const errs=await pool(keys,k=>S.db.doc('unita/'+k).update({stato:'scaricato',tecnicoId:'',motivoScarico:mot,notaScarico:nota,scaricatoAt:now}),6);if(errs.length)throw errs[0][1];const ta=$('#sb-sca');if(ta){ta.value='';sbUpdate('sca')}}};
     renderModal()};
 }
-function cercaHTML(){return `<div class="card" style="margin-bottom:14px"><h3>Controlla un seriale</h3><p class="note" style="margin-top:-4px">Scansiona o scrivi un seriale, un numero d'ordine o un ID risorsa: vedi dov'è il pezzo, per quale committente, a chi è assegnato e in quale pratica è stato installato.</p>
+function cercaHTML(){return `<div class="card" style="margin-bottom:14px"><h3>Controlla seriali</h3><p class="note" style="margin-top:-4px">Scansiona uno o più pezzi (anche tutto uno scaffale): per ogni codice vedi prodotto, committente, stato, tecnico e pratica in cui è installato.</p>
+  ${serBox('chk','Codici da controllare','Scansiona o scrivi i seriali, uno per riga')}<div class="acts" style="margin-top:-4px"><button type="button" class="btn sm" data-chkclear>Svuota elenco</button></div><div id="chkres"></div></div>
+  <div class="card" style="margin-bottom:14px"><h3>Cerca per ordine o ID risorsa</h3>
   <div class="acts"><input class="in mono" id="mq" style="flex:1 1 260px" placeholder="Seriale, ordine o ID risorsa" value="${esc(S.mag.q)}" autocomplete="off">${scanBtn('mq','Leggi da foto')}</div></div><div id="cres">${cercaRes()}</div>`}
 function cercaRes(){
   const q=normS(S.mag.q);if(q.length<2)return '<p class="note">Scrivi almeno 2 caratteri.</p>';
@@ -781,6 +785,8 @@ document.addEventListener('click',e=>{
   const t=e.target;
   if(t.closest('a[href]'))return;
   const r=t.closest('[data-open]');if(r){S.modal={type:'detail',id:r.dataset.open};renderModal();return}
+  if(t.closest('[data-magscan]')){S.mag.tab='cerca';S.mag.prod=null;render();setTimeout(()=>liveStart('sb-chk'),50);return}
+  if(t.closest('[data-chkclear]')){S.mag.chk='';const ta=$('#sb-chk');if(ta){ta.value='';sbUpdate('chk')}return}
   const pr=t.closest('[data-prod]');if(pr){S.mag.prod=pr.dataset.prod;if(pr.dataset.pc!==undefined&&pr.dataset.pc)S.mag.comm=pr.dataset.pc;S.mag.pst='';S.mag.pq='';render();window.scrollTo(0,0);return}
   if(t.closest('[data-back-prod]')){S.mag.prod=null;render();return}
   const m2=t.closest('[data-mt2]');if(m2){if(m2.dataset.cc)S.mag.lastComm=m2.dataset.cc;S.mag.tab=m2.dataset.mt2;S.mag.preProd=m2.dataset.pp||'';S.mag.prod=null;render();return}
