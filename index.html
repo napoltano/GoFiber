@@ -1357,7 +1357,7 @@ async function nfcStart(btn,cb){if(NFC.ac){nfcStop();return}
   catch(x){toast(x?.name==='NotAllowedError'?'Permesso NFC negato: consentilo nelle impostazioni del sito':x?.name==='NotSupportedError'?'NFC spento o non presente: attivalo nelle impostazioni del telefono':'NFC: '+(x?.message||x))}}
 const nfcBtn=k=>canNfc()?`<button type="button" class="btn sm yel" data-nfc="${k}">${ic('nfc')}Leggi con NFC</button>`:'';
 function rfNfcFound(c){const r=S.rf.get(rfk(c));if(S.view!=='rfid')return;
-  if(!r){if(S.admin&&S.rfv.comm&&$('#sb-rfa')){const t=$('#sb-rfa');const cur=new Set(serials('rfa'));if(!cur.has(c)){t.value=(t.value.trim()?t.value.trim()+'\n':'')+c;sbUpdate('rfa')}toast(c+' letto: premi Aggiungi per salvarlo')}else toast(`RFID ${c} non è in elenco`+(S.admin?'':': chiedi all\'ufficio di aggiungerlo'));return}
+  if(!r){if(S.admin&&S.rfv.comm){S.db.doc('rfid/'+rfk(c)).set({codice:c,committente:S.rfv.comm,stato:'libero',tecnicoId:'',praticaId:'',ordine:'',idRisorsa:'',usatoAt:'',createdAt:new Date().toISOString(),createdBy:S.me||''}).then(()=>{play('ok');toast(`RFID ${c} registrato in ${S.rfv.comm}`)}).catch(x=>toast(errText(x)))}else toast(`RFID ${c} non è in elenco`+(S.admin?'':': chiedi all\'ufficio di aggiungerlo'));return}
   if(r.committente!==S.rfv.comm){S.rfv.comm=r.committente;render()}
   S.rfv.q=r.codice;S.rfv.f='tutti';const q=$('#rfq');if(q)q.value=r.codice;rfRefresh();
   if(r.stato!=='usato'&&!(S.modal&&S.modal.type==='rfuse')){nfcStop();S.modal={type:'rfuse',id:rfk(c)};renderModal()}else if(r.stato==='usato')toast(`RFID ${r.codice} già usato${r.tecnicoId?' da '+tecName(r.tecnicoId):''}`)}
@@ -1370,7 +1370,7 @@ function rfidHTML(){const V=S.rfv,all=[...S.rf.values()];
        return `<button class="rfold" data-rfc="${c}">${ic('folder')}<div><b>${esc(c)}</b><span class="n"><b>${lib}</b> liberi · <b>${l.length-lib}</b> usati${!S.admin&&mine?` · <b>${mine}</b> presi da te`:''}</span></div></button>`}).join('')}</div>`}
   return `<div class="ph" style="margin-bottom:8px"><div><button class="lnk" data-rfback>← Tutte le cartelle</button><h1 style="margin-top:6px">RFID ${ctag(V.comm)}</h1></div></div>
    ${S.admin?`<form class="card pf" id="rfaf" novalidate style="margin-bottom:14px"><h3>Aggiungi RFID ${esc(V.comm)}</h3>${serBox('rfa','Codici RFID','Scrivi o scansiona i codici RFID, uno per riga')}<div class="err" id="rfaerr"></div><div class="acts"><button class="btn yel" type="submit">${ic('plus')}Aggiungi a ${esc(V.comm)}</button></div></form>`:''}
-   ${canNfc()?`<div class="acts" style="margin:0 0 10px">${nfcBtn('find')}<span class="note">Avvicina il tag: ${S.admin?'se è nuovo lo aggiungo all\'elenco qui sopra, se c\'è già lo trovo.':'trovo il codice e lo segni come prelevato.'}</span></div>`:''}
+   ${canNfc()?`<div class="acts" style="margin:0 0 10px">${nfcBtn('find')}<span class="note">Avvicina il tag: ${S.admin?'se è nuovo lo registro subito in '+esc(V.comm)+', se c\'è già lo trovo.':'trovo il codice e lo segni come prelevato.'}</span></div>`:''}
    <div class="subt" id="rff" style="margin-bottom:10px"></div>
    <input class="in" id="rfq" placeholder="Cerca codice, ordine o tecnico" value="${esc(V.q)}" autocomplete="off" style="margin-bottom:10px">
    <div id="rflist"></div>`}
