@@ -152,6 +152,8 @@ body.auth #netbar{display:none}
 .ctcb{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:10px}
 .ctcb .btn{min-height:50px}.btn.wa{background:#25d366;border-color:#25d366;color:#fff}
 .rowqa{display:flex;gap:6px;margin-top:6px}.rowqa a{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;text-decoration:none;padding:5px 10px;border-radius:99px;border:1px solid var(--line);background:var(--soft)}
+.rfgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px}.rfold{display:flex;gap:14px;align-items:center;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;cursor:pointer;box-shadow:var(--sh);color:var(--ink);font:inherit}.rfold>.i{width:44px;height:44px;color:var(--pri);flex:none}.rfold b{display:block;font-size:18px;margin-bottom:4px}.rfold span.n{font-size:14px;color:var(--mute)}.rfold span.n b{display:inline;font-size:14px;color:var(--ink)}
+.rfr{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:6px}.rfr code{font-size:15px;font-weight:600}.rfr .rfw{flex:1 1 180px;font-size:13px;color:var(--mute)}.rfr .acts{margin:0;gap:6px}
 .rowqa a.wa{background:#25d366;border-color:#25d366;color:#fff}.rowqa svg{width:15px;height:15px}
 .dupw{background:color-mix(in srgb,var(--wait) 14%,transparent);border:1px solid color-mix(in srgb,var(--wait) 45%,transparent);border-radius:10px;padding:10px 12px;font-size:14px;margin:-4px 0 14px}.dupw b{font-weight:600}.dupw button{margin-inline-start:4px}
 .r-OF{background:#13a538}.r-FC{background:#e2001a}
@@ -320,6 +322,8 @@ const IC={
  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
  pin:'<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
  cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+ rfid:'<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M7 10.2a2.6 2.6 0 0 1 0 3.6M9.6 8.4a5.4 5.4 0 0 1 0 7.2"/><path d="M14 10h4.5M14 14h3"/>',
+ folder:'<path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/>',
  wifi:'<path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1"/>',
  ont:'<rect x="3" y="12" width="18" height="8" rx="2"/><path d="M7 16h.01M10.5 16h.01M14 16h3M12 12V4M9 6.5 12 4l3 2.5"/>'};
 const ic=k=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
@@ -348,8 +352,8 @@ $('#bell').onclick=()=>{NT.list.forEach(x=>x.r=true);notifSave();bellRender();S.
 $('#thm').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
 
 const S={db:null,user:null,assets:null,admin:false,me:null,state:'load',
-  pr:new Map(),es:new Map(),tec:new Map(),pd:new Map(),un:new Map(),
-  loaded:{pr:false,es:false,tec:false,pd:false,un:false,pfsx:false,ro:false,cfg:false},pfs:new Map(),pfsDocs:new Map(),roles:new Map(),cfgMap:new Map(),cfg:{},role:null,gate:undefined,boss:false,isOwner:false,canApprove:false,forceReg:false,pfsBase:new Map(),pfsImp:new Map(),pfsBaseAt:'',pfsBaseState:'load',slow:false,err:null,
+  pr:new Map(),es:new Map(),tec:new Map(),pd:new Map(),un:new Map(),rf:new Map(),rfv:{comm:'',f:'liberi',q:''},
+  loaded:{pr:false,es:false,tec:false,pd:false,un:false,pfsx:false,ro:false,cfg:false,rf:false},pfs:new Map(),pfsDocs:new Map(),roles:new Map(),cfgMap:new Map(),cfg:{},role:null,gate:undefined,boss:false,isOwner:false,canApprove:false,forceReg:false,pfsBase:new Map(),pfsImp:new Map(),pfsBaseAt:'',pfsBaseState:'load',slow:false,err:null,
   view:'agenda',editId:null,f:{range:'oggi',day:'',stato:'',comm:'',tipo:'',tec:'',q:''},
   mag:{tab:'prodotti',prod:null,pst:'',pq:'',q:'',mode:'ser',comm:'',lastComm:''},ar:{q:'',mese:'',tipo:'',comm:'',tec:''},rep:{per:'mese',ref:new Date().toISOString().slice(0,10),comm:'',tipo:'',tec:''},repMine:false,imp:{txt:'',rows:null,skip:true,def:{tipo:'',comm:'',rete:'',data:'',fascia:'',tec:''}},nuovaMode:'one',modal:null,up:null,dupOk:null,needReg:null,busy:false};
 
@@ -405,6 +409,7 @@ const scanBtn=(tid,l)=>`${canLive()?`<button type="button" class="btn sm yel" da
 /* ---------- box seriali ---------- */
 const serials=id=>[...new Set((document.getElementById('sb-'+id)?.value||'').split(/[\s,;]+/).map(normS).filter(Boolean))];
 const VAL={
+  rfa:l=>l.map(c=>{const r=S.rf.get(rfk(c));return !r?[c,'ok','Nuovo']:[c,'ko','Già presente · '+(r.committente||'')+' · '+(r.stato==='usato'?'usato':'libero')]}),
   car:l=>l.map(s=>{const u=S.un.get(sk(s));return !u?[s,'ok','Nuovo']:u.stato==='scaricato'?[s,'wait','Era scaricato: verrà ricaricato']:[s,'ko','Già presente · '+prodName(u.prodottoId)+(u.committente?' · '+u.committente:'')]}),
   chk:l=>l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non presente in magazzino'];const [k,lab]=uLab(u);return[s,k==='neu'?'ok':k,prodName(u.prodottoId)+(u.committente?' · '+u.committente:'')+' · '+lab]}),
   pre:l=>l.map(s=>{const u=S.un.get(sk(s));if(!u)return[s,'ko','Non presente in magazzino: avvisa l\'ufficio'];const d=prodName(u.prodottoId)+(u.committente?' · '+u.committente:'');if(u.stato==='installato')return[s,'ko','Già installato · ordine '+(u.ordine||'—')];if(u.stato==='scaricato')return[s,'ko','Scaricato dal magazzino'];if(u.stato==='tecnico'&&u.tecnicoId===S.me)return[s,'neu',d+' · già in carico a te'];if(u.stato==='tecnico')return[s,'ko',d+' · in carico a '+tecName(u.tecnicoId)];return[s,'ok',d]}),
@@ -428,9 +433,9 @@ function sbUpdate(id){
 document.addEventListener('input',e=>{const t=e.target;if(t.id?.startsWith('sb-')){sbUpdate(t.id.slice(3));if(e.inputType==='insertLineBreak'||/\n$/.test(t.value))play('scan')}});
 
 /* ---------- navigazione ---------- */
-const views=()=>S.boss?['agenda','nuova','archivio','report','magazzino','tecnici','impostazioni']:S.admin?['agenda','nuova','archivio','report','magazzino']:['agenda','materiale','resa','profilo'];
+const views=()=>S.boss?['agenda','nuova','archivio','report','magazzino','rfid','tecnici','impostazioni']:S.admin?['agenda','nuova','archivio','report','magazzino','rfid']:['agenda','materiale','rfid','resa','profilo'];
 function tabs(){
-  const lab=S.admin?{agenda:['cal','Agenda'],nuova:['plus',S.editId?'Modifica':'Nuova pratica'],archivio:['arch','Archivio'],report:['chart','Riepilogo'],magazzino:['box','Magazzino'],tecnici:['users','Utenti'],impostazioni:['gear','Impostazioni']}:{agenda:['cal','Le mie pratiche'],archivio:['arch','Archivio'],materiale:['box','Il mio materiale'],resa:['chart','La mia resa'],profilo:['user','Profilo']};
+  const lab=S.admin?{agenda:['cal','Agenda'],nuova:['plus',S.editId?'Modifica':'Nuova pratica'],archivio:['arch','Archivio'],report:['chart','Riepilogo'],magazzino:['box','Magazzino'],rfid:['rfid','RFID'],tecnici:['users','Utenti'],impostazioni:['gear','Impostazioni']}:{agenda:['cal','Le mie pratiche'],archivio:['arch','Archivio'],materiale:['box','Il mio materiale'],rfid:['rfid','RFID'],resa:['chart','La mia resa'],profilo:['user','Profilo']};
   $('#tabs').innerHTML=(S.state==='ok'&&!S.gate)?views().map(v=>`<a href="#${v}" class="${S.view===v?'on':''}">${ic(lab[v][0])}<span>${lab[v][1]}</span></a>`).join(''):'';
   $('#who').textContent=S.state!=='ok'?'Non connesso':S.gate?'Accesso':(S.isOwner?'Proprietario':(S.tec.get(S.me)?.nome||'')+' · '+(RUOLI[S.role]||''));
 }
@@ -454,6 +459,7 @@ function render(){
   else if(v==='materiale'){m.innerHTML=materialeHTML();bindMateriale()}
   else if(v==='archivio'){m.innerHTML=archHTML();bindArch();renderArch()}
   else if(v==='magazzino'){m.innerHTML=magHTML();magBind()}
+  else if(v==='rfid'){m.innerHTML=rfidHTML();bindRfid()}
   else{m.innerHTML=agendaHTML();bindAgenda();renderList()}
 }
 function live(){notifCheck();bellRender();
@@ -463,6 +469,7 @@ function live(){notifCheck();bellRender();
   else if(S.view==='tecnici'){render()}
   else if(S.view==='materiale'){const l=$('#matList');if(l)l.innerHTML=matListHTML();sbUpdate('pre');tabs()}
   else if(S.view==='archivio'){renderArch();tabs()}
+  else if(S.view==='rfid'){rfRefresh();tabs()}
   else if(S.view==='report'||S.view==='resa'){renderReport();tabs()}
   else if(S.view==='magazzino'){magRefresh();tabs()}
   else{tabs();if(S.view==='nuova'){renderPfsSug();apRefresh()}}
@@ -930,7 +937,7 @@ function renderModal(){
       <h3>${p.indirizzo?`<a class="alink" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener">${esc(p.indirizzo)}${ic('pin')}</a>`:'Indirizzo non indicato'}</h3><div class="note" style="text-transform:capitalize">${esc(dayName(p.data))} · ${fa.a}–${fa.b}${p.ora?' · ore '+esc(p.ora):''}</div>
       ${Array.isArray(p.rimod)&&p.rimod.length?`<div class="dupw" style="margin:10px 0 0"><b>Rimodulata ${p.rimod.length===1?'1 volta':p.rimod.length+' volte'}</b>${p.rimod.map(r=>`<div style="margin-top:4px">${esc(dmy(r.daData))} ${esc(fascia(r.daFascia).a)} → <b>${esc(dmy(r.aData))} ${esc(fascia(r.aFascia).a)}–${esc(fascia(r.aFascia).b)}${r.ora?' ore '+esc(r.ora):''}</b> · ${esc(r.by?tecName(r.by):'gestore')} il ${esc(dt(r.at))}${r.nota?' · '+esc(r.nota):''}</div>`).join('')}</div>`:''}
       <dl class="kv"><dt>Intervento</dt><dd>${esc(p.tipo||'—')}</dd><dt>Rete</dt><dd>${esc(p.rete||'—')}</dd><dt>Ordine</dt><dd>${esc(p.ordine||'—')}</dd><dt>ID risorsa</dt><dd>${esc(p.idRisorsa||'—')}</dd><dt>PFS</dt><dd>${(()=>{const l=pfsLoc(p);return esc(p.pfs||'—')+(l?`${l.a?' · anello '+esc(l.a):''} <a class="btn sm pri" href="${navLL(l.lat,l.lng)}" target="_blank" rel="noopener">${ic('pin')}Vai al PFS</a>`:'')})()}</dd><dt>Numero permuta</dt><dd>${esc(pv(M.id,p,'permuta')||'—')}</dd><dt>Splitter</dt><dd>${esc(pv(M.id,p,'splitter')||'—')}</dd>
-        <dt>ONT</dt><dd>${apOf(p,'ont')?`<b>${esc(apNome(apOf(p,'ont'))||'del cliente')}</b> · ${APM[p.ont.m]}`:'Non serve'}</dd><dt>Modem</dt><dd>${apOf(p,'modem')?`<b>${esc(apNome(apOf(p,'modem'))||'del cliente')}</b> · ${APM[p.modem.m]}`:'Non serve'}</dd>
+        ${!isAss(p)?`<dt>RFID</dt><dd>${rfCode(M.id,e)?`<code>${esc(rfCode(M.id,e))}</code>`:'—'}</dd>`:''}<dt>ONT</dt><dd>${apOf(p,'ont')?`<b>${esc(apNome(apOf(p,'ont'))||'del cliente')}</b> · ${APM[p.ont.m]}`:'Non serve'}</dd><dt>Modem</dt><dd>${apOf(p,'modem')?`<b>${esc(apNome(apOf(p,'modem'))||'del cliente')}</b> · ${APM[p.modem.m]}`:'Non serve'}</dd>
         <dt>Indirizzo</dt><dd>${p.indirizzo?`<a class="alink" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener">${esc(p.indirizzo)}</a> <a class="btn sm pri" href="${esc(navAddr(p.indirizzo))}" target="_blank" rel="noopener">${ic('pin')}Naviga</a>`:'—'}</dd>
         <dt>Telefono</dt><dd>${p.telefono?`<a href="tel:${esc(p.telefono.replace(/[^\d+]/g,''))}">${esc(p.telefono)}</a> <button class="btn sm" data-copy="${esc(p.telefono)}">Copia</button>`:'—'}</dd>
         <dt>${tecsOf(p).length>1?'Tecnici':'Tecnico'}</dt><dd>${tecsOf(p).length?tecsOf(p).map(id=>esc(tecName(id))+(S.tec.get(id)?.telefono?' · '+esc(S.tec.get(id).telefono):'')).join('<br>'):(p.tecniciNomi?.length?esc(p.tecniciNomi.join(' + ')):'Non assegnata')}</dd></dl>${!arch&&st!=='fatta'?contactHTML(M.id,p):''}
@@ -960,9 +967,15 @@ function renderModal(){
       <form id="cf" style="margin-top:16px">
         <label class="f">Nota<textarea class="in" name="nota" rows="3" placeholder="Esito lavoro, eventuali problemi"></textarea></label>
         <div class="grid2"><label class="f">Numero permuta <span class="req">*</span><input class="in" name="permuta" value="${esc(p.permuta||'')}" autocomplete="off" required></label><label class="f">Splitter <span class="req">*</span><input class="in" name="splitter" value="${esc(p.splitter||'')}" autocomplete="off" required></label></div>
-        ${apNoteHTML(p)}${serBox('ins','Materiale installato · codici a barre dei seriali','Scansiona il codice a barre del seriale installato (uno per riga)')}
+        ${rfFieldHTML(M.id,p)}${apNoteHTML(p)}${serBox('ins','Materiale installato · codici a barre dei seriali','Scansiona il codice a barre del seriale installato (uno per riga)')}
         ${S.assets?`${blk('fotoIdRisorsa','Foto ID risorsa (facoltativa)',false,'image/*',false)}${blk('foto','Foto (facoltative)',false,'image/*',true)}${blk('caratterizzazione','Caratterizzazione · foto o PDF (facoltativa)',false,'image/*,application/pdf',true)}`:'<p class="note">Il caricamento di foto non è disponibile per il tuo account: puoi completare la pratica senza foto, oppure chiedi al gestore di condividerti l\'app come Collaboratore o Editor.</p>'}
         <div class="err" id="cerr"></div><div class="acts"><button class="btn yel" type="submit">Conferma completamento</button><button class="btn" type="button" data-back>Indietro</button></div></form>`);
+  }else if(M.type==='rfuse'){const r=S.rf.get(M.id);if(!r){closeModal();return}
+    box.innerHTML=shell(`<h3>${S.admin?'Segna usato':'Prelevo'} RFID <code>${esc(r.codice)}</code></h3><div class="note">${esc(r.committente)}</div><form id="rfuf" style="margin-top:14px">
+      ${S.admin?`<label class="f">Tecnico<select class="in" name="tec" id="rfutec">${tecOpts('','Nessuno')}</select></label>`:''}
+      <label class="f">Per quale pratica? (facoltativo)<select class="in" name="pid" id="rfupid">${rfPratOpts(r,'')}</select></label>
+      <div class="err" id="rfuerr"></div><div class="acts"><button class="btn yel" type="submit">Conferma</button><button class="btn" type="button" data-close>Annulla</button></div></form>`);
+    const ts=$('#rfutec');if(ts)ts.onchange=()=>{$('#rfupid').innerHTML=rfPratOpts(r,ts.value)};
   }else if(M.type==='soglie'){
     const p=S.pd.get(M.id)||{},so=p.soglie||{};
     box.innerHTML=shell(`<h3>Scorta minima</h3><p class="note">${esc(p.nome||'')}: quando i pezzi <b>in magazzino</b> di un committente scendono sotto questo numero, il Magazzino lo segnala e ricevi una notifica. 0 = nessun controllo.</p><form id="sogf" style="margin-top:12px">${COMM.map(c=>{const have=[...S.un.values()].filter(u=>u.prodottoId===M.id&&u.committente===c&&u.stato==='magazzino').length;return `<label class="f">${c} <span class="note" style="font-weight:400">· ora in magazzino: ${have}</span><input class="in" type="number" min="0" inputmode="numeric" name="${c}" value="${+so[c]||0}"></label>`}).join('')}<div class="err" id="sogerr"></div><div class="acts"><button class="btn yel" type="submit">Salva</button><button class="btn" type="button" data-close>Annulla</button></div></form>`);
@@ -1026,6 +1039,9 @@ $('#modal').addEventListener('submit',async e=>{
   if(e.target.id==='connf'){e.preventDefault();const u=String(new FormData(e.target).get('api')||'').trim();if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)){$('#cnerr').textContent='L\'indirizzo deve iniziare con https://script.google.com/';return}
     try{const r=await fetch(u);const j=await r.json();if(j.app!=='GoFiber')throw 0}catch(x){$('#cnerr').textContent='Non risponde come server GoFiber: controlla il deployment (accesso: Chiunque).';return}
     LS.set('gofiber-api',u);location.reload();return}
+  if(e.target.id==='rfuf'){e.preventDefault();const fd=new FormData(e.target),id=S.modal.id,r=S.rf.get(id);if(!r){closeModal();return}if(r.stato==='usato'){$('#rfuerr').textContent='Questo RFID è già stato usato.';return}
+    const pid=String(fd.get('pid')||''),p=pid?S.pr.get(pid)||{}:{},tid=S.admin?String(fd.get('tec')||'')||(pid?tecsOf(p)[0]||'':''):S.me;
+    try{await S.db.doc('rfid/'+id).update({stato:'usato',tecnicoId:tid||'',praticaId:pid,ordine:p.ordine||'',idRisorsa:p.idRisorsa||'',usatoAt:new Date().toISOString()});play('ok');closeModal();toast(`RFID ${r.codice} segnato come usato`+(p.ordine?' per l\'ordine '+p.ordine:''))}catch(x){$('#rfuerr').textContent=errText(x)}return}
   if(e.target.id==='sogf'){e.preventDefault();const fd=new FormData(e.target),so={};for(const c of COMM)so[c]=Math.max(0,parseInt(fd.get(c),10)||0);
     try{await S.db.doc('prodotti/'+S.modal.id).update({soglie:so});closeModal();toast('Scorta minima salvata')}catch(x){$('#sogerr').textContent=errText(x)}return}
   if(e.target.id==='pform'){e.preventDefault();const fd=new FormData(e.target);const nome=String(fd.get('nome')||'').trim(),codice=String(fd.get('codice')||'').trim();if(!nome){$('#perr').textContent='Inserisci il nome.';return}
@@ -1055,6 +1071,9 @@ $('#modal').addEventListener('submit',async e=>{
   if(bad.length){er.textContent='Controlla i seriali: '+bad.map(r=>r[0]+' ('+r[2]+')').join(', ');return}
   const cfd=new FormData(e.target);const nota=String(cfd.get('nota')||'').trim(),permuta=String(cfd.get('permuta')||'').trim(),splitter=String(cfd.get('splitter')||'').trim();
   if(!permuta||!splitter){er.textContent='Inserisci '+[!permuta&&'il numero permuta',!splitter&&'lo splitter'].filter(Boolean).join(' e ')+'.';return}
+  const rfc=normS(new FormData(e.target).get('rfid'));{const p0=S.pr.get(S.modal.id)||{};if(!rfc){er.textContent='Inserisci l\'RFID dell\'impianto.';return}
+    const r=S.rf.get(rfk(rfc)),w=!r?`L'RFID ${rfc} non è nell'elenco ${p0.committente||''}.`:(r.committente&&p0.committente&&r.committente!==p0.committente)?`L'RFID ${rfc} è di ${r.committente}, la pratica è ${p0.committente}.`:(r.praticaId&&r.praticaId!==S.modal.id)?`L'RFID ${rfc} è già usato per l'ordine ${r.ordine||'—'}.`:'';
+    if(w&&S.rfOk!==rfc){S.rfOk=rfc;play('err');er.textContent=w+' Controlla il codice, oppure premi di nuovo Conferma per usarlo comunque.';return}}
   {const miss=apMissing(S.pr.get(S.modal.id)||{},sr.map(r=>r[0])),mk=miss.join('|')+'#'+sr.length;if(miss.length&&S.apOk!==mk){S.apOk=mk;play('err');er.textContent='Non hai scansionato il seriale di: '+miss.join(', ')+'. Scansionalo qui sopra, oppure premi di nuovo Conferma per chiudere comunque.';return}}
   const all=['fotoIdRisorsa','foto','caratterizzazione'].flatMap(k=>S.up[k].map(u=>[k,u.file]));
   const out={fotoIdRisorsa:[],foto:[],caratterizzazione:[]};
@@ -1066,7 +1085,9 @@ $('#modal').addEventListener('submit',async e=>{
       out[k].push({id:r.id,type:r.contentType||type})}
     btn.textContent='Salvo…';
     const id=S.modal.id,p=S.pr.get(id)||{},mats=sr.map(r=>r[0]),now=new Date().toISOString();
-    await S.db.doc('esiti/'+id).set({nota,...out,materiali:mats,permuta,splitter,by:S.me||'',byAdmin:S.admin,completedAt:now,snap:{...snapOf(id),permuta,splitter}});
+    await S.db.doc('esiti/'+id).set({nota,...out,materiali:mats,permuta,splitter,rfid:rfc,by:S.me||'',byAdmin:S.admin,completedAt:now,snap:{...snapOf(id),permuta,splitter,rfid:rfc}});
+    {const r=S.rf.get(rfk(rfc)),old=rfOf(id);if(old&&normS(old.codice)!==rfc)await S.db.doc('rfid/'+rfk(old.codice)).update({praticaId:'',ordine:'',idRisorsa:''}).catch(()=>{});
+      await S.db.doc('rfid/'+rfk(rfc)).set({codice:r?.codice||rfc,committente:r?.committente||p.committente||'',stato:'usato',tecnicoId:r?.stato==='usato'&&r.tecnicoId?r.tecnicoId:(tecsOf(p).includes(S.me)?S.me:(tecsOf(p)[0]||S.me||'')),praticaId:id,ordine:p.ordine||'',idRisorsa:p.idRisorsa||'',usatoAt:r?.usatoAt||now,createdAt:r?.createdAt||now,createdBy:r?.createdBy||S.me||''}).catch(()=>{})}
     const team=tecsOf(p);
     const errs=await pool(mats.map(sk).filter(k=>S.un.has(k)),k=>{const u=S.un.get(k);const tid=team.includes(u.tecnicoId)?u.tecnicoId:(team.includes(S.me)?S.me:(team[0]||S.me||''));return S.db.doc('unita/'+k).update({stato:'installato',tecnicoId:tid,praticaId:id,ordine:p.ordine||'',idRisorsa:p.idRisorsa||'',installedAt:now})},6);
     S.busy=false;closeModal();toast(errs.length?`Pratica completata, ma ${errs.length} seriali non aggiornati`:'Pratica completata');S.modal={type:'detail',id};renderModal();
@@ -1326,6 +1347,50 @@ function renderImport(){
 }
 
 /* ---------- archivio ---------- */
+const rfk=c=>'r'+sk(normS(c));
+const rfOf=id=>[...S.rf.values()].find(r=>r.praticaId===id);
+const rfCode=(id,e)=>e?.rfid||rfOf(id)?.codice||'';
+function rfidHTML(){const V=S.rfv,all=[...S.rf.values()];
+  if(!V.comm||!COMM.includes(V.comm)){
+    return `<div class="ph"><div><h1>RFID</h1><div class="sub" style="text-transform:none">Un codice RFID per ogni impianto. ${S.admin?'Apri la cartella del committente per scrivere o scansionare i codici.':'Apri la cartella del committente e segna l\'RFID che prelevi.'}</div></div></div>
+     <div class="rfgrid">${COMM.map(c=>{const l=all.filter(r=>r.committente===c),lib=l.filter(r=>r.stato!=='usato').length,mine=l.filter(r=>r.stato==='usato'&&r.tecnicoId===S.me&&!r.praticaId).length;
+       return `<button class="rfold" data-rfc="${c}">${ic('folder')}<div><b>${esc(c)}</b><span class="n"><b>${lib}</b> liberi · <b>${l.length-lib}</b> usati${!S.admin&&mine?` · <b>${mine}</b> presi da te`:''}</span></div></button>`}).join('')}</div>`}
+  return `<div class="ph" style="margin-bottom:8px"><div><button class="lnk" data-rfback>← Tutte le cartelle</button><h1 style="margin-top:6px">RFID ${ctag(V.comm)}</h1></div></div>
+   ${S.admin?`<form class="card pf" id="rfaf" novalidate style="margin-bottom:14px"><h3>Aggiungi RFID ${esc(V.comm)}</h3>${serBox('rfa','Codici RFID','Scrivi o scansiona i codici RFID, uno per riga')}<div class="err" id="rfaerr"></div><div class="acts"><button class="btn yel" type="submit">${ic('plus')}Aggiungi a ${esc(V.comm)}</button></div></form>`:''}
+   <div class="subt" id="rff" style="margin-bottom:10px"></div>
+   <input class="in" id="rfq" placeholder="Cerca codice, ordine o tecnico" value="${esc(V.q)}" autocomplete="off" style="margin-bottom:10px">
+   <div id="rflist"></div>`}
+function rfRows(){const V=S.rfv,q=V.q.trim().toLowerCase();let l=[...S.rf.values()].filter(r=>r.committente===V.comm);
+  const n={liberi:l.filter(r=>r.stato!=='usato').length,usati:l.filter(r=>r.stato==='usato').length,tutti:l.length};
+  if(V.f==='liberi')l=l.filter(r=>r.stato!=='usato');else if(V.f==='usati')l=l.filter(r=>r.stato==='usato');
+  if(q)l=l.filter(r=>[r.codice,r.ordine,r.idRisorsa,r.tecnicoId?tecName(r.tecnicoId):''].join(' ').toLowerCase().includes(q));
+  l.sort((a,b)=>V.f==='liberi'?String(a.codice).localeCompare(String(b.codice)):String(b.usatoAt||b.createdAt||'').localeCompare(String(a.usatoAt||a.createdAt||'')));
+  const chips=[['liberi','Liberi'],['usati','Usati'],['tutti','Tutti']].map(([k,t])=>`<button class="chip ${V.f===k?'on':''}" data-rff="${k}">${t} · ${n[k]}</button>`).join('');
+  const rows=l.slice(0,400).map(r=>{const id=rfk(r.codice),used=r.stato==='usato';
+    return `<div class="rfr"><code>${esc(r.codice)}</code><span class="pill ${used?'ok':'neu'}">${used?'Usato':'Libero'}</span><span class="rfw">${used?`${r.tecnicoId?esc(tecName(r.tecnicoId)):'—'}${r.usatoAt?' · '+esc(dt(r.usatoAt)):''}${r.ordine?' · ordine <b>'+esc(r.ordine)+'</b>':' · non ancora su una pratica'}`:''}</span><span class="acts">${!used?`<button class="btn sm yel" data-rfuse="${esc(id)}">${S.admin?'Segna usato':'Prelevo'}</button>`:''}${used&&!r.praticaId&&r.tecnicoId===S.me&&!S.admin?`<button class="btn sm" data-rffree="${esc(id)}">Non l'ho usato</button>`:''}${used&&S.admin?`<button class="btn sm" data-rffree="${esc(id)}">Rendi libero</button>`:''}${!used&&S.admin?`<button class="btn sm dng" data-rfdel="${esc(id)}" aria-label="Elimina">×</button>`:''}</span></div>`}).join('');
+  return [chips,(rows||`<div class="empty" style="padding:16px">${n.tutti?'Nessun RFID in questa vista.':'Nessun RFID per '+esc(V.comm)+(S.admin?': aggiungili qui sopra.':'.')}</div>`)+(l.length>400?`<p class="note">Mostrati 400 su ${l.length}: usa la ricerca.</p>`:'')]}
+function rfRefresh(){if(S.view!=='rfid')return;if(!S.rfv.comm){$('#main').innerHTML=rfidHTML();return}const [c,r]=rfRows();const a=$('#rff'),b=$('#rflist');if(a)a.innerHTML=c;if(b)b.innerHTML=r;if($('#sb-rfa'))sbUpdate('rfa')}
+function bindRfid(){const m=$('#main');rfRefresh();
+  m.onclick=async e=>{const t=e.target;
+    const fo=t.closest('[data-rfc]');if(fo){S.rfv.comm=fo.dataset.rfc;S.rfv.q='';render();window.scrollTo(0,0);return}
+    if(t.closest('[data-rfback]')){S.rfv.comm='';render();return}
+    const ff=t.closest('[data-rff]');if(ff){S.rfv.f=ff.dataset.rff;rfRefresh();return}
+    const u=t.closest('[data-rfuse]');if(u){S.modal={type:'rfuse',id:u.dataset.rfuse};renderModal();return}
+    const fr=t.closest('[data-rffree]');if(fr){const r=S.rf.get(fr.dataset.rffree);S.modal={type:'confirm',title:'Rendere libero '+r.codice+'?',text:r.ordine?`Era usato per l'ordine ${r.ordine}: torna disponibile per un altro impianto.`:'Torna disponibile per un altro impianto.',ok:'Rendi libero',done:'RFID di nuovo libero',fn:async()=>{await S.db.doc('rfid/'+fr.dataset.rffree).update({stato:'libero',tecnicoId:'',praticaId:'',ordine:'',idRisorsa:'',usatoAt:''})}};renderModal();return}
+    const d=t.closest('[data-rfdel]');if(d){const r=S.rf.get(d.dataset.rfdel);S.modal={type:'confirm',danger:true,title:'Eliminare '+r.codice+'?',text:'Il codice viene tolto dall\'elenco '+r.committente+'.',ok:'Elimina',done:'RFID eliminato',fn:async()=>{await S.db.doc('rfid/'+d.dataset.rfdel).delete()}};renderModal();return}};
+  const q=$('#rfq');if(q)q.oninput=e=>{S.rfv.q=e.target.value;rfRefresh()};
+  const f=$('#rfaf');if(f)f.onsubmit=async e=>{e.preventDefault();const er=$('#rfaerr'),btn=f.querySelector('button[type=submit]');er.textContent='';
+    const all=serials('rfa'),list=all.filter(c=>!S.rf.has(rfk(c)));if(!list.length){er.textContent=all.length?'Questi RFID sono già tutti presenti.':'Scrivi o scansiona almeno un codice.';return}
+    const now=new Date().toISOString(),c=S.rfv.comm;btn.disabled=true;S.busy=true;
+    try{const errs=await pool(list,x=>S.db.doc('rfid/'+rfk(x)).set({codice:x,committente:c,stato:'libero',tecnicoId:'',praticaId:'',ordine:'',idRisorsa:'',usatoAt:'',createdAt:now,createdBy:S.me||''}),6,dn=>btn.textContent=`Salvo ${dn} di ${list.length}…`);
+      S.busy=false;play(errs.length?'err':'ok');toast(`${list.length-errs.length} RFID aggiunti a ${c}`+(all.length>list.length?` · ${all.length-list.length} già presenti`:''));$('#sb-rfa').value='';sbUpdate('rfa');if(errs.length)er.textContent=errs.length+' codici non salvati, riprova.'}
+    catch(x){S.busy=false;er.textContent=errText(x)}btn.disabled=false;btn.innerHTML=ic('plus')+'Aggiungi a '+esc(c)};
+}
+function rfFieldHTML(id,p){const pre=rfOf(id),mine=[...S.rf.values()].filter(r=>r.committente===p.committente&&((r.stato==='usato'&&!r.praticaId&&tecsOf(p).includes(r.tecnicoId))||r.stato!=='usato'));
+  mine.sort((a,b)=>(a.stato==='usato'?0:1)-(b.stato==='usato'?0:1)||String(a.codice).localeCompare(String(b.codice)));
+  return `<div><label class="f" style="margin-bottom:6px">RFID dell'impianto <span class="req">*</span><input class="in mono" name="rfid" id="cfrfid" list="rfdl" value="${esc(pre?.codice||'')}" autocomplete="off" autocapitalize="characters" placeholder="Scansiona o scegli il codice RFID"></label><datalist id="rfdl">${mine.slice(0,300).map(r=>`<option value="${esc(r.codice)}">${r.stato==='usato'?'prelevato da '+esc(tecName(r.tecnicoId)):'libero'}</option>`).join('')}</datalist><div class="acts" style="margin-top:0">${scanBtn('cfrfid')}</div></div>`}
+function rfPratOpts(r,tid){const l=[...S.pr].filter(([id,p])=>!isAss(p)&&p.committente===r.committente&&!S.es.has(id)&&!rfOf(id)&&(S.admin?(!tid||tecsOf(p).includes(tid)):tecsOf(p).includes(S.me))).sort((a,b)=>(a[1].data+a[1].fascia).localeCompare(b[1].data+b[1].fascia));
+  return `<option value="">Nessuna per ora (la indico quando chiudo la pratica)</option>`+l.map(([id,p])=>`<option value="${esc(id)}">${esc(dmy(p.data))} ${esc(fascia(p.fascia).a)} · ordine ${esc(p.ordine||'—')}${p.indirizzo?' · '+esc(p.indirizzo):''}</option>`).join('')}
 function apNoteHTML(p){const l=['ont','modem'].filter(k=>apOf(p,k));if(!l.length)return '';
   return `<div class="apnote"><b>Apparati di questa pratica</b>${l.map(k=>{const a=p[k];return `<div>${ic(k==='ont'?'ont':'wifi')} <b>${esc(apLab(k,a))}</b> · ${APM[a.m]}${apCons(a)?' · <span class="note">scansiona il seriale che consegni</span>':''}</div>`}).join('')}</div>`}
 function apMissing(p,mats){const out=[];for(const k of ['ont','modem']){const a=apOf(p,k);if(!apCons(a)||!a.id||!unitsOf(a.id).length)continue;if(!mats.some(s=>S.un.get(sk(s))?.prodottoId===a.id))out.push(apLab(k,a))}return out}
@@ -1339,7 +1404,7 @@ function archItems(){
     if(a.tipo&&p.tipo!==a.tipo)continue;if(a.comm&&p.committente!==a.comm)continue;
     if(S.admin&&a.tec&&!team.includes(a.tec))continue;
     const names=team.length?team.map(tecName).join(' + '):(p.tecniciNomi||[]).join(' + ');
-    if(q&&![p.ordine,p.idRisorsa,p.indirizzo,p.pfs,e.permuta||p.permuta,e.splitter||p.splitter,p.telefono,names,(e.materiali||[]).join(' '),apTxt(p,'ont'),apTxt(p,'modem')].join(' ').toLowerCase().includes(q))continue;
+    if(q&&![p.ordine,p.idRisorsa,p.indirizzo,p.pfs,e.permuta||p.permuta,e.splitter||p.splitter,p.telefono,names,(e.materiali||[]).join(' '),apTxt(p,'ont'),apTxt(p,'modem'),e.rfid||''].join(' ').toLowerCase().includes(q))continue;
     out.push({id,p,e,names});
   }
   return out.sort((x,y)=>(y.e.completedAt||'').localeCompare(x.e.completedAt||''));
@@ -1361,9 +1426,9 @@ function bindArch(){
     const nw=$('#stonow');if(nw)nw.onclick=async()=>{nw.disabled=true;try{const r=await S.call('archiveNow',{});toast(r.archiviate?`${r.archiviate} pratiche spostate nello storico`:'Nessuna pratica da spostare');if(r.archiviate)setTimeout(()=>location.reload(),1200)}catch(x){toast('Non riuscito: '+x.message)}nw.disabled=false}}
   const on=(id,k,ev)=>{const el=$('#'+id);if(el)el.addEventListener(ev||'change',e=>{S.ar[k]=e.target.value;renderArch()})};
   on('aq','q','input');on('am','mese');on('ati','tipo');on('acm','comm');on('atc','tec');
-  $('#arcopy').onclick=async()=>{const rows=archItems();const h=['Completata','Data','Fascia','Tipo','Esito','Rimodulazioni','Committente','Rete','Ordine','ID risorsa','PFS','Numero permuta','Splitter','ONT','Modem','Indirizzo','Tecnici','Seriali installati','Nota'];
+  $('#arcopy').onclick=async()=>{const rows=archItems();const h=['Completata','Data','Fascia','Tipo','Esito','Rimodulazioni','Committente','Rete','Ordine','ID risorsa','PFS','Numero permuta','Splitter','RFID','ONT','Modem','Indirizzo','Tecnici','Seriali installati','Nota'];
     const cl=v=>String(v??'').replace(/[\t\n\r]+/g,' ');
-    const tsv=[h.join('\t'),...rows.map(({p,e,names})=>[dt(e.completedAt),p.data,fascia(p.fascia).a+'-'+fascia(p.fascia).b,p.tipo,ESA[e.esitoAss]?.[1]||'Completata',(p.rimod||[]).length,p.committente,p.rete,p.ordine,p.idRisorsa,p.pfs,e.permuta||p.permuta,e.splitter||p.splitter,apTxt(p,'ont'),apTxt(p,'modem'),p.indirizzo,names,(e.materiali||[]).join(' '),e.nota].map(cl).join('\t'))].join('\n');
+    const tsv=[h.join('\t'),...rows.map(({p,e,names})=>[dt(e.completedAt),p.data,fascia(p.fascia).a+'-'+fascia(p.fascia).b,p.tipo,ESA[e.esitoAss]?.[1]||'Completata',(p.rimod||[]).length,p.committente,p.rete,p.ordine,p.idRisorsa,p.pfs,e.permuta||p.permuta,e.splitter||p.splitter,e.rfid||'',apTxt(p,'ont'),apTxt(p,'modem'),p.indirizzo,names,(e.materiali||[]).join(' '),e.nota].map(cl).join('\t'))].join('\n');
     try{await navigator.clipboard.writeText(tsv);toast(rows.length+' righe copiate: incollale in Excel')}catch(x){toast('Copia non riuscita')}};
 }
 function renderArch(){
@@ -1580,18 +1645,20 @@ async function bindImp(){
   if(S.remote){try{const r=await S.call('backups',{});$('#bklist').innerHTML=r.items.length?`<div class="tlist">${r.items.slice(0,15).map(b=>`<a class="trow" href="${esc(b.url)}" target="_blank" rel="noopener" style="text-decoration:none"><div class="nm" style="font-size:15px">${esc(b.nome)}</div><span class="note">Apri su Drive</span></a>`).join('')}</div><p class="note" style="margin-top:8px"><a href="${esc(r.cartella)}" target="_blank" rel="noopener">Apri la cartella GoFiber Backup</a></p>`:'<div class="empty">Nessun backup ancora: il primo viene creato automaticamente questo mese.</div>'}catch(x){const b=$('#bklist');if(b)b.innerHTML=`<p class="note">${esc(isNetErr(x)?'Serve la rete per vedere i backup su Drive.':x.message)}</p>`}}
 }
 async function cfgSave(o){try{await S.db.doc('config/app').set({...S.cfg,...o});toast('Impostazioni salvate')}catch(x){toast(errText(x))}}
-function backupData(){const o={};for(const [n,m] of [['pratiche',S.pr],['esiti',S.es],['prodotti',S.pd],['unita',S.un],['tecnici',S.tec],['ruoli',S.roles]])o[n]=Object.fromEntries(m);o.config=S.cfg;o.esportatoIl=new Date().toISOString();o.app='GoFiber';return o}
+function backupData(){const o={};for(const [n,m] of [['pratiche',S.pr],['esiti',S.es],['prodotti',S.pd],['unita',S.un],['rfid',S.rf],['tecnici',S.tec],['ruoli',S.roles]])o[n]=Object.fromEntries(m);o.config=S.cfg;o.esportatoIl=new Date().toISOString();o.app='GoFiber';return o}
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
 async function backupXlsx(){const X=await loadXLSX();const wb=X.utils.book_new();const stamp=today();
   const pr=[];const ids=new Set([...S.pr.keys(),...S.es.keys()]);
   for(const id of ids){const p=S.pr.get(id)||S.es.get(id)?.snap||{},e=S.es.get(id);const st=e?(ESA[e.esitoAss]?.[1]||'Completata'):(tecsOf(p).length?'Assegnata':'Da assegnare');
-    pr.push({Data:p.data||'',Fascia:p.fascia?fascia(p.fascia).a+'-'+fascia(p.fascia).b:'',Ora:p.ora||'',Tipo:normT(p.tipo)||'',Committente:p.committente||'',Rete:p.rete||'',Ordine:p.ordine||'','ID risorsa':p.idRisorsa||'',Indirizzo:p.indirizzo||'',Telefono:p.telefono||'',PFS:p.pfs||'',Permuta:e?.permuta||p.permuta||'',Splitter:e?.splitter||p.splitter||'',ONT:apTxt(p,'ont'),Modem:apTxt(p,'modem'),Tecnici:tecsOf(p).map(tecName).join(' + '),Stato:st,'Chiusa il':e?.completedAt?dt(e.completedAt):'',Nota:e?.nota||'','Seriali installati':(e?.materiali||[]).join(' '),Rimodulazioni:(p.rimod||[]).length,'In archivio':S.pr.has(id)?'':'sì'})}
+    pr.push({Data:p.data||'',Fascia:p.fascia?fascia(p.fascia).a+'-'+fascia(p.fascia).b:'',Ora:p.ora||'',Tipo:normT(p.tipo)||'',Committente:p.committente||'',Rete:p.rete||'',Ordine:p.ordine||'','ID risorsa':p.idRisorsa||'',Indirizzo:p.indirizzo||'',Telefono:p.telefono||'',PFS:p.pfs||'',Permuta:e?.permuta||p.permuta||'',Splitter:e?.splitter||p.splitter||'',RFID:e?.rfid||rfOf(id)?.codice||'',ONT:apTxt(p,'ont'),Modem:apTxt(p,'modem'),Tecnici:tecsOf(p).map(tecName).join(' + '),Stato:st,'Chiusa il':e?.completedAt?dt(e.completedAt):'',Nota:e?.nota||'','Seriali installati':(e?.materiali||[]).join(' '),Rimodulazioni:(p.rimod||[]).length,'In archivio':S.pr.has(id)?'':'sì'})}
   pr.sort((a,b)=>String(a.Data).localeCompare(String(b.Data)));
   X.utils.book_append_sheet(wb,X.utils.json_to_sheet(pr.length?pr:[{Nota:'Nessuna pratica'}]),'Pratiche');
   const un=[...S.un.values()].map(u=>({Seriale:u.seriale,Prodotto:prodName(u.prodottoId),Committente:u.committente||'',Stato:SL[u.stato]||u.stato,Tecnico:u.tecnicoId?tecName(u.tecnicoId):'',Ordine:u.ordine||'','ID risorsa':u.idRisorsa||'',Caricato:dt(u.createdAt),Installato:dt(u.installedAt),'Scarico':u.motivoScarico||''}));
   X.utils.book_append_sheet(wb,X.utils.json_to_sheet(un.length?un:[{Nota:'Magazzino vuoto'}]),'Magazzino');
   const pd=[...S.pd.values()].map(p=>({Prodotto:p.nome,Tipo:APK[p.cat]||'','Codice a barre':p.codice||'',...Object.fromEntries(COMM.map(c=>['Scorta minima '+c,+(p.soglie||{})[c]||0]))}));
   X.utils.book_append_sheet(wb,X.utils.json_to_sheet(pd.length?pd:[{Nota:'Nessun prodotto'}]),'Prodotti');
+  const rf=[...S.rf.values()].sort((a,b)=>(a.committente+a.codice).localeCompare(b.committente+b.codice)).map(r=>({RFID:r.codice,Committente:r.committente||'',Stato:r.stato==='usato'?'Usato':'Libero',Tecnico:r.tecnicoId?tecName(r.tecnicoId):'',Ordine:r.ordine||'','ID risorsa':r.idRisorsa||'','Usato il':r.usatoAt?dt(r.usatoAt):'',Caricato:r.createdAt?dt(r.createdAt):''}));
+  X.utils.book_append_sheet(wb,X.utils.json_to_sheet(rf.length?rf:[{Nota:'Nessun RFID'}]),'RFID');
   const us=[...S.tec].map(([id,t])=>{const r=roleInfo(id)||{};return{Nome:t.nome||'',Telefono:t.telefono||'',Email:t.email||'',Ruolo:RUOLI[r.ruolo]||'',Stato:r.stato||''}});
   X.utils.book_append_sheet(wb,X.utils.json_to_sheet(us.length?us:[{Nota:'Nessun utente'}]),'Utenti');
   const out=X.write(wb,{bookType:'xlsx',type:'array'});dl(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),`GoFiber-backup-${stamp}.xlsx`);toast('Backup Excel scaricato')}
@@ -1866,7 +1933,7 @@ function sub(path,key,map){
   setTimeout(()=>maybeInstall(),4000);setTimeout(secStart,1500);
   S.state='ok';if(S.remote){const b=document.createElement('button');b.className='thm';b.title='Esci';b.setAttribute('aria-label','Esci');b.innerHTML='<svg class="i" viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h11"/></svg>';b.onclick=logout;$('.hr').appendChild(b)}
   if(S.local)$('#localbar').innerHTML='<div class="wrap"><div class="dupw" style="margin:12px 0 0"><b>Modalità locale.</b> I dati restano solo in questo browser e su questo dispositivo, senza foto e senza utenti condivisi. <button class=\"lnk\" id=\"connGs\">Collega il foglio Google</button> per lavorare in squadra.</div></div>';if($('#connGs'))$('#connGs').onclick=()=>{S.modal={type:'conn'};renderModal()};render();
-  sub('tecnici','tec',S.tec);sub('ruoli','ro',S.roles);sub('config','cfg',S.cfgMap);sub('pratiche','pr',S.pr);sub('esiti','es',S.es);sub('prodotti','pd',S.pd);sub('unita','un',S.un);sub('pfsdb','pfsx',S.pfsDocs);loadPfsBase();
+  sub('tecnici','tec',S.tec);sub('ruoli','ro',S.roles);sub('config','cfg',S.cfgMap);sub('pratiche','pr',S.pr);sub('esiti','es',S.es);sub('prodotti','pd',S.pd);sub('unita','un',S.un);sub('rfid','rf',S.rf);sub('pfsdb','pfsx',S.pfsDocs);loadPfsBase();
 })();
 }
 </script>

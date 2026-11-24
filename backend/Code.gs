@@ -10,7 +10,7 @@
  *     Esegui come: Me · Chi ha accesso: Chiunque → Esegui il deployment.
  *  5. Copia l'URL che finisce con /exec e incollalo in GoFiber.
  */
-const VERSION = 3;
+const VERSION = 4;
 const BACKUP_KEEP = 12;     // backup mensili conservati su Drive
 const ARCHIVE_DAYS = 365;   // pratiche chiuse da più di un anno vanno nello Storico
 const TOMBSTONE_DAYS = 45; // righe eliminate tenute per avvisare i dispositivi, poi tolte
@@ -149,7 +149,7 @@ function canWrite_(path, id, role) {
   if (!role.attivo) return false;
   if (col === 'ruoli' || col === 'tecnici') return role.ruolo === 'admin';
   if (role.ruolo === 'admin' || role.ruolo === 'ufficio') return true;
-  return ['pratiche', 'esiti', 'unita'].indexOf(col) >= 0;
+  return ['pratiche', 'esiti', 'unita', 'rfid'].indexOf(col) >= 0;
 }
 function canRead_(path, id, role) {
   if (role.attivo) return true;
