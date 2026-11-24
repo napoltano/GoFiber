@@ -153,6 +153,7 @@ body.auth #netbar{display:none}
 .ctcb .btn{min-height:50px}.btn.wa{background:#25d366;border-color:#25d366;color:#fff}
 .rowqa{display:flex;gap:6px;margin-top:6px}.rowqa a{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;text-decoration:none;padding:5px 10px;border-radius:99px;border:1px solid var(--line);background:var(--soft)}
 .rfgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px}.rfold{display:flex;gap:14px;align-items:center;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;cursor:pointer;box-shadow:var(--sh);color:var(--ink);font:inherit}.rfold>.i{width:44px;height:44px;color:var(--pri);flex:none}.rfold b{display:block;font-size:18px;margin-bottom:4px}.rfold span.n{font-size:14px;color:var(--mute)}.rfold span.n b{display:inline;font-size:14px;color:var(--ink)}
+.btn[data-nfc].on{animation:nfcp 1.2s ease-in-out infinite}@keyframes nfcp{50%{opacity:.6}}
 .rfr{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:6px}.rfr code{font-size:15px;font-weight:600}.rfr .rfw{flex:1 1 180px;font-size:13px;color:var(--mute)}.rfr .acts{margin:0;gap:6px}
 .rowqa a.wa{background:#25d366;border-color:#25d366;color:#fff}.rowqa svg{width:15px;height:15px}
 .dupw{background:color-mix(in srgb,var(--wait) 14%,transparent);border:1px solid color-mix(in srgb,var(--wait) 45%,transparent);border-radius:10px;padding:10px 12px;font-size:14px;margin:-4px 0 14px}.dupw b{font-weight:600}.dupw button{margin-inline-start:4px}
@@ -323,6 +324,7 @@ const IC={
  pin:'<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
  cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
  rfid:'<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M7 10.2a2.6 2.6 0 0 1 0 3.6M9.6 8.4a5.4 5.4 0 0 1 0 7.2"/><path d="M14 10h4.5M14 14h3"/>',
+ nfc:'<path d="M6 18.5V5.5l12 13V5.5"/><path d="M3.5 8.5a9 9 0 0 0 0 7M20.5 8.5a9 9 0 0 1 0 7"/>',
  folder:'<path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/>',
  wifi:'<path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1"/>',
  ont:'<rect x="3" y="12" width="18" height="8" rx="2"/><path d="M7 16h.01M10.5 16h.01M14 16h3M12 12V4M9 6.5 12 4l3 2.5"/>'};
@@ -440,7 +442,7 @@ function tabs(){
   $('#who').textContent=S.state!=='ok'?'Non connesso':S.gate?'Accesso':(S.isOwner?'Proprietario':(S.tec.get(S.me)?.nome||'')+' · '+(RUOLI[S.role]||''));
 }
 function show(v){S.view=views().includes(v)?v:'agenda';if(location.hash.slice(1)!==S.view)location.hash=S.view;render();window.scrollTo(0,0)}
-addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(v!==S.view){S.editId=null;S.dupOk=null;S.view=views().includes(v)?v:'agenda';render();window.scrollTo(0,0)}});
+addEventListener('hashchange',()=>{nfcStop();const v=location.hash.slice(1);if(v!==S.view){S.editId=null;S.dupOk=null;S.view=views().includes(v)?v:'agenda';render();window.scrollTo(0,0)}});
 
 /* ---------- render ---------- */
 function render(){
@@ -967,7 +969,7 @@ function renderModal(){
       <form id="cf" style="margin-top:16px">
         <label class="f">Nota<textarea class="in" name="nota" rows="3" placeholder="Esito lavoro, eventuali problemi"></textarea></label>
         <div class="grid2"><label class="f">Numero permuta <span class="req">*</span><input class="in" name="permuta" value="${esc(p.permuta||'')}" autocomplete="off" required></label><label class="f">Splitter <span class="req">*</span><input class="in" name="splitter" value="${esc(p.splitter||'')}" autocomplete="off" required></label></div>
-        ${rfFieldHTML(M.id,p)}${apNoteHTML(p)}${serBox('ins','Materiale installato · codici a barre dei seriali','Scansiona il codice a barre del seriale installato (uno per riga)')}
+        ${apNoteHTML(p)}${serBox('ins','Materiale installato · codici a barre dei seriali','Scansiona il codice a barre del seriale installato (uno per riga)')}
         ${S.assets?`${blk('fotoIdRisorsa','Foto ID risorsa (facoltativa)',false,'image/*',false)}${blk('foto','Foto (facoltative)',false,'image/*',true)}${blk('caratterizzazione','Caratterizzazione · foto o PDF (facoltativa)',false,'image/*,application/pdf',true)}`:'<p class="note">Il caricamento di foto non è disponibile per il tuo account: puoi completare la pratica senza foto, oppure chiedi al gestore di condividerti l\'app come Collaboratore o Editor.</p>'}
         <div class="err" id="cerr"></div><div class="acts"><button class="btn yel" type="submit">Conferma completamento</button><button class="btn" type="button" data-back>Indietro</button></div></form>`);
   }else if(M.type==='rfuse'){const r=S.rf.get(M.id);if(!r){closeModal();return}
@@ -1071,9 +1073,6 @@ $('#modal').addEventListener('submit',async e=>{
   if(bad.length){er.textContent='Controlla i seriali: '+bad.map(r=>r[0]+' ('+r[2]+')').join(', ');return}
   const cfd=new FormData(e.target);const nota=String(cfd.get('nota')||'').trim(),permuta=String(cfd.get('permuta')||'').trim(),splitter=String(cfd.get('splitter')||'').trim();
   if(!permuta||!splitter){er.textContent='Inserisci '+[!permuta&&'il numero permuta',!splitter&&'lo splitter'].filter(Boolean).join(' e ')+'.';return}
-  const rfc=normS(new FormData(e.target).get('rfid'));{const p0=S.pr.get(S.modal.id)||{};if(!rfc){er.textContent='Inserisci l\'RFID dell\'impianto.';return}
-    const r=S.rf.get(rfk(rfc)),w=!r?`L'RFID ${rfc} non è nell'elenco ${p0.committente||''}.`:(r.committente&&p0.committente&&r.committente!==p0.committente)?`L'RFID ${rfc} è di ${r.committente}, la pratica è ${p0.committente}.`:(r.praticaId&&r.praticaId!==S.modal.id)?`L'RFID ${rfc} è già usato per l'ordine ${r.ordine||'—'}.`:'';
-    if(w&&S.rfOk!==rfc){S.rfOk=rfc;play('err');er.textContent=w+' Controlla il codice, oppure premi di nuovo Conferma per usarlo comunque.';return}}
   {const miss=apMissing(S.pr.get(S.modal.id)||{},sr.map(r=>r[0])),mk=miss.join('|')+'#'+sr.length;if(miss.length&&S.apOk!==mk){S.apOk=mk;play('err');er.textContent='Non hai scansionato il seriale di: '+miss.join(', ')+'. Scansionalo qui sopra, oppure premi di nuovo Conferma per chiudere comunque.';return}}
   const all=['fotoIdRisorsa','foto','caratterizzazione'].flatMap(k=>S.up[k].map(u=>[k,u.file]));
   const out={fotoIdRisorsa:[],foto:[],caratterizzazione:[]};
@@ -1085,9 +1084,7 @@ $('#modal').addEventListener('submit',async e=>{
       out[k].push({id:r.id,type:r.contentType||type})}
     btn.textContent='Salvo…';
     const id=S.modal.id,p=S.pr.get(id)||{},mats=sr.map(r=>r[0]),now=new Date().toISOString();
-    await S.db.doc('esiti/'+id).set({nota,...out,materiali:mats,permuta,splitter,rfid:rfc,by:S.me||'',byAdmin:S.admin,completedAt:now,snap:{...snapOf(id),permuta,splitter,rfid:rfc}});
-    {const r=S.rf.get(rfk(rfc)),old=rfOf(id);if(old&&normS(old.codice)!==rfc)await S.db.doc('rfid/'+rfk(old.codice)).update({praticaId:'',ordine:'',idRisorsa:''}).catch(()=>{});
-      await S.db.doc('rfid/'+rfk(rfc)).set({codice:r?.codice||rfc,committente:r?.committente||p.committente||'',stato:'usato',tecnicoId:r?.stato==='usato'&&r.tecnicoId?r.tecnicoId:(tecsOf(p).includes(S.me)?S.me:(tecsOf(p)[0]||S.me||'')),praticaId:id,ordine:p.ordine||'',idRisorsa:p.idRisorsa||'',usatoAt:r?.usatoAt||now,createdAt:r?.createdAt||now,createdBy:r?.createdBy||S.me||''}).catch(()=>{})}
+    await S.db.doc('esiti/'+id).set({nota,...out,materiali:mats,permuta,splitter,by:S.me||'',byAdmin:S.admin,completedAt:now,snap:{...snapOf(id),permuta,splitter}});
     const team=tecsOf(p);
     const errs=await pool(mats.map(sk).filter(k=>S.un.has(k)),k=>{const u=S.un.get(k);const tid=team.includes(u.tecnicoId)?u.tecnicoId:(team.includes(S.me)?S.me:(team[0]||S.me||''));return S.db.doc('unita/'+k).update({stato:'installato',tecnicoId:tid,praticaId:id,ordine:p.ordine||'',idRisorsa:p.idRisorsa||'',installedAt:now})},6);
     S.busy=false;closeModal();toast(errs.length?`Pratica completata, ma ${errs.length} seriali non aggiornati`:'Pratica completata');S.modal={type:'detail',id};renderModal();
@@ -1348,6 +1345,22 @@ function renderImport(){
 
 /* ---------- archivio ---------- */
 const rfk=c=>'r'+sk(normS(c));
+const canNfc=()=>'NDEFReader' in window;
+const NFC={ac:null,tid:'',cb:null};
+function nfcCode(ev){try{for(const r of ev.message?.records||[]){if(r.recordType==='text'||r.recordType==='url'){const t=new TextDecoder(r.encoding||'utf-8').decode(r.data).trim();if(t)return normS(t.replace(/^https?:\/\/\S*[\/=]/,''))}}}catch(e){}return normS(String(ev.serialNumber||'').replace(/:/g,''))}
+function nfcStop(){try{NFC.ac&&NFC.ac.abort()}catch(e){}NFC.ac=null;document.querySelectorAll('[data-nfc].on').forEach(b=>{b.classList.remove('on');b.innerHTML=ic('nfc')+'Leggi con NFC'})}
+async function nfcStart(btn,cb){if(NFC.ac){nfcStop();return}
+  if(!canNfc()){toast('NFC non disponibile qui: serve Chrome su Android con NFC attivo');return}
+  const ac=new AbortController();try{const r=new NDEFReader();await r.scan({signal:ac.signal});NFC.ac=ac;btn.classList.add('on');btn.innerHTML=ic('nfc')+'Avvicina il tag… (tocca per fermare)';toast('Avvicina il tag RFID al retro del telefono');
+    let last='',lt=0;r.onreading=ev=>{const c=nfcCode(ev);if(!c)return;const n=Date.now();if(c===last&&n-lt<2500)return;last=c;lt=n;play('scan');try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}cb(c)};
+    r.onreadingerror=()=>toast('Tag non letto: riprova tenendolo fermo')}
+  catch(x){toast(x?.name==='NotAllowedError'?'Permesso NFC negato: consentilo nelle impostazioni del sito':x?.name==='NotSupportedError'?'NFC spento o non presente: attivalo nelle impostazioni del telefono':'NFC: '+(x?.message||x))}}
+const nfcBtn=k=>canNfc()?`<button type="button" class="btn sm yel" data-nfc="${k}">${ic('nfc')}Leggi con NFC</button>`:'';
+function rfNfcFound(c){const r=S.rf.get(rfk(c));if(S.view!=='rfid')return;
+  if(!r){if(S.admin&&S.rfv.comm&&$('#sb-rfa')){const t=$('#sb-rfa');const cur=new Set(serials('rfa'));if(!cur.has(c)){t.value=(t.value.trim()?t.value.trim()+'\n':'')+c;sbUpdate('rfa')}toast(c+' letto: premi Aggiungi per salvarlo')}else toast(`RFID ${c} non è in elenco`+(S.admin?'':': chiedi all\'ufficio di aggiungerlo'));return}
+  if(r.committente!==S.rfv.comm){S.rfv.comm=r.committente;render()}
+  S.rfv.q=r.codice;S.rfv.f='tutti';const q=$('#rfq');if(q)q.value=r.codice;rfRefresh();
+  if(r.stato!=='usato'&&!(S.modal&&S.modal.type==='rfuse')){nfcStop();S.modal={type:'rfuse',id:rfk(c)};renderModal()}else if(r.stato==='usato')toast(`RFID ${r.codice} già usato${r.tecnicoId?' da '+tecName(r.tecnicoId):''}`)}
 const rfOf=id=>[...S.rf.values()].find(r=>r.praticaId===id);
 const rfCode=(id,e)=>e?.rfid||rfOf(id)?.codice||'';
 function rfidHTML(){const V=S.rfv,all=[...S.rf.values()];
@@ -1357,6 +1370,7 @@ function rfidHTML(){const V=S.rfv,all=[...S.rf.values()];
        return `<button class="rfold" data-rfc="${c}">${ic('folder')}<div><b>${esc(c)}</b><span class="n"><b>${lib}</b> liberi · <b>${l.length-lib}</b> usati${!S.admin&&mine?` · <b>${mine}</b> presi da te`:''}</span></div></button>`}).join('')}</div>`}
   return `<div class="ph" style="margin-bottom:8px"><div><button class="lnk" data-rfback>← Tutte le cartelle</button><h1 style="margin-top:6px">RFID ${ctag(V.comm)}</h1></div></div>
    ${S.admin?`<form class="card pf" id="rfaf" novalidate style="margin-bottom:14px"><h3>Aggiungi RFID ${esc(V.comm)}</h3>${serBox('rfa','Codici RFID','Scrivi o scansiona i codici RFID, uno per riga')}<div class="err" id="rfaerr"></div><div class="acts"><button class="btn yel" type="submit">${ic('plus')}Aggiungi a ${esc(V.comm)}</button></div></form>`:''}
+   ${canNfc()?`<div class="acts" style="margin:0 0 10px">${nfcBtn('find')}<span class="note">Avvicina il tag: ${S.admin?'se è nuovo lo aggiungo all\'elenco qui sopra, se c\'è già lo trovo.':'trovo il codice e lo segni come prelevato.'}</span></div>`:''}
    <div class="subt" id="rff" style="margin-bottom:10px"></div>
    <input class="in" id="rfq" placeholder="Cerca codice, ordine o tecnico" value="${esc(V.q)}" autocomplete="off" style="margin-bottom:10px">
    <div id="rflist"></div>`}
@@ -1367,13 +1381,14 @@ function rfRows(){const V=S.rfv,q=V.q.trim().toLowerCase();let l=[...S.rf.values
   l.sort((a,b)=>V.f==='liberi'?String(a.codice).localeCompare(String(b.codice)):String(b.usatoAt||b.createdAt||'').localeCompare(String(a.usatoAt||a.createdAt||'')));
   const chips=[['liberi','Liberi'],['usati','Usati'],['tutti','Tutti']].map(([k,t])=>`<button class="chip ${V.f===k?'on':''}" data-rff="${k}">${t} · ${n[k]}</button>`).join('');
   const rows=l.slice(0,400).map(r=>{const id=rfk(r.codice),used=r.stato==='usato';
-    return `<div class="rfr"><code>${esc(r.codice)}</code><span class="pill ${used?'ok':'neu'}">${used?'Usato':'Libero'}</span><span class="rfw">${used?`${r.tecnicoId?esc(tecName(r.tecnicoId)):'—'}${r.usatoAt?' · '+esc(dt(r.usatoAt)):''}${r.ordine?' · ordine <b>'+esc(r.ordine)+'</b>':' · non ancora su una pratica'}`:''}</span><span class="acts">${!used?`<button class="btn sm yel" data-rfuse="${esc(id)}">${S.admin?'Segna usato':'Prelevo'}</button>`:''}${used&&!r.praticaId&&r.tecnicoId===S.me&&!S.admin?`<button class="btn sm" data-rffree="${esc(id)}">Non l'ho usato</button>`:''}${used&&S.admin?`<button class="btn sm" data-rffree="${esc(id)}">Rendi libero</button>`:''}${!used&&S.admin?`<button class="btn sm dng" data-rfdel="${esc(id)}" aria-label="Elimina">×</button>`:''}</span></div>`}).join('');
+    return `<div class="rfr"><code>${esc(r.codice)}</code><span class="pill ${used?'ok':'neu'}">${used?'Usato':'Libero'}</span><span class="rfw">${used?`${r.tecnicoId?esc(tecName(r.tecnicoId)):'—'}${r.usatoAt?' · '+esc(dt(r.usatoAt)):''}${r.ordine?' · ordine <b>'+esc(r.ordine)+'</b>':' · non ancora su una pratica'}`:''}</span><span class="acts"><button class="btn sm" data-rfcopy="${esc(r.codice)}" title="Copia il codice per incollarlo nell'app SH">Copia</button>${!used?`<button class="btn sm yel" data-rfuse="${esc(id)}">${S.admin?'Segna usato':'Prelevo'}</button>`:''}${used&&!r.praticaId&&r.tecnicoId===S.me&&!S.admin?`<button class="btn sm" data-rffree="${esc(id)}">Non l'ho usato</button>`:''}${used&&S.admin?`<button class="btn sm" data-rffree="${esc(id)}">Rendi libero</button>`:''}${!used&&S.admin?`<button class="btn sm dng" data-rfdel="${esc(id)}" aria-label="Elimina">×</button>`:''}</span></div>`}).join('');
   return [chips,(rows||`<div class="empty" style="padding:16px">${n.tutti?'Nessun RFID in questa vista.':'Nessun RFID per '+esc(V.comm)+(S.admin?': aggiungili qui sopra.':'.')}</div>`)+(l.length>400?`<p class="note">Mostrati 400 su ${l.length}: usa la ricerca.</p>`:'')]}
 function rfRefresh(){if(S.view!=='rfid')return;if(!S.rfv.comm){$('#main').innerHTML=rfidHTML();return}const [c,r]=rfRows();const a=$('#rff'),b=$('#rflist');if(a)a.innerHTML=c;if(b)b.innerHTML=r;if($('#sb-rfa'))sbUpdate('rfa')}
 function bindRfid(){const m=$('#main');rfRefresh();
   m.onclick=async e=>{const t=e.target;
+    const cp=t.closest('[data-rfcopy]');if(cp){const c=cp.dataset.rfcopy;try{await navigator.clipboard.writeText(c);toast('Codice '+c+' copiato: incollalo nell\'app SH');play('tap')}catch(x){prompt('Copia il codice',c)}return}
     const fo=t.closest('[data-rfc]');if(fo){S.rfv.comm=fo.dataset.rfc;S.rfv.q='';render();window.scrollTo(0,0);return}
-    if(t.closest('[data-rfback]')){S.rfv.comm='';render();return}
+    if(t.closest('[data-rfback]')){nfcStop();S.rfv.comm='';render();return}
     const ff=t.closest('[data-rff]');if(ff){S.rfv.f=ff.dataset.rff;rfRefresh();return}
     const u=t.closest('[data-rfuse]');if(u){S.modal={type:'rfuse',id:u.dataset.rfuse};renderModal();return}
     const fr=t.closest('[data-rffree]');if(fr){const r=S.rf.get(fr.dataset.rffree);S.modal={type:'confirm',title:'Rendere libero '+r.codice+'?',text:r.ordine?`Era usato per l'ordine ${r.ordine}: torna disponibile per un altro impianto.`:'Torna disponibile per un altro impianto.',ok:'Rendi libero',done:'RFID di nuovo libero',fn:async()=>{await S.db.doc('rfid/'+fr.dataset.rffree).update({stato:'libero',tecnicoId:'',praticaId:'',ordine:'',idRisorsa:'',usatoAt:''})}};renderModal();return}
@@ -1386,9 +1401,6 @@ function bindRfid(){const m=$('#main');rfRefresh();
       S.busy=false;play(errs.length?'err':'ok');toast(`${list.length-errs.length} RFID aggiunti a ${c}`+(all.length>list.length?` · ${all.length-list.length} già presenti`:''));$('#sb-rfa').value='';sbUpdate('rfa');if(errs.length)er.textContent=errs.length+' codici non salvati, riprova.'}
     catch(x){S.busy=false;er.textContent=errText(x)}btn.disabled=false;btn.innerHTML=ic('plus')+'Aggiungi a '+esc(c)};
 }
-function rfFieldHTML(id,p){const pre=rfOf(id),mine=[...S.rf.values()].filter(r=>r.committente===p.committente&&((r.stato==='usato'&&!r.praticaId&&tecsOf(p).includes(r.tecnicoId))||r.stato!=='usato'));
-  mine.sort((a,b)=>(a.stato==='usato'?0:1)-(b.stato==='usato'?0:1)||String(a.codice).localeCompare(String(b.codice)));
-  return `<div><label class="f" style="margin-bottom:6px">RFID dell'impianto <span class="req">*</span><input class="in mono" name="rfid" id="cfrfid" list="rfdl" value="${esc(pre?.codice||'')}" autocomplete="off" autocapitalize="characters" placeholder="Scansiona o scegli il codice RFID"></label><datalist id="rfdl">${mine.slice(0,300).map(r=>`<option value="${esc(r.codice)}">${r.stato==='usato'?'prelevato da '+esc(tecName(r.tecnicoId)):'libero'}</option>`).join('')}</datalist><div class="acts" style="margin-top:0">${scanBtn('cfrfid')}</div></div>`}
 function rfPratOpts(r,tid){const l=[...S.pr].filter(([id,p])=>!isAss(p)&&p.committente===r.committente&&!S.es.has(id)&&!rfOf(id)&&(S.admin?(!tid||tecsOf(p).includes(tid)):tecsOf(p).includes(S.me))).sort((a,b)=>(a[1].data+a[1].fascia).localeCompare(b[1].data+b[1].fascia));
   return `<option value="">Nessuna per ora (la indico quando chiudo la pratica)</option>`+l.map(([id,p])=>`<option value="${esc(id)}">${esc(dmy(p.data))} ${esc(fascia(p.fascia).a)} · ordine ${esc(p.ordine||'—')}${p.indirizzo?' · '+esc(p.indirizzo):''}</option>`).join('')}
 function apNoteHTML(p){const l=['ont','modem'].filter(k=>apOf(p,k));if(!l.length)return '';
@@ -1562,6 +1574,7 @@ function liveStop(){LIVE.on=false;clearTimeout(LIVE.timer);
   if(LIVE.stream){LIVE.stream.getTracks().forEach(t=>t.stop());LIVE.stream=null}
   const box=$('#scanner');box.hidden=true;box.innerHTML='';
   if(LIVE.seen&&LIVE.seen.size&&!LIVE.single)toast(LIVE.seen.size===1?'1 codice nell\'elenco':LIVE.seen.size+' codici nell\'elenco',true)}
+document.addEventListener('click',e=>{const n=e.target.closest('[data-nfc]');if(n){e.preventDefault();nfcStart(n,rfNfcFound);return}});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-live]');if(b){e.preventDefault();liveStart(b.dataset.live)}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&LIVE.on){e.stopPropagation();liveStop()}},true);
 
