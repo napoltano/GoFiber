@@ -154,6 +154,7 @@ body.auth #netbar{display:none}
 .rowqa{display:flex;gap:6px;margin-top:6px}.rowqa a{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;text-decoration:none;padding:5px 10px;border-radius:99px;border:1px solid var(--line);background:var(--soft)}
 .rfgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px}.rfold{display:flex;gap:14px;align-items:center;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;cursor:pointer;box-shadow:var(--sh);color:var(--ink);font:inherit}.rfold>.i{width:44px;height:44px;color:var(--pri);flex:none}.rfold b{display:block;font-size:18px;margin-bottom:4px}.rfold span.n{font-size:14px;color:var(--mute)}.rfold span.n b{display:inline;font-size:14px;color:var(--ink)}
 .btn[data-nfc].on{animation:nfcp 1.2s ease-in-out infinite}@keyframes nfcp{50%{opacity:.6}}
+.crc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:10px}.crc h4{margin:0 0 8px;font-size:17px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.crrow{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed var(--line);flex-wrap:wrap}.crrow .k{width:84px;color:var(--mute);font-size:13px;flex:none}.crrow .v{flex:1 1 140px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:15px;word-break:break-all;min-width:0}.crrow .btn{padding:6px 10px;font-size:13px}.crnote{font-size:14px;color:var(--mute);white-space:pre-wrap;margin-top:6px}
 .rfr{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:6px}.rfr code{font-size:15px;font-weight:600}.rfr .rfw{flex:1 1 180px;font-size:13px;color:var(--mute)}.rfr .acts{margin:0;gap:6px}
 .rowqa a.wa{background:#25d366;border-color:#25d366;color:#fff}.rowqa svg{width:15px;height:15px}
 .dupw{background:color-mix(in srgb,var(--wait) 14%,transparent);border:1px solid color-mix(in srgb,var(--wait) 45%,transparent);border-radius:10px;padding:10px 12px;font-size:14px;margin:-4px 0 14px}.dupw b{font-weight:600}.dupw button{margin-inline-start:4px}
@@ -380,8 +381,8 @@ $('#bell').onclick=()=>{NT.list.forEach(x=>x.r=true);notifSave();bellRender();S.
 $('#thm').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
 
 const S={db:null,user:null,assets:null,admin:false,me:null,state:'load',
-  pr:new Map(),es:new Map(),tec:new Map(),pd:new Map(),un:new Map(),rf:new Map(),rfv:{comm:'',f:'liberi',q:''},
-  loaded:{pr:false,es:false,tec:false,pd:false,un:false,pfsx:false,ro:false,cfg:false,rf:false},pfs:new Map(),pfsDocs:new Map(),roles:new Map(),cfgMap:new Map(),cfg:{},role:null,gate:undefined,boss:false,isOwner:false,canApprove:false,forceReg:false,pfsBase:new Map(),pfsImp:new Map(),pfsBaseAt:'',pfsBaseState:'load',slow:false,err:null,
+  pr:new Map(),es:new Map(),tec:new Map(),pd:new Map(),un:new Map(),rf:new Map(),rfv:{comm:'',f:'liberi',q:''},cr:new Map(),crv:{az:'',q:'',show:new Set()},
+  loaded:{pr:false,es:false,tec:false,pd:false,un:false,pfsx:false,ro:false,cfg:false,rf:false,cr:false},pfs:new Map(),pfsDocs:new Map(),roles:new Map(),cfgMap:new Map(),cfg:{},role:null,gate:undefined,boss:false,isOwner:false,canApprove:false,forceReg:false,pfsBase:new Map(),pfsImp:new Map(),pfsBaseAt:'',pfsBaseState:'load',slow:false,err:null,
   view:'agenda',editId:null,f:{range:'oggi',day:'',stato:'',comm:'',tipo:'',tec:'',q:''},
   mag:{tab:'prodotti',prod:null,pst:'',pq:'',q:'',mode:'ser',comm:'',lastComm:''},ar:{q:'',mese:'',tipo:'',comm:'',tec:''},rep:{per:'mese',ref:new Date().toISOString().slice(0,10),comm:'',tipo:'',tec:''},repMine:false,imp:{txt:'',rows:null,skip:true,def:{tipo:'',comm:'',rete:'',data:'',fascia:'',tec:''}},nuovaMode:'one',modal:null,up:null,dupOk:null,needReg:null,busy:false};
 
@@ -461,9 +462,9 @@ function sbUpdate(id){
 document.addEventListener('input',e=>{const t=e.target;if(t.id?.startsWith('sb-')){sbUpdate(t.id.slice(3));if(e.inputType==='insertLineBreak'||/\n$/.test(t.value))play('scan')}});
 
 /* ---------- navigazione ---------- */
-const views=()=>S.boss?['agenda','nuova','archivio','report','magazzino','rfid','tecnici','impostazioni']:S.admin?['agenda','nuova','archivio','report','magazzino','rfid']:['agenda','materiale','rfid','resa','profilo'];
+const views=()=>S.boss?['agenda','nuova','archivio','report','magazzino','rfid','credenziali','tecnici','impostazioni']:S.admin?['agenda','nuova','archivio','report','magazzino','rfid','credenziali']:['agenda','materiale','rfid','credenziali','resa','profilo'];
 function tabs(){
-  const lab=S.admin?{agenda:['cal','Agenda'],nuova:['plus',S.editId?'Modifica':'Nuova pratica'],archivio:['arch','Archivio'],report:['chart','Riepilogo'],magazzino:['box','Magazzino'],rfid:['rfid','RFID'],tecnici:['users','Utenti'],impostazioni:['gear','Impostazioni']}:{agenda:['cal','Le mie pratiche'],archivio:['arch','Archivio'],materiale:['box','Il mio materiale'],rfid:['rfid','RFID'],resa:['chart','La mia resa'],profilo:['user','Profilo']};
+  const lab=S.admin?{agenda:['cal','Agenda'],nuova:['plus',S.editId?'Modifica':'Nuova pratica'],archivio:['arch','Archivio'],report:['chart','Riepilogo'],magazzino:['box','Magazzino'],rfid:['rfid','RFID'],credenziali:['key','Credenziali'],tecnici:['users','Utenti'],impostazioni:['gear','Impostazioni']}:{agenda:['cal','Le mie pratiche'],archivio:['arch','Archivio'],materiale:['box','Il mio materiale'],rfid:['rfid','RFID'],credenziali:['key','Credenziali'],resa:['chart','La mia resa'],profilo:['user','Profilo']};
   $('#tabs').innerHTML=(S.state==='ok'&&!S.gate)?views().map(v=>`<a href="#${v}" class="${S.view===v?'on':''}">${ic(lab[v][0])}<span>${lab[v][1]}</span></a>`).join(''):'';
   gemPaint();$('#who').textContent=S.state!=='ok'?'Non connesso':S.gate?'Accesso':(S.isOwner?'Proprietario':(S.tec.get(S.me)?.nome||'')+' · '+(RUOLI[S.role]||''));
 }
@@ -488,6 +489,7 @@ function render(){
   else if(v==='archivio'){m.innerHTML=archHTML();bindArch();renderArch()}
   else if(v==='magazzino'){m.innerHTML=magHTML();magBind()}
   else if(v==='rfid'){m.innerHTML=rfidHTML();bindRfid()}
+  else if(v==='credenziali'){m.innerHTML=credHTML();bindCred()}
   else{m.innerHTML=agendaHTML();bindAgenda();renderList()}
 }
 /* =====================================================================
@@ -742,6 +744,7 @@ function live(){notifCheck();bellRender();
   else if(S.view==='materiale'){const l=$('#matList');if(l)l.innerHTML=matListHTML();sbUpdate('pre');tabs()}
   else if(S.view==='archivio'){renderArch();tabs()}
   else if(S.view==='rfid'){rfRefresh();tabs()}
+  else if(S.view==='credenziali'){credRefresh();tabs()}
   else if(S.view==='report'||S.view==='resa'){renderReport();tabs()}
   else if(S.view==='magazzino'){magRefresh();tabs()}
   else{tabs();if(S.view==='nuova'){renderPfsSug();apRefresh()}}
@@ -1243,6 +1246,16 @@ function renderModal(){
         ${apNoteHTML(p)}${serBox('ins','Materiale installato · codici a barre dei seriali','Scansiona il codice a barre del seriale installato (uno per riga)')}
         ${S.assets?`${blk('fotoIdRisorsa','Foto ID risorsa (facoltativa)',false,'image/*',false)}${blk('foto','Foto (facoltative)',false,'image/*',true)}${blk('caratterizzazione','Caratterizzazione · foto o PDF (facoltativa)',false,'image/*,application/pdf',true)}`:'<p class="note">Il caricamento di foto non è disponibile per il tuo account: puoi completare la pratica senza foto, oppure chiedi al gestore di condividerti l\'app come Collaboratore o Editor.</p>'}
         <div class="err" id="cerr"></div><div class="acts"><button class="btn yel" type="submit">Conferma completamento</button><button class="btn" type="button" data-back>Indietro</button></div></form>`);
+  }else if(M.type==='craz'){
+    box.innerHTML=shell(`<h3>Nuova cartella</h3><form id="crazf"><label class="f">Nome dell'azienda<input class="in" name="nome" placeholder="Es. Open Fiber, FiberCop, TIM" autocomplete="off" required></label><div class="err" id="crazerr"></div><div class="acts"><button class="btn yel" type="submit">Crea</button><button class="btn" type="button" data-close>Annulla</button></div></form>`);
+  }else if(M.type==='cred'){const c=M.id?S.cr.get(M.id)||{}:{};
+    box.innerHTML=shell(`<h3>${M.id?'Modifica credenziale':'Nuova credenziale'}</h3><div class="note">${esc(M.az)}</div><form id="credf" style="margin-top:14px" autocomplete="off">
+      <label class="f">Portale o servizio <span class="req">*</span><input class="in" name="titolo" value="${esc(c.titolo||'')}" placeholder="Es. Portale WFM, Email aziendale" autocomplete="off"></label>
+      <label class="f">Utente<input class="in mono" name="utente" value="${esc(c.utente||'')}" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <label class="f">Password<input class="in mono" name="password" type="text" value="${esc(c.password||'')}" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <label class="f">Indirizzo del sito (facoltativo)<input class="in" name="link" value="${esc(c.link||'')}" placeholder="https://…" autocomplete="off" autocapitalize="off"></label>
+      <label class="f">Note<textarea class="in" name="note" rows="2" placeholder="Es. scade ogni 90 giorni, codice cliente…">${esc(c.note||'')}</textarea></label>
+      <div class="err" id="crerr"></div><div class="acts"><button class="btn yel" type="submit">Salva</button><button class="btn" type="button" data-close>Annulla</button></div></form>`);
   }else if(M.type==='rfuse'){const r=S.rf.get(M.id);if(!r){closeModal();return}
     box.innerHTML=shell(`<h3>${S.admin?'Segna usato':'Prelevo'} RFID <code>${esc(r.codice)}</code></h3><div class="note">${esc(r.committente)}</div><form id="rfuf" style="margin-top:14px">
       ${S.admin?`<label class="f">Tecnico<select class="in" name="tec" id="rfutec">${tecOpts('','Nessuno')}</select></label>`:''}
@@ -1312,6 +1325,13 @@ $('#modal').addEventListener('submit',async e=>{
   if(e.target.id==='connf'){e.preventDefault();const u=String(new FormData(e.target).get('api')||'').trim();if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)){$('#cnerr').textContent='L\'indirizzo deve iniziare con https://script.google.com/';return}
     try{const r=await fetch(u);const j=await r.json();if(j.app!=='GoFiber')throw 0}catch(x){$('#cnerr').textContent='Non risponde come server GoFiber: controlla il deployment (accesso: Chiunque).';return}
     LS.set('gofiber-api',u);location.reload();return}
+  if(e.target.id==='crazf'){e.preventDefault();const n=String(new FormData(e.target).get('nome')||'').trim().replace(/\s+/g,' ');const er=$('#crazerr');
+    if(!n){er.textContent='Scrivi il nome.';return}if(crAziende().some(a=>a.toLowerCase()===n.toLowerCase())){er.textContent='Esiste già una cartella con questo nome.';return}
+    try{await S.db.doc(CR_AZ).set({nomi:[...((S.cr.get('aziende')?.nomi)||[]),n]});closeModal();S.crv.az=n;render();toast('Cartella '+n+' creata')}catch(x){er.textContent=errText(x)}return}
+  if(e.target.id==='credf'){e.preventDefault();const fd=new FormData(e.target),g=k=>String(fd.get(k)||'').trim(),er=$('#crerr');const o={titolo:g('titolo'),utente:g('utente'),password:String(fd.get('password')||''),link:g('link'),note:g('note'),azienda:S.modal.az,updatedAt:new Date().toISOString(),updatedBy:S.me||''};
+    if(!o.titolo){er.textContent='Scrivi il nome del portale o servizio.';return}if(!o.utente&&!o.password){er.textContent='Inserisci almeno utente o password.';return}
+    const b=e.target.querySelector('button[type=submit]');b.disabled=true;
+    try{if(S.modal.id)await S.db.doc('credenziali/'+S.modal.id).set({...S.cr.get(S.modal.id),...o});else await S.db.collection('credenziali').add({...o,createdAt:o.updatedAt});play('ok');closeModal();toast('Credenziale salvata')}catch(x){b.disabled=false;er.textContent=errText(x)}return}
   if(e.target.id==='rfuf'){e.preventDefault();const fd=new FormData(e.target),id=S.modal.id,r=S.rf.get(id);if(!r){closeModal();return}if(r.stato==='usato'){$('#rfuerr').textContent='Questo RFID è già stato usato.';return}
     const pid=String(fd.get('pid')||''),p=pid?S.pr.get(pid)||{}:{},tid=S.admin?String(fd.get('tec')||'')||(pid?tecsOf(p)[0]||'':''):S.me;
     try{await S.db.doc('rfid/'+id).update({stato:'usato',tecnicoId:tid||'',praticaId:pid,ordine:p.ordine||'',idRisorsa:p.idRisorsa||'',usatoAt:new Date().toISOString()});play('ok');closeModal();toast(`RFID ${r.codice} segnato come usato`+(p.ordine?' per l\'ordine '+p.ordine:''))}catch(x){$('#rfuerr').textContent=errText(x)}return}
@@ -1615,6 +1635,40 @@ function renderImport(){
 }
 
 /* ---------- archivio ---------- */
+const CR_AZ='credenziali/aziende';
+const crAziende=()=>{const extra=(S.cr.get('aziende')?.nomi)||[];const used=[...S.cr.values()].map(c=>c.azienda).filter(Boolean);return [...new Set([...COMM,...extra,...used])]};
+const crList=az=>[...S.cr].filter(([id,c])=>id!=='aziende'&&c.azienda===az).sort((a,b)=>String(a[1].titolo||'').localeCompare(String(b[1].titolo||'')));
+function credHTML(){const V=S.crv;
+  if(!V.az||!crAziende().includes(V.az)){V.az='';
+    return `<div class="ph"><div><h1>Credenziali</h1><div class="sub" style="text-transform:none">Utenti e password dei portali, divisi per azienda. ${S.boss?'Solo tu puoi aggiungerle e modificarle.':'Puoi leggerle e copiarle: le modifica solo l\'amministratore.'}</div></div>${S.boss?`<button class="btn yel" data-craz>${ic('plus')}Nuova cartella</button>`:''}</div>
+     <div class="rfgrid">${crAziende().map(a=>{const n=crList(a).length;return `<button class="rfold" data-crf="${esc(a)}">${ic('folder')}<div><b>${esc(a)}</b><span class="n"><b>${n}</b> ${n===1?'credenziale':'credenziali'}</span></div></button>`}).join('')}</div>`}
+  return `<div class="ph" style="margin-bottom:8px"><div><button class="lnk" data-crback>← Tutte le aziende</button><h1 style="margin-top:6px">${esc(V.az)}</h1></div>
+    ${S.boss?`<div class="acts" style="margin:0">${!COMM.includes(V.az)&&!crList(V.az).length?`<button class="btn dng" data-crazdel>Elimina cartella</button>`:''}<button class="btn yel" data-cradd>${ic('plus')}Aggiungi credenziale</button></div>`:''}</div>
+   <input class="in" id="crq" placeholder="Cerca portale, utente o nota" value="${esc(V.q)}" autocomplete="off" style="margin-bottom:12px">
+   <div id="crlist"></div>`}
+function crCard(id,c){const shown=S.crv.show.has(id);
+  return `<div class="crc"><h4>${ic('key')}${esc(c.titolo||'Credenziale')}${c.link?`<a class="btn sm" href="${esc(/^https?:\/\//i.test(c.link)?c.link:'https://'+c.link)}" target="_blank" rel="noopener">Apri sito</a>`:''}</h4>
+   ${c.utente?`<div class="crrow"><span class="k">Utente</span><span class="v">${esc(c.utente)}</span><button class="btn" data-crcopy="${esc(id)}|utente">Copia</button></div>`:''}
+   ${c.password?`<div class="crrow"><span class="k">Password</span><span class="v">${shown?esc(c.password):'••••••••'}</span><button class="btn" data-crshow="${esc(id)}">${shown?'Nascondi':'Mostra'}</button><button class="btn" data-crcopy="${esc(id)}|password">Copia</button></div>`:''}
+   ${c.note?`<div class="crnote">${esc(c.note)}</div>`:''}
+   ${S.boss?`<div class="acts" style="margin-top:10px"><button class="btn sm" data-credit="${esc(id)}">Modifica</button><button class="btn sm dng" data-crdel="${esc(id)}">Elimina</button></div>`:''}
+   <div class="note" style="margin-top:6px;font-size:12px">${c.updatedAt?'Aggiornata il '+esc(dt(c.updatedAt)):''}</div></div>`}
+function credRefresh(){if(S.view!=='credenziali')return;if(!S.crv.az||!$('#crlist')){if(!S.modal)$('#main').innerHTML=credHTML(),bindCred();return}
+  const q=S.crv.q.trim().toLowerCase();let l=crList(S.crv.az);if(q)l=l.filter(([,c])=>[c.titolo,c.utente,c.note,c.link].join(' ').toLowerCase().includes(q));
+  $('#crlist').innerHTML=l.map(([id,c])=>crCard(id,c)).join('')||`<div class="empty" style="padding:16px">${crList(S.crv.az).length?'Nessuna credenziale corrisponde alla ricerca.':'Nessuna credenziale per '+esc(S.crv.az)+(S.boss?': aggiungila con il tasto qui sopra.':'.')}</div>`}
+function bindCred(){const m=$('#main');if(S.crv.az&&$('#crlist'))credRefresh();
+  m.onclick=async e=>{const t=e.target;
+    const fo=t.closest('[data-crf]');if(fo){S.crv.az=fo.dataset.crf;S.crv.q='';S.crv.show.clear();render();window.scrollTo(0,0);return}
+    if(t.closest('[data-crback]')){S.crv.az='';S.crv.show.clear();render();return}
+    const sh=t.closest('[data-crshow]');if(sh){const id=sh.dataset.crshow;S.crv.show.has(id)?S.crv.show.delete(id):S.crv.show.add(id);credRefresh();return}
+    const cp=t.closest('[data-crcopy]');if(cp){const [id,k]=cp.dataset.crcopy.split('|'),v=S.cr.get(id)?.[k]||'';try{await navigator.clipboard.writeText(v);toast((k==='password'?'Password':'Utente')+' copiato');play('tap')}catch(x){prompt('Copia',v)}return}
+    if(!S.boss)return;
+    if(t.closest('[data-craz]')){S.modal={type:'craz'};renderModal();return}
+    if(t.closest('[data-cradd]')){S.modal={type:'cred',id:'',az:S.crv.az};renderModal();return}
+    const ed=t.closest('[data-credit]');if(ed){S.modal={type:'cred',id:ed.dataset.credit,az:S.crv.az};renderModal();return}
+    const dl=t.closest('[data-crdel]');if(dl){const c=S.cr.get(dl.dataset.crdel)||{};S.modal={type:'confirm',danger:true,title:'Eliminare '+(c.titolo||'questa credenziale')+'?',text:'Sparisce per tutti. Non si può annullare.',ok:'Elimina',done:'Credenziale eliminata',fn:async()=>{await S.db.doc('credenziali/'+dl.dataset.crdel).delete()}};renderModal();return}
+    if(t.closest('[data-crazdel]')){const a=S.crv.az;S.modal={type:'confirm',danger:true,title:'Eliminare la cartella '+a+'?',text:'La cartella è vuota.',ok:'Elimina',done:'Cartella eliminata',fn:async()=>{const l=((S.cr.get('aziende')?.nomi)||[]).filter(x=>x!==a);await S.db.doc(CR_AZ).set({nomi:l});S.crv.az=''}};renderModal();return}};
+  const q=$('#crq');if(q)q.oninput=e=>{S.crv.q=e.target.value;credRefresh()}}
 const rfk=c=>'r'+sk(normS(c));
 const canNfc=()=>'NDEFReader' in window;
 const NFC={ac:null,tid:'',cb:null};
@@ -2218,7 +2272,7 @@ function sub(path,key,map){
   setTimeout(()=>maybeInstall(),4000);setTimeout(secStart,1500);
   S.state='ok';if(S.remote){const b=document.createElement('button');b.className='thm';b.title='Esci';b.setAttribute('aria-label','Esci');b.innerHTML='<svg class="i" viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h11"/></svg>';b.onclick=logout;$('.hr').appendChild(b)}
   if(S.local)$('#localbar').innerHTML='<div class="wrap"><div class="dupw" style="margin:12px 0 0"><b>Modalità locale.</b> I dati restano solo in questo browser e su questo dispositivo, senza foto e senza utenti condivisi. <button class=\"lnk\" id=\"connGs\">Collega il foglio Google</button> per lavorare in squadra.</div></div>';if($('#connGs'))$('#connGs').onclick=()=>{S.modal={type:'conn'};renderModal()};render();
-  sub('tecnici','tec',S.tec);sub('ruoli','ro',S.roles);sub('config','cfg',S.cfgMap);sub('pratiche','pr',S.pr);sub('esiti','es',S.es);sub('prodotti','pd',S.pd);sub('unita','un',S.un);sub('rfid','rf',S.rf);sub('pfsdb','pfsx',S.pfsDocs);loadPfsBase();
+  sub('tecnici','tec',S.tec);sub('ruoli','ro',S.roles);sub('config','cfg',S.cfgMap);sub('pratiche','pr',S.pr);sub('esiti','es',S.es);sub('prodotti','pd',S.pd);sub('unita','un',S.un);sub('rfid','rf',S.rf);sub('credenziali','cr',S.cr);sub('pfsdb','pfsx',S.pfsDocs);loadPfsBase();
 })();
 }
 </script>
