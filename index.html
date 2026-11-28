@@ -221,6 +221,19 @@ dl.kv dt{color:var(--mute)}dl.kv dd{margin:0;font-weight:500;overflow-wrap:anywh
 .sv code{flex:none;font-size:14px}.sv span{color:var(--mute)}
 .sv.ko span{color:var(--ko)}.sv.ok span{color:var(--ok)}.sv.wait span{color:var(--wait)}
 .big img{max-width:100%;max-height:80vh;display:block;margin:0 auto;border-radius:8px}
+.gemfab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:35;width:60px;height:60px;border-radius:50%;border:0;color:#fff;cursor:pointer;display:grid;place-items:center;background:linear-gradient(135deg,#1a73e8,#8e44ec 60%,#d64e84);box-shadow:0 10px 26px rgba(66,85,230,.4)}.gemfab[hidden]{display:none}.gemfab .i{width:28px;height:28px}
+.gemgrad{color:#fff!important;border:0!important;background:linear-gradient(120deg,#1a73e8,#8e44ec 60%,#d64e84)!important}
+.gempanel{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:36;max-width:560px;margin:0 auto;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:0 18px 44px rgba(15,23,42,.28);overflow:hidden}.gempanel[hidden]{display:none}
+.gemhead{display:flex;align-items:center;gap:8px;padding:10px 10px 10px 12px;background:linear-gradient(120deg,rgba(26,115,232,.12),rgba(142,68,236,.12) 60%,rgba(214,78,132,.12))}
+.gemorb{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1a73e8,#8e44ec,#d64e84);flex:none;transform:scale(calc(1 + var(--lvl,0)*.35));transition:transform .08s}.gemorb .i{width:18px;height:18px}.gempanel.talk .gemorb{animation:gemPulse 1s ease-in-out infinite}@keyframes gemPulse{50%{box-shadow:0 0 0 8px rgba(142,68,236,.18)}}
+.gemst{flex:1;font-weight:700;font-size:15px;color:var(--ink)}.gemctl{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none}.gemctl .i{width:18px;height:18px}.gemctl.off{background:#fee2e2;color:#b91c1c;border-color:transparent}.gemctl.stop{background:#1f2937;color:#fff;border-color:transparent}
+.gemlog{max-height:170px;overflow-y:auto;padding:8px 12px 12px;display:flex;flex-direction:column;gap:5px;font-size:14px}.gemlog p{margin:0;line-height:1.35}.gemlog .u{color:var(--mute)}.gemlog .g{color:var(--ink);font-weight:600}.gemlog .t{color:#15803d;font-weight:700}.gemlog .e{color:#b91c1c;font-weight:600}.gemact{align-self:flex-start;margin-top:4px;text-decoration:none}
+body.gem-on main{padding-bottom:230px}
+.gemhit{animation:gemHit 1.3s ease-out}@keyframes gemHit{0%{box-shadow:0 0 0 3px rgba(142,68,236,.55);background-color:rgba(142,68,236,.12)}100%{box-shadow:0 0 0 0 rgba(142,68,236,0)}}
+.gemok{display:flex;gap:8px;align-items:center;color:#15803d;font-weight:600;font-size:14px}.gemok .i{width:18px;height:18px}
+.gemsteps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px}.gemsteps li{display:flex;gap:10px;align-items:flex-start}.gemsteps .n{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff;background:linear-gradient(135deg,#1a73e8,#8e44ec);flex:none}.gemsteps p{margin:3px 0 8px}
+.gemprivacy{display:flex;gap:8px;align-items:flex-start;margin-top:14px}.gemprivacy .i{width:16px;height:16px;flex:none;margin-top:2px;color:#16a34a}.gemplain{padding-left:20px;line-height:1.5}
+.gemprev{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}.gemprev th,.gemprev td{padding:6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.gemprev th{color:var(--mute);font-weight:600;width:38%}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;z-index:40;font-weight:500;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .note{font-size:14px;color:var(--mute)}
 .tlist{display:grid;gap:8px}
@@ -288,6 +301,12 @@ body.auth main{min-height:100vh;min-height:100dvh;display:grid;place-items:cente
 <div id="localbar"></div><div id="netbar"></div>
 <main class="wrap" id="main"><p class="note">Caricamento…</p></main>
 <div id="modal"></div>
+<button type="button" class="gemfab" id="gemFab" hidden aria-label="Parla con Gemini" title="Parla con Gemini"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>
+<div class="gempanel" id="gemPanel" hidden role="region" aria-label="Assistente Gemini"><div class="gemhead"><span class="gemorb" id="gemOrb"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 4.6 3.4 7.4 8 8-4.6.6-7.4 3.4-8 8-.6-4.6-3.4-7.4-8-8 4.6-.6 7.4-3.4 8-8z"/></svg></span><span class="gemst" id="gemState">Collegamento…</span>
+<button type="button" class="gemctl" id="gemKeyBtn" aria-label="Chiave di Gemini" title="Chiave di Gemini"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l8.5-8.5M16.5 6.5l2.5 2.5M14.5 8.5l2 2"/></svg></button>
+<button type="button" class="gemctl" id="gemMute" aria-label="Pausa microfono" title="Pausa microfono"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>
+<button type="button" class="gemctl stop" id="gemStop" aria-label="Chiudi Gemini" title="Chiudi Gemini"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="gemlog" id="gemLog"></div></div>
+<input type="file" id="gemPhotoIn" accept="image/*" hidden>
 <div id="toast"></div>
 <div id="ntoasts"></div>
 <div id="scanner" hidden></div>
@@ -325,6 +344,13 @@ const IC={
  cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
  rfid:'<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M7 10.2a2.6 2.6 0 0 1 0 3.6M9.6 8.4a5.4 5.4 0 0 1 0 7.2"/><path d="M14 10h4.5M14 14h3"/>',
  nfc:'<path d="M6 18.5V5.5l12 13V5.5"/><path d="M3.5 8.5a9 9 0 0 0 0 7M20.5 8.5a9 9 0 0 1 0 7"/>',
+ spark:'<path d="M12 3c.6 4.6 3.4 7.4 8 8-4.6.6-7.4 3.4-8 8-.6-4.6-3.4-7.4-8-8 4.6-.6 7.4-3.4 8-8z"/>',
+ mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
+ check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+ lock:'<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/>',
+ nav:'<path d="M3.5 11 20.5 3.5 13 20.5l-2-7.5z"/>',
+ key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l8.5-8.5M16.5 6.5l2.5 2.5M14.5 8.5l2 2"/>',
+ x:'<path d="M6 6l12 12M18 6 6 18"/>',
  folder:'<path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/>',
  wifi:'<path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1"/>',
  ont:'<rect x="3" y="12" width="18" height="8" rx="2"/><path d="M7 16h.01M10.5 16h.01M14 16h3M12 12V4M9 6.5 12 4l3 2.5"/>'};
@@ -439,7 +465,7 @@ const views=()=>S.boss?['agenda','nuova','archivio','report','magazzino','rfid',
 function tabs(){
   const lab=S.admin?{agenda:['cal','Agenda'],nuova:['plus',S.editId?'Modifica':'Nuova pratica'],archivio:['arch','Archivio'],report:['chart','Riepilogo'],magazzino:['box','Magazzino'],rfid:['rfid','RFID'],tecnici:['users','Utenti'],impostazioni:['gear','Impostazioni']}:{agenda:['cal','Le mie pratiche'],archivio:['arch','Archivio'],materiale:['box','Il mio materiale'],rfid:['rfid','RFID'],resa:['chart','La mia resa'],profilo:['user','Profilo']};
   $('#tabs').innerHTML=(S.state==='ok'&&!S.gate)?views().map(v=>`<a href="#${v}" class="${S.view===v?'on':''}">${ic(lab[v][0])}<span>${lab[v][1]}</span></a>`).join(''):'';
-  $('#who').textContent=S.state!=='ok'?'Non connesso':S.gate?'Accesso':(S.isOwner?'Proprietario':(S.tec.get(S.me)?.nome||'')+' · '+(RUOLI[S.role]||''));
+  gemPaint();$('#who').textContent=S.state!=='ok'?'Non connesso':S.gate?'Accesso':(S.isOwner?'Proprietario':(S.tec.get(S.me)?.nome||'')+' · '+(RUOLI[S.role]||''));
 }
 function show(v){S.view=views().includes(v)?v:'agenda';if(location.hash.slice(1)!==S.view)location.hash=S.view;render();window.scrollTo(0,0)}
 addEventListener('hashchange',()=>{nfcStop();const v=location.hash.slice(1);if(v!==S.view){S.editId=null;S.dupOk=null;S.view=views().includes(v)?v:'agenda';render();window.scrollTo(0,0)}});
@@ -457,13 +483,257 @@ function render(){
   else if(v==='impostazioni'){m.innerHTML=impHTML();bindImp()}
   else if(v==='resa'){m.innerHTML=reportHTML(true);bindReport();renderReport()}
   else if(v==='tecnici')m.innerHTML=utentiHTML();
-  else if(v==='profilo'){m.innerHTML=profileHTML(false);bindProfile()}
+  else if(v==='profilo'){m.innerHTML=profileHTML(false)+`<div class="msg" style="margin-top:16px">${gemCardHTML()}</div>`;bindProfile()}
   else if(v==='materiale'){m.innerHTML=materialeHTML();bindMateriale()}
   else if(v==='archivio'){m.innerHTML=archHTML();bindArch();renderArch()}
   else if(v==='magazzino'){m.innerHTML=magHTML();magBind()}
   else if(v==='rfid'){m.innerHTML=rfidHTML();bindRfid()}
   else{m.innerHTML=agendaHTML();bindAgenda();renderList()}
 }
+/* =====================================================================
+   ASSISTENTE GEMINI: si parla con l'app, oppure si legge un ordine di lavoro da una foto.
+   La chiave è dell'utente e resta solo su questo dispositivo (localStorage):
+   non viene mai salvata nel database di GoFiber né mandata al server di GoFiber.
+   Voce e foto vanno direttamente dal telefono a Google.
+   ===================================================================== */
+const GEM_KEY='gofiber-gemini-key',GEM_MODEL='gemini-3.8-live',GEM_FLASH=['gemini-3.8-flash','gemini-flash-latest'],GEM_MIC='gofiber-mic-ok';
+const gemKey=()=>{try{return localStorage.getItem(GEM_KEY)||''}catch(e){return ''}};
+const gemKeyOk=k=>/^[A-Za-z0-9_\-]{30,60}$/.test(k||'');
+async function gemTestKey(k){const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);
+  try{const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key='+encodeURIComponent(k),{signal:c.signal});const d=await r.json().catch(()=>({}));
+    if(!r.ok)return{ok:false,msg:d.error?.message||('Errore '+r.status)};return{ok:true}}
+  catch(e){return{ok:false,msg:e.name==='AbortError'?'Google non risponde: controlla la connessione.':'Connessione non riuscita.'}}finally{clearTimeout(t)}}
+function gemCardHTML(){const k=gemKey();
+  return `<div class="card" id="gemcard"><h3>${ic('spark')} Assistente Gemini</h3>
+   <p class="note" style="margin-top:-4px">Parli con l'app e lei apre pratiche, compila i moduli, ti dice l'agenda e il magazzino. Legge anche gli ordini di lavoro da una foto. Serve una chiave gratuita di Google.</p>
+   ${k?`<div class="gemok">${ic('check')}<span>Collegato · chiave …${esc(k.slice(-4))} salvata <b>solo su questo dispositivo</b></span></div><div class="acts"><button type="button" class="btn" data-gemtest>Prova la chiave</button><button type="button" class="btn dng" data-gemdel>Scollega</button></div>`
+     :`<div class="acts"><button type="button" class="btn gemgrad" data-gemconn>${ic('spark')}Collega Gemini</button></div>`}</div>`}
+const gemCardRefresh=()=>{const c=$('#gemcard');if(c)c.outerHTML=gemCardHTML()};
+function gemConnHTML(){return `<h3>Collega Gemini</h3>
+  <ol class="gemsteps"><li><span class="n">1</span><div><p>Apri Google AI Studio e accedi con il tuo account Google. Tocca <b>Crea chiave API</b> e poi <b>copia</b>. È gratis.</p><a class="btn" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Apri Google AI Studio</a></div></li>
+   <li><span class="n">2</span><div><p>Torna qui e collega la chiave che hai copiato.</p><button type="button" class="btn gemgrad" data-gempaste>${ic('spark')}Incolla e collega</button>
+    <input class="in" id="gemKeyIn" placeholder="…oppure incollala qui" autocomplete="off" autocapitalize="off" spellcheck="false" style="margin-top:10px"><div class="note" id="gemConnSt" style="margin-top:6px"></div></div></li></ol>
+  <p class="note gemprivacy">${ic('lock')} La chiave resta <b>solo su questo dispositivo</b>: non viene salvata in GoFiber e non va al server dell'azienda. Ogni collega usa la sua. Quando parli o mandi una foto, i dati vanno direttamente a Google. Con la chiave gratuita Google può usarli per migliorare i suoi servizi: evita di dettare dati personali che non servono.</p>
+  <div class="acts"><button class="btn" data-close>Chiudi</button></div>`}
+async function gemConnect(raw){const st=$('#gemConnSt'),k=String(raw||'').trim().replace(/^key=/,'');if(!st)return;
+  if(!gemKeyOk(k)){st.textContent='Questa non sembra una chiave di Google: copiala di nuovo da AI Studio.';return}
+  st.textContent='Verifico la chiave…';const r=await gemTestKey(k);if(!r.ok){st.textContent='Chiave non accettata da Google: '+r.msg;return}
+  try{localStorage.setItem(GEM_KEY,k)}catch(e){st.textContent='Questo browser non permette di salvare la chiave.';return}
+  closeModal();toast('Gemini collegato: tocca il tasto colorato in basso e parla');gemCardRefresh();gemPaint()}
+function gemOpenConnect(){S.modal={type:'gemconn'};renderModal()}
+
+/* ---------- audio: microfono 16 kHz verso Google, voce di Gemini 24 kHz ---------- */
+const GEM_WORKLET=`class C extends AudioWorkletProcessor{constructor(){super();this.r=sampleRate/16000;this.p=0;this.b=new Int16Array(640);this.i=0;this.m=false;this.port.onmessage=e=>{this.m=!!e.data.mute}}
+ process(inp){const c=inp[0]&&inp[0][0];if(!c)return true;let s=0;for(let k=0;k<c.length;k++)s+=c[k]*c[k];this.port.postMessage({lvl:Math.sqrt(s/c.length)});
+ while(this.p<c.length){const v=this.m?0:Math.max(-1,Math.min(1,c[Math.floor(this.p)]));this.b[this.i++]=v<0?v*32768:v*32767;if(this.i>=this.b.length){this.port.postMessage({pcm:this.b.buffer.slice(0)});this.i=0}this.p+=this.r}
+ this.p-=c.length;return true}}registerProcessor('gem-cap',C);`;
+const b64Buf=buf=>{const u=new Uint8Array(buf);let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)};
+const GEM={live:false,ws:null,ctx:null,out:null,stream:null,node:null,muted:false,playAt:0,src:[],uL:null,gL:null,closing:false,spoke:false};
+function gemLog(cls,text,append){const log=$('#gemLog');if(!log)return null;const key=cls==='u'?'uL':cls==='g'?'gL':null;
+  if(append&&key&&GEM[key]){GEM[key].textContent+=text;log.scrollTop=log.scrollHeight;return GEM[key]}
+  const p=document.createElement('p');p.className=cls;p.textContent=text;log.appendChild(p);while(log.children.length>40)log.firstChild.remove();log.scrollTop=log.scrollHeight;if(key)GEM[key]=p;return p}
+function gemAction(label,href,icon){const log=$('#gemLog');if(!log)return;const a=document.createElement('a');a.className='btn yel gemact';a.href=href;if(/^https?:/.test(href)){a.target='_blank';a.rel='noopener'}
+  a.innerHTML=ic(icon||'nav')+esc(label);log.appendChild(a);log.scrollTop=log.scrollHeight}
+const gemState=(t,talk)=>{const s=$('#gemState');if(s)s.textContent=t;$('#gemPanel')?.classList.toggle('talk',!!talk)};
+function gemPlay(b64){const c=GEM.out;if(!c)return;const bin=atob(b64),n=bin.length>>1,buf=c.createBuffer(1,n,24000),ch=buf.getChannelData(0);
+  for(let i=0;i<n;i++){let v=bin.charCodeAt(2*i)|(bin.charCodeAt(2*i+1)<<8);if(v>=32768)v-=65536;ch[i]=v/32768}
+  const s=c.createBufferSource();s.buffer=buf;s.connect(c.destination);const at=Math.max(c.currentTime+0.03,GEM.playAt);s.start(at);GEM.playAt=at+buf.duration;
+  GEM.src.push(s);s.onended=()=>{GEM.src=GEM.src.filter(x=>x!==s);if(!GEM.src.length&&GEM.live)gemState(GEM.muted?'Microfono in pausa':'In ascolto…')};gemState('Gemini parla…',true)}
+const gemHush=()=>{GEM.src.forEach(s=>{try{s.stop()}catch(e){}});GEM.src=[];GEM.playAt=0};
+
+/* ---------- cosa sa fare: strumenti che Gemini può chiamare ---------- */
+const gemDay=g=>{g=String(g||'oggi').toLowerCase().trim();const d=new Date();
+  if(g==='oggi'||!g)return today();if(g==='domani'){d.setDate(d.getDate()+1);return d.toISOString().slice(0,10)}if(g==='ieri'){d.setDate(d.getDate()-1);return d.toISOString().slice(0,10)}
+  if(/^\d{4}-\d{2}-\d{2}$/.test(g))return g;const m=/^(\d{1,2})[\/\-.](\d{1,2})(?:[\/\-.](\d{2,4}))?$/.exec(g);
+  if(m){const y=m[3]?(m[3].length===2?'20'+m[3]:m[3]):String(d.getFullYear());return `${y}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`}return today()};
+const gemFascia=v=>{v=String(v||'').replace(/\s/g,'');if(!v)return '';const f=F.find(x=>x.k===v.replace(':','')||x.a===v||x.a.replace(/^0/,'')===v.replace(/^0/,'')||v.startsWith(x.a)||v.replace(':','').startsWith(x.k));return f?f.k:''};
+const gemMine=p=>S.admin||tecsOf(p).includes(S.me);
+const gemBrief=(id,p)=>({ordine:p.ordine||'',tipo:p.tipo||'',committente:p.committente||'',rete:p.rete||'',giorno:p.data||'',fascia:fascia(p.fascia).a+(fascia(p.fascia).b?'-'+fascia(p.fascia).b:''),indirizzo:p.indirizzo||'',pfs:p.pfs||'',id_risorsa:p.idRisorsa||'',stato:S.es.has(id)?'completata':'da fare',tecnici:tecsOf(p).map(tecName).join(', '),...(p.anticipo?{anticipo:true}:{})});
+function gemFindPr(q){q=String(q||'').trim().toLowerCase();if(!q)return{list:[]};const nq=q.replace(/[^a-z0-9]/g,'');
+  const all=[...S.pr].filter(([id,p])=>gemMine(p));
+  const exact=all.filter(([,p])=>[p.ordine,p.idRisorsa,p.pfs].some(v=>v&&String(v).toLowerCase().replace(/[^a-z0-9]/g,'')===nq));if(exact.length===1)return{pick:exact[0],list:exact};
+  const l=all.filter(([,p])=>[p.ordine,p.idRisorsa,p.indirizzo,p.pfs,p.telefono].some(v=>v&&(String(v).toLowerCase().includes(q)||(nq.length>2&&String(v).toLowerCase().replace(/[^a-z0-9]/g,'').includes(nq)))));
+  const td=Date.parse(today()),dist=p=>Math.abs((Date.parse(p.data||'')||0)-td);l.sort((a,b)=>(S.es.has(a[0])-S.es.has(b[0]))||(dist(a[1])-dist(b[1]))||String(a[1].fascia).localeCompare(String(b[1].fascia)));
+  const open=l.filter(([id])=>!S.es.has(id));return{pick:l.length===1?l[0]:open.length===1?open[0]:null,list:l.slice(0,6)}}
+const gemSetRadio=(f,name,val)=>{if(!val)return false;const v=String(val).toLowerCase().replace(/\s/g,'');const r=[...f.querySelectorAll(`[name="${name}"]`)].find(x=>x.value.toLowerCase().replace(/\s/g,'')===v);if(!r)return false;r.checked=true;r.dispatchEvent(new Event('change',{bubbles:true}));return true};
+const gemSetVal=(el,v)=>{if(!el||v==null||v==='')return false;el.value=String(v);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));return true};
+function gemFlash(el){const x=el&&(el.closest('label.f')||el.closest('.seg')||el);if(!x)return;x.classList.remove('gemhit');void x.offsetWidth;x.classList.add('gemhit')}
+async function gemFillNew(a){
+  if(!S.admin)return{ok:false,motivo:'solo ufficio e amministratore creano pratiche'};
+  if(S.view!=='nuova'||S.nuovaMode==='imp'){S.nuovaMode='one';closeModal();show('nuova');await new Promise(r=>setTimeout(r,250))}
+  const f=$('#pf');if(!f)return{ok:false,motivo:'modulo non aperto'};const done=[],nok=[];
+  const R=(n,v,l)=>{if(v==null||v==='')return;if(gemSetRadio(f,n,v)){done.push(l);gemFlash(f.querySelector(`[name="${n}"]`))}else nok.push(l+' "'+v+'"')};
+  R('tipo',a.tipo&&(/ass|guast/i.test(a.tipo)?'Assurance':'Delivery'),'tipo');
+  R('committente',a.committente,'committente');R('rete',a.rete&&(/fib|tim|cop/i.test(a.rete)?'FiberCop':'Open Fiber'),'rete');
+  for(const [k,n] of [['ordine','ordine'],['id_risorsa','idRisorsa'],['indirizzo','indirizzo'],['telefono','telefono'],['permuta','permuta'],['splitter','splitter']])if(a[k]){if(gemSetVal(f.elements[n],a[k])){done.push(k.replace('_',' '));gemFlash(f.elements[n])}}
+  if(a.pfs){const inp=$('#pfsIn');gemSetVal(inp,String(a.pfs).toUpperCase());await new Promise(r=>setTimeout(r,120));const b=[...document.querySelectorAll('[data-pfspick]')].find(x=>x.dataset.pfspick.toUpperCase()===String(a.pfs).toUpperCase().replace(/\s/g,''));if(b)b.click();done.push('PFS');gemFlash(inp)}
+  if(a.giorno){if(gemSetVal(f.elements.data,gemDay(a.giorno))){done.push('data');gemFlash(f.elements.data)}}
+  if(a.fascia){const k=gemFascia(a.fascia);R('fascia',k||a.fascia,'fascia')}
+  if(a.tecnici&&a.tecnici.length){for(const n of [].concat(a.tecnici)){const q=String(n).toLowerCase();const t=activeTecs().filter(([,x])=>(x.nome||'').toLowerCase().includes(q));
+    if(t.length===1){const c=f.querySelector(`[name=tecnici][value="${t[0][0]}"]`);if(c&&!c.checked){c.checked=true;c.dispatchEvent(new Event('change',{bubbles:true}))}done.push('tecnico '+t[0][1].nome);gemFlash(c)}else nok.push(t.length?'tecnico "'+n+'" (più colleghi con questo nome)':'tecnico "'+n+'" (non trovato)')}}
+  if(typeof a.anticipo==='boolean'&&f.elements.anticipo){f.elements.anticipo.checked=a.anticipo;done.push('anticipo')}
+  for(const k of ['ont','modem'])if(a[k]){const m={consegna:'cons','solo consegna':'cons','consegna e installazione':'consinst',installazione:'inst','solo installazione':'inst','non serve':''}[String(a[k]).toLowerCase()];if(m!=null&&gemSetRadio(f,k+'M',m))done.push(k)}
+  if(a[`modello_ont`]||a[`modello_modem`])for(const k of ['ont','modem']){const want=String(a['modello_'+k]||'').toLowerCase();if(!want)continue;const sel=f.elements[k+'Id'];const o=sel&&[...sel.options].find(o=>o.value&&o.text.toLowerCase().includes(want));if(o){sel.value=o.value;done.push('modello '+k)}else nok.push('modello '+k+' "'+want+'"')}
+  return{ok:true,compilati:done,non_riusciti:nok,ricorda:'La pratica NON è salvata: controlla e chiedi di salvarla, oppure tocca Salva.'}}
+async function gemFillClose(a){const M=S.modal;if(!M||M.type!=='complete')return{ok:false,motivo:'nessuna chiusura aperta: prima apri la pratica con chiudi_pratica'};
+  const f=$('#cf'),p=S.pr.get(M.id)||{},done=[];
+  if(a.nota){const n=f.elements.nota;gemSetVal(n,(n.value?n.value.replace(/\s+$/,'')+'\n':'')+a.nota);done.push('nota');gemFlash(n)}
+  if(isAss(p)){if(a.esito&&gemSetRadio(f,'esitoAss',String(a.esito).toLowerCase().startsWith('rimod')?'rimodulato':String(a.esito).toLowerCase().startsWith('neg')?'negativa':'positiva')){done.push('esito');gemFlash(f.querySelector('[name=esitoAss]'))}
+    if(a.nuovo_giorno&&f.elements.rData){gemSetVal(f.elements.rData,gemDay(a.nuovo_giorno));done.push('nuova data')}if(a.nuova_fascia){const k=gemFascia(a.nuova_fascia);if(gemSetRadio(f,'rFascia',k))done.push('nuova fascia')}
+    if(a.nuova_ora&&f.elements.rOra){gemSetVal(f.elements.rOra,a.nuova_ora);done.push('ora')}}
+  else{for(const k of ['permuta','splitter'])if(a[k]&&f.elements[k]){gemSetVal(f.elements[k],a[k]);done.push(k);gemFlash(f.elements[k])}
+    if(a.seriali&&a.seriali.length){const t=$('#sb-ins');if(t){const cur=new Set(serials('ins'));const add=[].concat(a.seriali).map(s=>normS(s)).filter(s=>s&&!cur.has(s));t.value=(t.value.trim()?t.value.trim()+'\n':'')+add.join('\n');sbUpdate('ins');done.push(add.length+' seriali');gemFlash(t)}}}
+  return{ok:true,compilati:done,ricorda:'Non è ancora confermata: il tecnico controlla e tocca Conferma.'}}
+const GEM_TOOLS=[
+ {name:'apri_sezione',description:'Apre una sezione di GoFiber.',parameters:{type:'OBJECT',properties:{nome:{type:'STRING',description:'agenda, nuova (nuova pratica), archivio, report, magazzino, materiale (il mio materiale), rfid, resa, profilo, impostazioni, tecnici (utenti)'}},required:['nome']}},
+ {name:'agenda',description:'Pratiche di un giorno (di serie quelle del tecnico che usa l’app; ufficio e amministratore le vedono tutte).',parameters:{type:'OBJECT',properties:{giorno:{type:'STRING',description:'oggi, domani, ieri, GG/MM o AAAA-MM-GG'},solo_da_fare:{type:'BOOLEAN'},tecnico:{type:'STRING',description:'nome del tecnico, solo per ufficio'}}}},
+ {name:'cerca_pratica',description:'Cerca pratiche aperte per ordine, ID risorsa, indirizzo, PFS o telefono.',parameters:{type:'OBJECT',properties:{testo:{type:'STRING'}},required:['testo']}},
+ {name:'apri_pratica',description:'Apre la scheda di una pratica.',parameters:{type:'OBJECT',properties:{testo:{type:'STRING',description:'ordine, ID risorsa, via o PFS'}},required:['testo']}},
+ {name:'naviga',description:'Prepara il navigatore verso il cliente (indirizzo) o verso il PFS di una pratica: compare un tasto da toccare.',parameters:{type:'OBJECT',properties:{testo:{type:'STRING',description:'ordine, via o PFS della pratica'},verso:{type:'STRING',enum:['cliente','pfs']}},required:['testo']}},
+ {name:'contatta_cliente',description:'Prepara chiamata, WhatsApp o SMS al cliente di una pratica con il messaggio già scritto: compare un tasto da toccare.',parameters:{type:'OBJECT',properties:{testo:{type:'STRING'},modo:{type:'STRING',enum:['chiama','whatsapp','sms']},messaggio:{type:'STRING',enum:['conferma','arrivo','sposta','assente']}},required:['testo','modo']}},
+ {name:'chiudi_pratica',description:'Apre la chiusura (completamento) di una pratica.',parameters:{type:'OBJECT',properties:{testo:{type:'STRING'}},required:['testo']}},
+ {name:'compila_chiusura',description:'Scrive nella chiusura aperta: nota; per Delivery permuta, splitter e seriali installati; per Assurance esito (positiva, negativa, rimodulato) e, se rimodulato, nuovo giorno, fascia e ora. Non conferma.',parameters:{type:'OBJECT',properties:{nota:{type:'STRING'},permuta:{type:'STRING'},splitter:{type:'STRING'},seriali:{type:'ARRAY',items:{type:'STRING'}},esito:{type:'STRING',enum:['positiva','negativa','rimodulato']},nuovo_giorno:{type:'STRING'},nuova_fascia:{type:'STRING'},nuova_ora:{type:'STRING',description:'HH:MM'}}}},
+ {name:'compila_nuova_pratica',description:'Solo ufficio e amministratore: apre Nuova pratica e scrive i campi detti. Non salva.',parameters:{type:'OBJECT',properties:{tipo:{type:'STRING',enum:['Delivery','Assurance']},committente:{type:'STRING',enum:COMM},rete:{type:'STRING',enum:['Open Fiber','FiberCop']},ordine:{type:'STRING'},id_risorsa:{type:'STRING'},indirizzo:{type:'STRING'},telefono:{type:'STRING'},pfs:{type:'STRING'},permuta:{type:'STRING'},splitter:{type:'STRING'},giorno:{type:'STRING'},fascia:{type:'STRING',description:F.map(x=>x.a).join(', ')},tecnici:{type:'ARRAY',items:{type:'STRING'}},anticipo:{type:'BOOLEAN'},ont:{type:'STRING',enum:['non serve','solo consegna','consegna e installazione','solo installazione']},modello_ont:{type:'STRING'},modem:{type:'STRING',enum:['non serve','solo consegna','consegna e installazione','solo installazione']},modello_modem:{type:'STRING'}}}},
+ {name:'salva_nuova_pratica',description:'Salva la nuova pratica compilata. Solo quando l’utente lo chiede esplicitamente.',parameters:{type:'OBJECT',properties:{}}},
+ {name:'magazzino',description:'Quanti pezzi ci sono: per l’ufficio giacenze per prodotto e committente; per il tecnico il materiale che ha con sé.',parameters:{type:'OBJECT',properties:{prodotto:{type:'STRING'},committente:{type:'STRING'}}}},
+ {name:'rfid',description:'Quanti RFID liberi e usati ci sono per committente.',parameters:{type:'OBJECT',properties:{committente:{type:'STRING'}}}},
+ {name:'tema',description:'Cambia il tema dell’app.',parameters:{type:'OBJECT',properties:{tema:{type:'STRING',enum:['chiaro','scuro']}},required:['tema']}}
+];
+function gemSystem(){const me=S.tec.get(S.me)?.nome||'';
+  return `Sei l'assistente vocale di GoFiber, l'app che una ditta di installatori di fibra ottica (FTTH) usa per le pratiche di lavoro. Parla sempre italiano, frasi brevissime, niente spiegazioni inutili.
+Chi ti usa: ${me||'utente'}, ruolo ${S.boss?'amministratore':S.admin?'ufficio':'tecnico'}. Oggi è ${new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}. Sezione aperta: ${S.view}.
+Termini: pratica = lavoro da fare; Delivery = nuova attivazione; Assurance = guasto; committenti ${COMM.join(', ')}; rete Open Fiber o FiberCop; PFS = armadio stradale (codici tipo NA_05/08W22); permuta e splitter sono codici; fasce orarie ${F.map(x=>x.a+'-'+x.b).join(', ')}.
+Regole:
+- Usa sempre gli strumenti per leggere dati: non inventare pratiche, orari, indirizzi o quantità.
+- Codici (ordine, ID risorsa, PFS, permuta, seriali): trascrivili esatti, maiuscolo, senza spazi. Lettere dettate tipo "A come Ancona" = A. Se non hai capito chiedi di ripetere.
+- Elenchi: leggi al massimo 3 pratiche (orario, via, tipo), poi chiedi se aprirne una.
+- naviga e contatta_cliente mostrano un tasto nel pannello: dì "Tocca il tasto qui sotto".
+- compila_nuova_pratica e compila_chiusura non salvano: alla fine dì cosa hai scritto e cosa manca. Salva con salva_nuova_pratica solo se l'utente dice esplicitamente di salvare; la chiusura la conferma sempre l'utente toccando Conferma.
+- Dopo aver scritto un codice ripetilo cifra per cifra, brevissimo.
+All'inizio dì solo "Pronto, dimmi." e aspetta: non usare strumenti finché l'utente non chiede qualcosa.`}
+async function gemTool(name,a){a=a||{};
+  if(!GEM.spoke)return{ok:false,motivo:'L’utente non ha ancora chiesto nulla: aspetta che parli.'};
+  if(name==='apri_sezione'){const v=String(a.nome||'').toLowerCase().replace('nuova pratica','nuova').replace('utenti','tecnici').replace('il mio materiale','materiale');if(!views().includes(v))return{ok:false,motivo:'sezione non disponibile per questo utente',disponibili:views()};closeModal();show(v);return{ok:true}}
+  if(name==='agenda'){const d=gemDay(a.giorno);let l=[...S.pr].filter(([id,p])=>p.data===d&&gemMine(p));
+    if(a.tecnico&&S.admin){const q=String(a.tecnico).toLowerCase();l=l.filter(([,p])=>tecsOf(p).some(t=>tecName(t).toLowerCase().includes(q)))}
+    if(a.solo_da_fare)l=l.filter(([id])=>!S.es.has(id));l.sort((x,y)=>(x[1].fascia||'').localeCompare(y[1].fascia||''));
+    return{giorno:dmy(d),totale:l.length,completate:l.filter(([id])=>S.es.has(id)).length,pratiche:l.slice(0,12).map(([id,p])=>gemBrief(id,p))}}
+  if(name==='cerca_pratica'){const r=gemFindPr(a.testo);return{trovate:r.list.length,pratiche:r.list.map(([id,p])=>gemBrief(id,p))}}
+  if(['apri_pratica','naviga','contatta_cliente','chiudi_pratica'].includes(name)){const r=gemFindPr(a.testo);
+    if(!r.pick)return r.list.length?{ok:false,motivo:'più pratiche',candidati:r.list.map(([id,p])=>gemBrief(id,p))}:{ok:false,motivo:'nessuna pratica trovata'};
+    const [id,p]=r.pick;
+    if(name==='apri_pratica'){S.modal={type:'detail',id};renderModal();return{ok:true,...gemBrief(id,p)}}
+    if(name==='chiudi_pratica'){if(S.es.has(id))return{ok:false,motivo:'già completata'};if(!S.admin&&!tecsOf(p).includes(S.me))return{ok:false,motivo:'non è assegnata a te'};S.up=null;S.modal={type:'complete',id};renderModal();return{ok:true,tipo:p.tipo,ordine:p.ordine,chiedi:isAss(p)?'nota ed esito':'nota, permuta, splitter e seriali'}}
+    if(name==='naviga'){if(a.verso==='pfs'){const L=pfsLoc(p);if(!L)return{ok:false,motivo:p.pfs?'posizione del PFS sconosciuta':'pratica senza PFS'};gemAction('Naviga al PFS '+L.n,navLL(L.lat,L.lng),'nav');return{ok:true,pfs:L.n}}
+      if(!p.indirizzo)return{ok:false,motivo:'pratica senza indirizzo'};gemAction('Naviga a '+p.indirizzo,navAddr(p.indirizzo),'nav');return{ok:true,indirizzo:p.indirizzo}}
+    if(name==='contatta_cliente'){const n=telIntl(p.telefono);if(!n)return{ok:false,motivo:'pratica senza telefono'};const msg=msgCliente(p,a.messaggio||'conferma');
+      if(a.modo==='chiama')gemAction('Chiama il cliente','tel:+'+n,'phone');else if(a.modo==='sms')gemAction('Apri SMS al cliente',smsLink(n,msg),'sms');else gemAction('Apri WhatsApp al cliente',waLink(n,msg),'wa');return{ok:true,messaggio:a.modo==='chiama'?'':msg}}}
+  if(name==='compila_chiusura')return gemFillClose(a);
+  if(name==='compila_nuova_pratica')return gemFillNew(a);
+  if(name==='salva_nuova_pratica'){const f=$('#pf');if(!f||S.view!=='nuova')return{ok:false,motivo:'nessuna nuova pratica aperta'};const n=S.pr.size;f.requestSubmit?f.requestSubmit():f.dispatchEvent(new Event('submit',{cancelable:true}));await new Promise(r=>setTimeout(r,1400));
+    const err=$('#ferr')?.textContent||'';if(S.pr.size>n||S.view!=='nuova'){gemLog('t','✓ Pratica salvata');return{ok:true}}return{ok:false,motivo:err||'non salvata: guarda lo schermo (forse un avviso di doppione da confermare)'}}
+  if(name==='magazzino'){const q=String(a.prodotto||'').toLowerCase(),c=a.committente&&COMM.find(x=>x.toLowerCase()===String(a.committente).toLowerCase());const out={};
+    for(const u of S.un.values()){if(c&&u.committente!==c)continue;if(!S.admin&&!(u.stato==='tecnico'&&u.tecnicoId===S.me))continue;const n=prodName(u.prodottoId);if(q&&!n.toLowerCase().includes(q))continue;
+      const k=n+(c?'':' · '+(u.committente||'—'));const o=out[k]||(out[k]={prodotto:n,committente:u.committente||'',in_magazzino:0,presso_tecnici:0,installati:0});
+      if(u.stato==='magazzino')o.in_magazzino++;else if(u.stato==='tecnico')o.presso_tecnici++;else if(u.stato==='installato')o.installati++}
+    return{righe:Object.values(out).slice(0,20)}}
+  if(name==='rfid'){const out={};for(const r of S.rf.values()){if(a.committente&&r.committente.toLowerCase()!==String(a.committente).toLowerCase())continue;const o=out[r.committente]||(out[r.committente]={committente:r.committente,liberi:0,usati:0,presi_da_te:0});if(r.stato==='usato'){o.usati++;if(r.tecnicoId===S.me&&!r.praticaId)o.presi_da_te++}else o.liberi++}return{per_committente:Object.values(out)}}
+  if(name==='tema'){setTheme(a.tema==='scuro'?'dark':'light');return{ok:true}}
+  return{ok:false,motivo:'strumento sconosciuto'}}
+
+/* ---------- sessione vocale ---------- */
+async function gemStart(){
+  if(GEM.live)return gemStop();
+  if(!gemKey()){gemOpenConnect();return}
+  if(!navigator.mediaDevices||!window.AudioWorkletNode||!window.WebSocket){toast('Questo telefono non supporta la voce in tempo reale.');return}
+  if(!navigator.onLine){toast('Gemini ha bisogno di internet: sei offline.');return}
+  GEM.closing=false;GEM.live=true;GEM.muted=false;GEM.spoke=false;const P=$('#gemPanel');P.hidden=false;document.body.classList.add('gem-on');$('#gemLog').innerHTML='';GEM.uL=GEM.gL=null;$('#gemMute').classList.remove('off');gemPaint();
+  gemState('Collegamento…');
+  try{GEM.stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});try{localStorage.setItem(GEM_MIC,'1')}catch(e){}}
+  catch(e){gemStop();S.modal={type:'gemmic',blocked:e&&(e.name==='NotAllowedError'||e.name==='SecurityError')};renderModal();return}
+  try{const AC=window.AudioContext||window.webkitAudioContext;try{GEM.ctx=new AC({sampleRate:16000})}catch(e){GEM.ctx=new AC()}try{GEM.out=new AC({sampleRate:24000})}catch(e){GEM.out=new AC()}
+    await GEM.ctx.resume();await GEM.out.resume();
+    const url=URL.createObjectURL(new Blob([GEM_WORKLET],{type:'application/javascript'}));await GEM.ctx.audioWorklet.addModule(url);URL.revokeObjectURL(url);
+    const src=GEM.ctx.createMediaStreamSource(GEM.stream);GEM.node=new AudioWorkletNode(GEM.ctx,'gem-cap');src.connect(GEM.node);let ready=false;
+    GEM.node.port.onmessage=e=>{if(e.data.lvl!=null){const o=$('#gemOrb');if(o)o.style.setProperty('--lvl',GEM.muted?0:Math.min(1,e.data.lvl*6).toFixed(2));return}
+      if(ready&&e.data.pcm&&GEM.ws&&GEM.ws.readyState===1)GEM.ws.send(JSON.stringify({realtimeInput:{audio:{mimeType:'audio/pcm;rate=16000',data:b64Buf(e.data.pcm)}}}))};
+    const ws=GEM.ws=new WebSocket('wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key='+encodeURIComponent(gemKey()));
+    ws.onopen=()=>ws.send(JSON.stringify({setup:{model:'models/'+GEM_MODEL,generationConfig:{responseModalities:['AUDIO'],temperature:0.4,speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:'Kore'}}}},
+      systemInstruction:{parts:[{text:gemSystem()}]},tools:[{functionDeclarations:S.admin?GEM_TOOLS:GEM_TOOLS.filter(t=>!/nuova_pratica/.test(t.name))}],
+      inputAudioTranscription:{},outputAudioTranscription:{},realtimeInputConfig:{automaticActivityDetection:{silenceDurationMs:700,prefixPaddingMs:300}}}}));
+    ws.onmessage=async ev=>{let d;try{d=JSON.parse(typeof ev.data==='string'?ev.data:await (ev.data.text?ev.data.text():new Response(ev.data).text()))}catch(e){return}
+      if(d.setupComplete){ready=true;gemState('In ascolto…');ws.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:'Inizia: rispondi solo "Pronto, dimmi." e aspetta che io parli. Non usare strumenti finché non ti chiedo qualcosa.'}]}],turnComplete:true}}));return}
+      if(d.toolCall&&d.toolCall.functionCalls){const res=[];for(const fc of d.toolCall.functionCalls){let r;try{r=await gemTool(fc.name,fc.args)}catch(e){r={ok:false,motivo:String(e.message||e)}}res.push({id:fc.id,name:fc.name,response:{result:r}})}
+        if(ws.readyState===1)ws.send(JSON.stringify({toolResponse:{functionResponses:res}}));return}
+      const sc=d.serverContent;if(!sc){if(d.goAway)gemLog('e','Google chiuderà la sessione tra poco: riapri Gemini se serve.');return}
+      if(sc.interrupted)gemHush();(sc.modelTurn?.parts||[]).forEach(pt=>{if(pt.inlineData?.data)gemPlay(pt.inlineData.data)});
+      if(sc.inputTranscription?.text){GEM.spoke=true;GEM.gL=null;if(!GEM.uL)gemLog('u','Tu: ');gemLog('u',sc.inputTranscription.text,true)}
+      if(sc.outputTranscription?.text){GEM.uL=null;if(!GEM.gL)gemLog('g','Gemini: ');gemLog('g',sc.outputTranscription.text,true)}
+      if(sc.turnComplete){GEM.uL=null;GEM.gL=null}};
+    ws.onerror=()=>{};
+    ws.onclose=ev=>{if(GEM.closing)return;const why=ev.reason||'';
+      gemLog('e',/quota|exhaust|429|rate/i.test(why)?'Hai finito le richieste gratuite di Gemini per ora: riprova più tardi.':/key|auth|permission|403|401/i.test(why)?'Google non accetta la chiave: ricollegala.':/not found|model/i.test(why)?'Il modello vocale di Gemini non è disponibile per questa chiave.':'Sessione chiusa'+(why?': '+why.slice(0,140):'. Tocca il tasto Gemini per riaprirla.'));
+      gemStop(true)};
+  }catch(e){gemLog('e','Gemini non è partito: '+(e.message||e));gemStop(true)}}
+function gemStop(keep){GEM.closing=true;GEM.live=false;try{GEM.ws&&GEM.ws.close()}catch(e){}gemHush();try{GEM.node&&GEM.node.disconnect()}catch(e){}
+  try{GEM.stream&&GEM.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{GEM.ctx&&GEM.ctx.close()}catch(e){}try{GEM.out&&GEM.out.close()}catch(e){}
+  GEM.ws=GEM.node=GEM.stream=GEM.ctx=GEM.out=null;const P=$('#gemPanel');
+  if(keep===true&&P){gemState('Gemini chiuso');P.classList.remove('talk')}else if(P){P.hidden=true;document.body.classList.remove('gem-on')}gemPaint()}
+function gemPaint(){const b=$('#gemFab');if(!b)return;const on=S.state==='ok'&&!S.gate&&!!S.me&&!$('#lock:not([hidden])');b.hidden=!on||GEM.live||!$('#gemPanel').hidden;
+  const pb=$('#gemNewPhoto');if(pb)pb.hidden=false}
+
+/* ---------- foto di un ordine di lavoro → nuova pratica ---------- */
+async function gemImg(file){const img=await new Promise((res,rej)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{URL.revokeObjectURL(u);res(i)};i.onerror=rej;i.src=u});
+  const sc=Math.min(1,1800/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);return c.toDataURL('image/jpeg',0.85).split(',')[1]}
+const GEM_NEW_PROMPT=`Questa è una foto o uno screenshot di un ordine di lavoro per un'installazione o un guasto di fibra ottica FTTH in Italia (portali o email di ${COMM.join(', ')}; rete Open Fiber o FiberCop).
+Estrai i dati della pratica. Regole: trascrivi codici e numeri esattamente come sono scritti. Se un dato non c'è lascialo vuoto: non inventare. Il tipo è Assurance se si parla di guasto/ripristino/TT, altrimenti Delivery.
+Per il giorno usa AAAA-MM-GG. Per la fascia usa l'ora di inizio dell'appuntamento HH:MM se c'è.`;
+const GEM_NEW_SCHEMA={type:'OBJECT',properties:{tipo:{type:'STRING',enum:['Delivery','Assurance','']},committente:{type:'STRING'},rete:{type:'STRING'},ordine:{type:'STRING'},id_risorsa:{type:'STRING'},indirizzo:{type:'STRING'},telefono:{type:'STRING'},pfs:{type:'STRING'},permuta:{type:'STRING'},splitter:{type:'STRING'},giorno:{type:'STRING'},ora:{type:'STRING'},cliente:{type:'STRING'},note:{type:'STRING'}}};
+async function gemReadNew(b64){let last='';for(const model of GEM_FLASH){
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(gemKey())}`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{inlineData:{mimeType:'image/jpeg',data:b64}},{text:GEM_NEW_PROMPT}]}],generationConfig:{temperature:0,responseMimeType:'application/json',responseSchema:GEM_NEW_SCHEMA}})});
+    const d=await r.json().catch(()=>({}));if(r.status===404){last='modello non disponibile';continue}
+    if(!r.ok)throw new Error(r.status===429?'hai finito le richieste gratuite di Gemini per ora':d.error?.message||('errore '+r.status));
+    const t=(d.candidates?.[0]?.content?.parts||[]).map(x=>x.text||'').join('');return JSON.parse(t||'{}')}
+  throw new Error(last||'nessun modello disponibile')}
+const GEM_NEW_LBL={tipo:'Tipo',committente:'Committente',rete:'Rete',ordine:'Ordine',id_risorsa:'ID risorsa',indirizzo:'Indirizzo',telefono:'Telefono',pfs:'PFS',permuta:'Numero permuta',splitter:'Splitter',giorno:'Giorno',ora:'Ora',cliente:'Cliente',note:'Note'};
+async function gemNewPhoto(file){if(!gemKey()){gemOpenConnect();return}if(!navigator.onLine){toast('Gemini ha bisogno di internet: sei offline.');return}
+  toast('Gemini legge la foto…',true);let res;
+  try{res=await gemReadNew(await gemImg(file))}catch(e){toast('Foto non letta: '+(e.message||e));return}
+  const c=res.committente&&COMM.find(x=>String(res.committente).toLowerCase().includes(x.toLowerCase()));res.committente=c||res.committente||'';
+  const keys=Object.keys(GEM_NEW_LBL).filter(k=>res[k]);if(keys.length<2){toast('Nella foto non ho trovato i dati di una pratica: riprova più vicino e con più luce.');return}
+  S.modal={type:'gemnew',res,keys};renderModal()}
+function gemNewApply(res){const a={...res,fascia:res.ora||''};delete a.ora;if(res.committente&&!COMM.includes(res.committente))delete a.committente;
+  gemFillNew(a).then(r=>{toast(`Compilati ${r.compilati?.length||0} campi dalla foto: controlla e salva`)})}
+
+/* ---------- modali e avvio ---------- */
+function gemModal(M,box){
+  if(M.type==='gemconn'){box.innerHTML=shell(gemConnHTML());const i=$('#gemKeyIn');i.addEventListener('input',()=>{if(gemKeyOk(i.value.trim()))gemConnect(i.value)});
+    box.querySelector('[data-gempaste]').onclick=async()=>{let t='';try{t=await navigator.clipboard.readText()}catch(e){}if(!t){$('#gemConnSt').textContent='Non riesco a leggere gli appunti: incolla la chiave nel campo qui sotto.';i.focus();return}gemConnect(t)};return true}
+  if(M.type==='gemmic'){const steps=isIOS()?(isStandalone()?'<li>Apri <b>Impostazioni</b> dell’iPhone → <b>Safari</b> → <b>Microfono</b> e scegli <b>Consenti</b>.</li><li>Chiudi GoFiber e riaprila.</li>':'<li>Tocca <b>aA</b> nella barra dell’indirizzo → <b>Impostazioni sito web</b>.</li><li>Alla voce <b>Microfono</b> scegli <b>Consenti</b>.</li>')
+      :'<li>Tocca l’icona <b>a sinistra dell’indirizzo</b> → <b>Autorizzazioni</b>.</li><li>Alla voce <b>Microfono</b> scegli <b>Consenti</b>, poi ricarica la pagina.</li>';
+    box.innerHTML=shell(`<h3>${M.blocked?'Microfono bloccato':'Microfono non disponibile'}</h3><p>Per parlare con Gemini serve il microfono. Gemini ti ascolta solo mentre il pannello è aperto.</p>${M.blocked?`<ol class="gemplain">${steps}</ol>`:''}<div class="acts"><button class="btn yel" data-gemretry>Riprova</button><button class="btn" data-close>Chiudi</button></div>`);
+    box.querySelector('[data-gemretry]').onclick=()=>{closeModal();gemStart()};return true}
+  if(M.type==='gemkey'){const k=gemKey();box.innerHTML=shell(`<h3>Chiave di Gemini</h3><p class="note">${k?`Chiave …${esc(k.slice(-4))} salvata solo su questo dispositivo.`:'Nessuna chiave su questo dispositivo.'}</p><div class="acts"><button class="btn" data-gemtest>Prova la chiave</button><button class="btn dng" data-gemdel>Scollega</button><button class="btn" data-close>Chiudi</button></div>`);return true}
+  if(M.type==='gemnew'){box.innerHTML=shell(`<h3>${ic('spark')} Gemini ha letto la foto</h3><p class="note">Controlla: i dati vanno nel modulo Nuova pratica, poi li verifichi e salvi tu.</p>
+      <table class="gemprev">${M.keys.map(k=>`<tr><th>${GEM_NEW_LBL[k]}</th><td>${esc(M.res[k])}</td></tr>`).join('')}</table>
+      ${M.res.cliente||M.res.note?'<p class="note">Cliente e note non hanno un campo nella pratica: li vedi qui sopra.</p>':''}
+      <div class="acts"><button class="btn yel" data-gemapply>Inserisci nel modulo</button><button class="btn" data-close>Annulla</button></div>`);
+    box.querySelector('[data-gemapply]').onclick=()=>{const r=M.res;closeModal();gemNewApply(r)};return true}
+  return false}
+document.addEventListener('click',async e=>{const t=e.target;
+  if(t.closest('[data-gemconn]')){gemOpenConnect();return}
+  if(t.closest('[data-gemtest]')){const r=await gemTestKey(gemKey());toast(r.ok?'Chiave valida: Gemini è pronto.':'Chiave non valida: '+r.msg);return}
+  if(t.closest('[data-gemdel]')){try{localStorage.removeItem(GEM_KEY)}catch(x){}if(GEM.live)gemStop();if(S.modal?.type==='gemkey')closeModal();toast('Gemini scollegato: la chiave è stata cancellata da questo dispositivo.',true);gemCardRefresh();return}
+  if(t.closest('#gemFab')){gemStart();return}
+  if(t.closest('#gemStop')){gemStop();return}
+  if(t.closest('#gemKeyBtn')){S.modal={type:'gemkey'};renderModal();return}
+  if(t.closest('#gemMute')){GEM.muted=!GEM.muted;if(GEM.node)GEM.node.port.postMessage({mute:GEM.muted});$('#gemMute').classList.toggle('off',GEM.muted);gemState(GEM.muted?'Microfono in pausa':'In ascolto…');return}
+  if(t.closest('[data-gemphoto]')){if(!gemKey()){gemOpenConnect();return}const i=$('#gemPhotoIn');i.value='';i.click();return}
+});
+document.addEventListener('change',e=>{if(e.target.id==='gemPhotoIn'){const f=e.target.files?.[0];if(f)gemNewPhoto(f)}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&GEM.live)gemStop()});
+
 function live(){notifCheck();bellRender();
   const fr=S.forceReg;if(applyRole()&&!fr){render()}
   else if(S.gate){tabs();if(!fr&&S.gate!=='nuovo')render()}
@@ -561,7 +831,7 @@ function bindNuovaTabs(){$('#ntabs').onclick=e=>{const b=e.target.closest('[data
 function formHTML(){
   const p=S.editId?S.pr.get(S.editId):null;
   const v=p||{tipo:'',committente:'',ordine:'',idRisorsa:'',indirizzo:'',telefono:'',pfs:'',data:S.f.range==='giorno'&&S.f.day?S.f.day:today(),fascia:'',tecnicoId:''};
-  return `<div class="ph"><h1>${p?'Modifica pratica':'Nuova pratica'}</h1></div><form class="pf card" id="pf" novalidate>
+  return `<div class="ph"><h1>${p?'Modifica pratica':'Nuova pratica'}</h1>${p?'':`<button type="button" class="btn gemgrad" data-gemphoto title="Foto o screenshot dell'ordine di lavoro">${ic('spark')}Compila da foto</button>`}</div><form class="pf card" id="pf" novalidate>
    <div class="lbl">Tipo di intervento <span class="req">*</span></div>
    <div class="seg tipo">${TIPI.map(t=>`<label><input type="radio" name="tipo" value="${t}" ${v.tipo===t?'checked':''}><span class="k-${t}">${t}</span></label>`).join('')}</div>
    <div class="lbl">Committente <span class="req">*</span></div>
@@ -929,6 +1199,7 @@ const thumbs=list=>(list||[]).map(a=>a.type==='application/pdf'?`<a class="th" h
 const prev=k=>(S.up?.[k]||[]).map((u,i)=>`<div class="th">${u.file.type==='application/pdf'?esc(u.file.name):`<img src="${u.url}" alt="">`}<button type="button" class="rm" data-rm="${k}:${i}" aria-label="Rimuovi">×</button></div>`).join('');
 function renderModal(){
   const M=S.modal,box=$('#modal');if(!M){box.innerHTML='';return}
+  if(gemModal(M,box))return;
   if(M.type==='detail'){
     const arch=!S.pr.has(M.id);const p=S.pr.get(M.id)||S.es.get(M.id)?.snap;if(!p){closeModal();return}
     const st=statoOf(M.id,p),e=S.es.get(M.id),fa=fascia(p.fascia);
@@ -1623,7 +1894,8 @@ function secStart(){
 }
 function secCheck(){if(!S.remote||SEC.locked||S.gate)return;const min=+S.cfg.lockMin;if(!min||!hasPin())return;
   const last=+LS.get('gofiber-last')||Date.now();if(Date.now()-last>min*60000)lockShow()}
-function lockShow(){SEC.locked=true;const L=$('#lock');L.hidden=false;
+function lockShow(){if(typeof GEM!=='undefined'&&GEM.live)gemStop();return lockShow0.apply(this,arguments)}
+function lockShow0(){SEC.locked=true;const L=$('#lock');L.hidden=false;
   L.innerHTML=`<form class="authcard" id="lockf" novalidate>${authHead('App bloccata')}<label class="f">Inserisci il tuo PIN<input class="in pin" name="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="8"></label><div class="err" id="lockerr"></div><button class="btn yel" type="submit">Sblocca</button><p class="authfoot">PIN dimenticato? <button type="button" class="lnk" onclick="logout()">Esci e accedi con la password</button></p></form>`;
   setTimeout(()=>L.querySelector('input').focus(),50);
   $('#lockf').onsubmit=async e=>{e.preventDefault();const pin=String(new FormData(e.target).get('pin')||'');
@@ -1635,7 +1907,7 @@ function pinSetup(forced){S.modal={type:'pin',forced};renderModal()}
 /* ---------- impostazioni (solo amministratore) ---------- */
 function impHTML(){const c=S.cfg;
   return `<div class="ph"><h1>Impostazioni</h1></div>
-  <div class="grid2" style="align-items:start">
+  <div class="grid2" style="align-items:start">${gemCardHTML()}
   <form class="card" id="cfgmsg"><h3>Messaggi ai clienti</h3><p class="note" style="margin-top:-4px">Il nome compare nei messaggi WhatsApp e SMS che tecnici e ufficio mandano dalla pratica.</p>
    <label class="f">Nome dell'azienda<input class="in" name="azienda" value="${esc(c.azienda||'')}" placeholder="Es. Rossi Impianti srl"></label>
    <div class="acts"><button class="btn yel" type="submit">Salva</button></div></form>
